@@ -170,3 +170,6 @@ AUTHENTICATION_BACKENDS = (
 )
 
 AUTH_USER_MODEL = 'users.UserProfile'   #路径
+
+
+MEDIA_URL='/images/'

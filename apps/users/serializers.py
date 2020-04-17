@@ -15,10 +15,27 @@ class  S_Department(serializers.ModelSerializer):
         exclude=["id"]
 
 class S_Register(serializers.ModelSerializer):
-    create_time=serializers.SerializerMethodField()
-    update_time=serializers.SerializerMethodField()
+    # det=serializers.SerializerMethodField()  #自定义字段
+    #
+    # def get_det(self,obj):   #处理自定义字段的返回值-OBJ就是当前的整个UserProfiled的对象
+    #     return {obj.det.}
 
     class Meta:
         model=models.UserProfile
-        fields=["username","name","password","department_id"]
+        # department=models.Department
+        fields=["username","name","password","det"]
+
+
+
+
+
+    # def validate(self, attrs):
+    #     attrs["det"]=attrs
+
+    def create(self,  validated_data):
+        user=super().create(validated_data=validated_data)
+        user.set_password(validated_data["password"])
+        # validated_data["det"]=validated_data["department"].filter("det")
+        user.save()
+        return user(det=self.context["det"],**validated_data)
 

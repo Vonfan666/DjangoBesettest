@@ -46,7 +46,8 @@ def jwt_success_response(token, user=None, request=None):
 def jwt_error_response(serializer , request = None):
     data={
         "msg":"用户名或密码错误",
-        "status":400,
+        "status":200,
+
         "detail":serializer.errors
 
     }
