@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "users",    #因为apps已经设置为根目录 所以可以直接找到users
+    "project",
     "rest_framework",
     "django_filters",
     'rest_framework.authtoken',    #token验证
@@ -152,7 +153,9 @@ REST_FRAMEWORK = {
     ),
 
     "DEFAULT_SCHEMA_CLASS":"rest_framework.schemas.AutoSchema", #接口文档docs配置
-    'NON_FIELD_ERRORS_KEY': 'error' #修改错误信息key
+    # 'NON_FIELD_ERRORS_KEY': 'error', #修改错误信息key
+    # 'EXCEPTION_HANDLER':"libs.exception.custom_exception_handler",
+    # 'DEFAULT_RENDERER_CLASSES':('libs.exception.customrenderer',)
 }
 
 

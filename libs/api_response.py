@@ -13,7 +13,7 @@ class APIResponse(Response):
                  status=None, headers=None, content_type=None, **kwargs):
         data = {
             'status': data_status,
-            'message': data_msg
+            'msg': data_msg
         }
         if results is not None:
             data['results'] = results

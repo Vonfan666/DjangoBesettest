@@ -12,6 +12,7 @@ class  UserProfile(AbstractUser):
     password = models.CharField(verbose_name="密码", max_length=255)
     create_time=models.DateField(auto_now_add=True, verbose_name="创建时间")  #创建对象时更新这个时间，以后sava都不会更新
     update_time=models.DateField(auto_now=True, verbose_name="更新时间")  #每次save都更新这个时间
+    user_last_project=models.IntegerField(default=0,verbose_name="用户最后一次访问项目id")
     grp=models.ForeignKey("UserGroup", to_field="id", on_delete=models.SET_DEFAULT, related_name="isUserGroup", default=1)
     det=models.ForeignKey("Department", to_field="department_id",on_delete=models.SET_DEFAULT, related_name="isDepartment", default=1)
 
@@ -37,7 +38,7 @@ class UserGroup(models.Model):
         (3,"增查改删"),
 
     )
-    user_group_id=models.CharField(choices=authority,max_length=2,unique=True)
+    user_group_id=models.CharField(choices=authority,max_length=2,unique=True,default=1)
 
     class Meta:
         db_table="user_group"
