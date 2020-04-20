@@ -14,12 +14,13 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-from users import  views as userViews
-from project import views as projectViews
-from django.contrib import admin
 from django.conf.urls import url,include
+from django.contrib import admin
 from rest_framework.documentation import include_docs_urls
 from rest_framework_jwt.views import obtain_jwt_token
+
+from project import views as projectViews
+from users import  views as userViews
 
 urlpatterns = [
     url('admin/', admin.site.urls),  #admin后台url
@@ -31,5 +32,9 @@ urlpatterns = [
     #project
     url(r"^users/projectList/", projectViews.ProjectList.as_view(), name="ProjectList"),
     url(r"^users/addproject/", projectViews.AddProject.as_view(), name="ProjectList"),
+    url(r"^users/edit_project/", projectViews.EditProject.as_view(), name="ProjectList"),
+    url(r"^users/remove_project/", projectViews.RmoveProject.as_view(), name="ProjectList"),
+
+
 
 ]

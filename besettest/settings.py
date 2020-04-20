@@ -154,7 +154,7 @@ REST_FRAMEWORK = {
 
     "DEFAULT_SCHEMA_CLASS":"rest_framework.schemas.AutoSchema", #接口文档docs配置
     # 'NON_FIELD_ERRORS_KEY': 'error', #修改错误信息key
-    # 'EXCEPTION_HANDLER':"libs.exception.custom_exception_handler",
+    'EXCEPTION_HANDLER':"libs.exception.custom_exception_handler",
     # 'DEFAULT_RENDERER_CLASSES':('libs.exception.customrenderer',)
 }
 

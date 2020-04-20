@@ -24,9 +24,9 @@ class Registers(APIView):
         if validate_data.is_valid(raise_exception=True):
             a=validate_data.save()
             print("data",validate_data)
-            res_data=serializers.S_Register(a).data
+            res_data=serializers.S_Register(a)
             print(res_data)
-            return APIResponse(200, "注册成功",results=res_data, status=status.HTTP_200_OK)
+            return APIResponse(200, "注册成功",results=res_data.data, status=status.HTTP_200_OK)
         else:
             return APIResponse(200,"注册失败",results={},status=status.HTTP_200_OK)
 

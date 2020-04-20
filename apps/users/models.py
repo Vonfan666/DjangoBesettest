@@ -25,7 +25,7 @@ class Department(models.Model):
     """
 
     name=models.CharField(max_length=10,verbose_name="部门",default="研发部")
-    department_id=models.CharField(default=1,max_length=2,unique=True)
+    department_id=models.IntegerField(default=1,unique=True)
     class Meta:
         db_table="department"
 

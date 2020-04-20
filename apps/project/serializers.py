@@ -1,23 +1,41 @@
 from  rest_framework import serializers
-from  . import models
-from  rest_framework.validators import ValidationError
+
+from  project import models
 
 
 class  S_ProjectList(serializers.ModelSerializer):
+    create_time = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
     class Meta:
-        model=models.ProjectList
+        model= models.ProjectList
         fields="__all__"
 
 
 class S_AddProject(serializers.ModelSerializer):
 
-    create_user_id=serializers.SerializerMethodField(read_only=False)
-
-    def get_create_user_id(self,obj):
-        return {"id":obj.create_user_id.name}
+    user=serializers.SerializerMethodField()
+    create_time=serializers.DateTimeField(read_only=True,format='%Y-%m-%d %H:%M:%S')
+    def get_user(self,obj):
+        return {"id":obj.user.name}
     class Meta:
-        model=models.ProjectList
-        fields=["name","dev_attr","test_attr","product_attr","create_user_id"]
+        model= models.ProjectList
+        fields=["name","dev_attr","test_attr","product_attr","user","create_time"]
+
+
+    def create(self, validated_data):
+        user=super().create(validated_data=validated_data)
+        user.save()
+        return user
+
+
+class S_UpdateProject(serializers.ModelSerializer):
+
+    user=serializers.SerializerMethodField()
+    create_time=serializers.DateTimeField(read_only=True,format='%Y-%m-%d %H:%M:%S')
+    def get_user(self,obj):
+        return {"id":obj.user.name}
+    class Meta:
+        model= models.ProjectList
+        fields=["name","dev_attr","test_attr","product_attr","user","create_time","id"]
 
 
     def create(self, validated_data):
