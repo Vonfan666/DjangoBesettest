@@ -57,6 +57,7 @@ class RmoveProject(APIView):
             return  APIResponse(400, "项目不存在", results=[] ,status=status.HTTP_200_OK)
 
 class  LastProject(APIView):
+    """获取用户最后一次访问的项目"""
     def get(self,req):
         print(req)
         userId=req.query_params

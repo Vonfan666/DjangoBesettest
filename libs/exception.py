@@ -22,12 +22,12 @@ def custom_exception_handler(exc, context):
 
                 if isinstance(value, str):
                     message = value
-                    if message == "Authentication credentials were not provided.":
+                    if message == "Authentication credentials were not provided." or message=="Invalid Authorization header. No credentials provided.":
                         message = "用户未登录或登录态失效"
                 else:
                     message = value[0]
         # print('123 = %s - %s - %s' % (context['view'], context['request'].method, exc))
-        return APIResponse(400,message,status=status.HTTP_200_OK)
+        return APIResponse(401,message,status=status.HTTP_200_OK)
 
 
 
