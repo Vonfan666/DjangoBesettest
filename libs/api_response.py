@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 
 class APIResponse(Response):
     def __init__(self, data_status, data_msg, results=None,
-                 status=None, headers=None, content_type=None, **kwargs):
+                 status=None, headers=None, content_type=None,*args ,**kwargs):
         data = {
             'status': data_status,
             'msg': data_msg

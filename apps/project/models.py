@@ -7,6 +7,6 @@ class ProjectList(models.Model):
     test_attr=models.CharField(max_length=100,verbose_name="测试地址")
     product_attr=models.CharField(max_length=100,verbose_name="生产地址")
     create_time=models.DateTimeField(auto_now_add=True,verbose_name="创建时间")
-    user=models.ForeignKey("users.UserProfile",to_field="id",on_delete=models.SET_DEFAULT,default=1)
+    user=models.ForeignKey("users.UserProfile",to_field="id",on_delete=models.SET_DEFAULT,default=1,verbose_name="创建用户id")
     class Meta:
-        db_table= "Project_list"
+        db_table= "project_list"

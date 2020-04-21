@@ -30,11 +30,10 @@ urlpatterns = [
     url(r"^users/registers/", userViews.Registers.as_view(), name="Register"),
     url(r"^users/department/", userViews.Department.as_view(), name="Department"),
     #project
-    url(r"^users/projectList/", projectViews.ProjectList.as_view(), name="ProjectList"),
-    url(r"^users/addproject/", projectViews.AddProject.as_view(), name="ProjectList"),
-    url(r"^users/edit_project/", projectViews.EditProject.as_view(), name="ProjectList"),
-    url(r"^users/remove_project/", projectViews.RmoveProject.as_view(), name="ProjectList"),
-
-
+    url(r"^users/project_list/", projectViews.ProjectList.as_view(), name="ProjectList"),
+    url(r"^users/add_project/", projectViews.AddProject.as_view(), name="ProjectAdd"),
+    url(r"^users/edit_project/", projectViews.EditProject.as_view(), name="ProjectEdit"),
+    url(r"^users/remove_project/", projectViews.RmoveProject.as_view(), name="ProjectRemove"),
+    url(r"^users/last_use_project/", projectViews.LastProject.as_view(), name="ProjectLast"), #用户最后使用项目记录
 
 ]
