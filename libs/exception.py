@@ -5,7 +5,6 @@ from rest_framework import status
 
 # 将仅针对由引发的异常生成的响应调用异常处理程序。它不会用于视图直接返回的任何响应
 def custom_exception_handler(exc, context):
-    print("先执行这个---------")
     response = exception_handler(exc, context)
     message=""
 
@@ -13,7 +12,7 @@ def custom_exception_handler(exc, context):
 
 
     if response is None:
-        return APIResponse(200,"服务器错误",status=status.HTTP_500_INTERNAL_SERVER_ERROR,exception=True)
+        return APIResponse(400,"服务器错误",status=status.HTTP_500_INTERNAL_SERVER_ERROR,exception=True)
     else:
         for index, value in enumerate(response.data):
             if index == 0:

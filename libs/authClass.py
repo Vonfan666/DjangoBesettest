@@ -28,8 +28,7 @@ class CustomBackend(ModelBackend):
         except:
             raise ValidationError("用户名或密码错误")
 def jwt_success_response(token, user=None, request=None):
-    print(token)
-    print(user)
+
     data = {
         "status":200,
         'token': token,

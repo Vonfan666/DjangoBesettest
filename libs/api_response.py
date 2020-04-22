@@ -7,6 +7,7 @@
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
+from  . import Pagination
 
 class APIResponse(Response):
     def __init__(self, data_status, data_msg, results=None,
@@ -17,5 +18,6 @@ class APIResponse(Response):
         }
         if results is not None:
             data['results'] = results
+
         data.update(kwargs)
         super().__init__(data=data, status=status, headers=headers, content_type=content_type)
