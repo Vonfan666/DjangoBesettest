@@ -9,7 +9,7 @@ def custom_exception_handler(exc, context):
     message=""
 
     # 这个循环是取第一个错误的提示用于渲染
-
+    print(exc.args)
 
     if response is None:
         return APIResponse(400,"服务器错误",status=status.HTTP_500_INTERNAL_SERVER_ERROR,exception=True)

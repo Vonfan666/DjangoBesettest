@@ -13,8 +13,8 @@ class  UserProfile(AbstractUser):
     create_time=models.DateField(auto_now_add=True, verbose_name="创建时间")  #创建对象时更新这个时间，以后sava都不会更新
     update_time=models.DateField(auto_now=True, verbose_name="更新时间")  #每次save都更新这个时间
     user_last_project=models.IntegerField(default=0,verbose_name="用户最后一次访问项目id")
-    grp=models.ForeignKey("UserGroup", to_field="id", on_delete=models.SET_DEFAULT, related_name="isUserGroup", default=1)
-    det=models.ForeignKey("Department", to_field="department_id",on_delete=models.SET_DEFAULT, related_name="isDepartment", default=1)
+    grp=models.ForeignKey("UserGroup", to_field="id", on_delete=models.SET_NULL, related_name="isUserGroup",null=True)
+    det=models.ForeignKey("Department", to_field="department_id",on_delete=models.SET_NULL,null=True, related_name="isDepartment")
 
     class Meta:
         db_table="user_profile"

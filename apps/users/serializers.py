@@ -24,17 +24,19 @@ class S_Register(serializers.ModelSerializer):
     username=serializers.CharField(required=True,error_messages={
         "required":"账号已存在"
     })
-    def get_det(self,obj):   #处理自定义字段的返回值-OBJ就是当前的整个UserProfiled的对象
-        return {"name":obj.det.name,"department_id":obj.det.department_id}
 
-    def get_grp(self,obj):
-        return {"user_group_id":obj.grp.user_group_id}
     class Meta:
         model=models.UserProfile
         # department=models.Department
         fields=["username","name","password","det","grp"]
 
+    def get_det(self,obj):   #处理自定义字段的返回值-OBJ就是当前的整个UserProfiled的对象
+        a=obj
+        print(a)
+        return {"name":obj.det.name,"department_id":obj.det.department_id}
 
+    def get_grp(self,obj):
+        return {"user_group_id":obj.grp.user_group_id}
     def  validate(self, attrs):
         username=attrs.get("username")
         password = attrs.get("password")

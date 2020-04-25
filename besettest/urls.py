@@ -35,5 +35,7 @@ urlpatterns = [
     url(r"^users/edit_project/", projectViews.EditProject.as_view(), name="ProjectEdit"),
     url(r"^users/remove_project/", projectViews.RmoveProject.as_view(), name="ProjectRemove"),
     url(r"^users/last_use_project/", projectViews.LastProject.as_view(), name="ProjectLast"), #用户最后使用项目记录
+    #files
+    url(r"^users/add_files/", projectViews.addFiles.as_view(), name="addFiles") # 用户最后使用项目记录
 
 ]
