@@ -106,6 +106,31 @@ class  LastProject(APIView):
         UserProfile.objects.filter(id=userId).update(user_last_project=projectId)
         return APIResponse(200,"success",status=status.HTTP_200_OK)
 
+
+
+class PostMethods(APIView):
+    """返回所有的请求数据"""
+    def get(self,req):
+        postMthodObj=models.PostMethods.objects.all()
+        postTypeObj=models.PostType.objects.all()
+        resTypeObj=models.ResType.objects.all()
+        res_post_methods=serializers.S_PostMethods(postMthodObj,many=True)
+        res_post_type=serializers.S_PostType(postTypeObj,many=True)
+        res_res_type=serializers.S_ResType(resTypeObj,many=True)
+        return  APIResponse(200,"sucess",res_post_methods=res_post_methods.data,
+                            res_post_type=res_post_type.data,
+                            res_res_type=res_res_type.data
+                            ,status=status.HTTP_200_OK)
+class addFilesName(APIView):
+    def post(self,req):
+        data=req.data
+        valid_data=serializers.S_InterfaceFilesName(data=data,many=False)
+        if  valid_data.is_valid(raise_exception=True):
+            res_data=valid_data.save()
+            res_data=serializers.S_InterfaceFilesName(res_data)
+            return APIResponse(200,"添加成功",data=res_data.data,status=status.HTTP_200_OK)
+
+
 class  addFiles(APIView):
     """新增接口文档"""
     def post(self,req):

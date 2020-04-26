@@ -33,10 +33,18 @@ class ResType(models.Model):
     class Meta:
         db_table= "res_type"
 
+class InterfaceFilesName(models.Model):
+    """文件夹"""
+    name=models.CharField(max_length=100)
+    project_id=models.ForeignKey("ProjectList",on_delete=models.SET_NULL,null=True,related_name="file_project",verbose_name="所属项目id")
+    class Meta:
+        db_table="interface_files_name"
+
 class InterfaceFiles(models.Model):
     """文档列表"""
 
     project=models.ForeignKey("ProjectList", to_field="id", on_delete=models.SET_NULL,null=True, related_name="project_id", verbose_name="所属项目id")
+    file=models.ForeignKey("InterfaceFilesName",to_field="id",on_delete=models.SET_NULL,null=True,related_name="files_name",verbose_name="关联接口文件id")
     create_user=models.ForeignKey("users.UserProfile", to_field="id", on_delete=models.SET_DEFAULT, default=None, related_name="create_user_id", verbose_name="创建用户")
     filesName=models.CharField(max_length=255, verbose_name="接口文档名称")
 

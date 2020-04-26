@@ -52,7 +52,20 @@ class S_UpdateProject(serializers.ModelSerializer):
         user.save()
         return user
 
+class S_PostMethods(serializers.ModelSerializer):
+    class Meta:
+        model=models.PostMethods
+        fields = "__all__"
 
+class S_PostType(serializers.ModelSerializer):
+    class Meta:
+        model=models.PostType
+        fields = "__all__"
+
+class S_ResType(serializers.ModelSerializer):
+    class Meta:
+        model=models.ResType
+        fields="__all__"
 
 class S_AddFiles(serializers.ModelSerializer):
     post_methods = serializers.SerializerMethodField()
@@ -122,3 +135,18 @@ class S_AddFiles(serializers.ModelSerializer):
             print(f)
             raise  ValidationError(f)
         return user
+
+
+
+class  S_InterfaceFilesName(serializers.ModelSerializer):
+    class Meta:
+        model=models.InterfaceFilesName
+        fields="__all__"
+
+    def  create(self, validated_data):
+        projectId=self.initial_data["projectId"]
+        projectObj=models.ProjectList.objects.get(id=projectId)
+        validated_data["project_id"]=projectObj
+        user=super().create(validated_data=validated_data)
+        user.save()
+        return  user
