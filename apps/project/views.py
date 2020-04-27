@@ -122,6 +122,7 @@ class PostMethods(APIView):
                             res_res_type=res_res_type.data
                             ,status=status.HTTP_200_OK)
 class addFilesName(APIView):
+    """新增文件夹"""
     def post(self,req):
         data=req.data
         valid_data=serializers.S_InterfaceFilesName(data=data,many=False)
@@ -129,6 +130,50 @@ class addFilesName(APIView):
             res_data=valid_data.save()
             res_data=serializers.S_InterfaceFilesName(res_data)
             return APIResponse(200,"添加成功",data=res_data.data,status=status.HTTP_200_OK)
+
+class EditFilesName(APIView):
+    """修改文件夹名称
+        :param
+        id      文件夹id
+        name    修改后的文件夹名称
+    """
+    def post(self,req):
+        data=req.data
+        editObj=models.InterfaceFilesName.objects.get(id=data["id"])
+        valid_data=serializers.S_InterfaceFilesName(data=data,instance=editObj,many=False,partial=True)
+        if  valid_data.is_valid(raise_exception=True):
+            valid_data=valid_data.save()
+            res_data=serializers.S_InterfaceFilesName(valid_data)
+            res_data=res_data.data
+            return APIResponse(200,"修改成功",results=res_data,status=status.HTTP_200_OK)
+
+class RemoveFilesName(APIView):
+    """
+    删除接口文件夹
+    :param
+    id 文件夹ID
+    """
+    def  post(selfs,req):
+        id=req.data["id"]
+        models.InterfaceFilesName.objects.get(id=id).delete()
+        return APIResponse(200,"删除成功",status=status.HTTP_200_OK)
+
+
+class  SelectFilesName(APIView):
+    """
+    查看接口文件夹，以及其下内容
+    :param
+    projectId
+    """
+    def get(self,req):
+        projectId=req.query_params["projectId"]
+        obj=models.InterfaceFilesName.objects.filter(project_id=projectId)
+        print(obj,"1111")
+        Many=ManyOrOne.IsMany(obj)
+        res_data=serializers.S_select_InterfaceFilesName(obj,many=Many)
+        res_data=res_data.data
+        print(res_data)
+        return APIResponse(200,"sucess",results=res_data,status=status.HTTP_200_OK)
 
 
 class  addFiles(APIView):

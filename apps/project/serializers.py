@@ -80,6 +80,7 @@ class S_AddFiles(serializers.ModelSerializer):
         return {"id": obj.post_type.id, "name": obj.post_type.name}
     def get_res_type(self,obj):
         return {"id":obj.res_type.id, "name": obj.res_type.name}
+
     class Meta:
         model=models.InterfaceFiles
         fields="__all__"
@@ -124,6 +125,10 @@ class S_AddFiles(serializers.ModelSerializer):
             validated_data["post_type"]=post_type_obj
             validated_data["res_type"]=res_type_obj
 
+            fileId = self.initial_data["fileId"]
+            fileId_obj = models.InterfaceFilesName.objects.get(id=fileId)
+            validated_data["file"] = fileId_obj
+
             # validated_data["post_header"]=json.dumps(self.initial_data["post_header"])
             # validated_data["post_data"] = json.dumps(self.initial_data["post_data"])
             # validated_data["res_header"] = json.dumps(self.initial_data["res_header"])
@@ -139,14 +144,36 @@ class S_AddFiles(serializers.ModelSerializer):
 
 
 class  S_InterfaceFilesName(serializers.ModelSerializer):
+
+    userName=serializers.SerializerMethodField()
+    def get_userName(self,obj):
+        return obj.project_id.user.name
+
     class Meta:
         model=models.InterfaceFilesName
         fields="__all__"
 
+
     def  create(self, validated_data):
-        projectId=self.initial_data["projectId"]
-        projectObj=models.ProjectList.objects.get(id=projectId)
-        validated_data["project_id"]=projectObj
+        if  "projectId"  in self.initial_data:
+            projectId=self.initial_data["projectId"]
+            projectObj=models.ProjectList.objects.get(id=projectId)
+            validated_data["project_id"]=projectObj
         user=super().create(validated_data=validated_data)
         user.save()
         return  user
+
+    # def update(self, instance, validated_data):
+
+
+class S_select_InterfaceFilesName(serializers.ModelSerializer):
+
+    Clist=serializers.SerializerMethodField()
+
+    def get_Clist(self,obj):
+        print(obj.files_name.all())
+        print(obj,"2222")
+        return obj.files_name.all().values("id","filesName","project__user__name")
+    class Meta:
+        model=models.InterfaceFilesName
+        fields = "__all__"
