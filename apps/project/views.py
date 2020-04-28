@@ -159,7 +159,6 @@ class RemoveFilesName(APIView):
         models.InterfaceFilesName.objects.get(id=id).delete()
         return APIResponse(200,"删除成功",status=status.HTTP_200_OK)
 
-
 class  SelectFilesName(APIView):
     """
     查看接口文件夹，以及其下内容
@@ -174,7 +173,6 @@ class  SelectFilesName(APIView):
         res_data=res_data.data
         print(res_data)
         return APIResponse(200,"sucess",results=res_data,status=status.HTTP_200_OK)
-
 
 class  addFiles(APIView):
     """新增接口文档"""
@@ -224,24 +222,20 @@ class CopyFiles(APIView):
     def  post(self,req):
         id=req.data["id"]
         # projectId=req.data["projectId"]
+        userId=req.data["userId"]
         fileId=req.data["fileId"]
         oldObj=models.InterfaceFiles.objects.filter(id=int(id))
-        print(oldObj)
         # Many=ManyOrOne.IsMany(oldObj)
         data=serializers.S_CopyFiles(oldObj,many=True)
-        print(data)
-        print(data.data)
         a=data.data
-
         try:
             b = json.loads(json.dumps(a))[0]
-            print(b)
             b["resTypeId"]=b["res_type"]
             b["postMethodsId"]=b["post_methods"]
             b["postTypeId"]=b["post_type"]
             b["fileId"]=fileId
             b["projectId"]=b["project"]
-            b["createUserId"]=b["create_user"]
+            b["createUserId"]=userId
             del b["res_type"]
             del b["post_methods"]
             del b["post_type"]
@@ -250,8 +244,6 @@ class CopyFiles(APIView):
             del b["update_time"]
             del b["create_time"]
             del b["project"]
-
-            print(b)
             obj = serializers.S_AddFiles(data=b, many=False)
             if obj.is_valid(raise_exception=True):
                 save_data = obj.save()

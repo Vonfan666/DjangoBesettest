@@ -72,6 +72,7 @@ class S_AddFiles(serializers.ModelSerializer):
     post_methods = serializers.SerializerMethodField()
     post_type = serializers.SerializerMethodField()
     res_type = serializers.SerializerMethodField()
+    create_user=serializers.SerializerMethodField()
     create_time = serializers.DateTimeField(read_only=True,format='%Y-%m-%d %H:%M:%S')
     update_time = serializers.DateTimeField(read_only=True,format='%Y-%m-%d %H:%M:%S')
     def get_post_methods(self,obj):
@@ -82,6 +83,8 @@ class S_AddFiles(serializers.ModelSerializer):
     def get_res_type(self,obj):
         return {"id":obj.res_type.id, "name": obj.res_type.name}
 
+    def get_create_user(self,obj):
+        return obj.create_user.name
     class Meta:
         model=models.InterfaceFiles
         fields="__all__"
