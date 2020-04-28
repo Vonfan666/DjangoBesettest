@@ -35,12 +35,16 @@ urlpatterns = [
     url(r"^users/edit_project/", projectViews.EditProject.as_view(), name="ProjectEdit"),
     url(r"^users/remove_project/", projectViews.RmoveProject.as_view(), name="ProjectRemove"),
     url(r"^users/last_use_project/", projectViews.LastProject.as_view(), name="ProjectLast"), #用户最后使用项目记录
-    #files
-    url(r"^users/add_files/", projectViews.addFiles.as_view(), name="addFiles"), # 用户最后使用项目记录
-    url(r"^users/post_methods/", projectViews.PostMethods.as_view(), name="PostMethods"),  # 用户最后使用项目记录
-    url(r"^users/add_file/", projectViews.addFilesName.as_view(), name="addFiles"),  # 用户最后使用项目记录
-    url(r"^users/edit_file/", projectViews.EditFilesName.as_view(), name="EditFilesName"),  # 用户最后使用项目记录
-    url(r"^users/remove_file/", projectViews.RemoveFilesName.as_view(), name="RemoveFilesName"),  # 用户最后使用项目记录
-    url(r"^users/select_file/", projectViews.SelectFilesName.as_view(), name="SelectFilesName"),  # 用户最后使用项目记录
+    #files文件夹操作
+    url(r"^users/post_methods/", projectViews.PostMethods.as_view(), name="PostMethods"),  # 请求数据集
+    url(r"^users/add_file/", projectViews.addFilesName.as_view(), name="addFiles"),  # 新增接口文件夹
+    url(r"^users/edit_file/", projectViews.EditFilesName.as_view(), name="EditFilesName"),  # 编辑接口文件夹
+    url(r"^users/remove_file/", projectViews.RemoveFilesName.as_view(), name="RemoveFilesName"),  # 移除接口文件夹
+    url(r"^users/select_file/", projectViews.SelectFilesName.as_view(), name="SelectFilesName"),  # 查看接口返回类容
+    #接口文件操作
+    url(r"^users/add_files/", projectViews.addFiles.as_view(), name="addFiles"),  # 新增接口文件
+    url(r"^users/edit_files/", projectViews.EditFiles.as_view(), name="EditFiles"),  # 编辑接口文件
+    url(r"^users/remove_files/", projectViews.RmoveFiles.as_view(), name="RmoveFiles"),  # 编辑接口文件
+    url(r"^users/copy_files/", projectViews.CopyFiles.as_view(), name="CopyFiles"),  # 复制接口文件
 
 ]

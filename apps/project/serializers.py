@@ -67,6 +67,7 @@ class S_ResType(serializers.ModelSerializer):
         model=models.ResType
         fields="__all__"
 
+
 class S_AddFiles(serializers.ModelSerializer):
     post_methods = serializers.SerializerMethodField()
     post_type = serializers.SerializerMethodField()
@@ -91,18 +92,8 @@ class S_AddFiles(serializers.ModelSerializer):
         "project":{
             "write_only":True
         }
-        # "create_time":{
-        #     "write_only":True,
-        #     "format":'%Y-%m-%d %H:%M:%S'
-        # },
-        # "update_time":{
-        #     "write_only":True,
-        #     "format":'%Y-%m-%d %H:%M:%S'
-        # }
+
     }
-
-
-
     def create(self, validated_data):
         projectId=self.initial_data["projectId"]
         try:
@@ -141,7 +132,11 @@ class S_AddFiles(serializers.ModelSerializer):
             raise  ValidationError(f)
         return user
 
+class S_CopyFiles(serializers.ModelSerializer):
 
+    class Meta:
+        model = models.InterfaceFiles
+        fields = "__all__"
 
 class  S_InterfaceFilesName(serializers.ModelSerializer):
 

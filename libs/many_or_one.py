@@ -6,9 +6,13 @@
 from rest_framework.views import APIView
 from .api_response import APIResponse
 from rest_framework import status
+
 class ManyOrOne(APIView,APIResponse):
     def IsMany(self,request_data):
         # request_data=request_data.dict()
+        # if("QuerySet" in type(request_data)):
+        #     Many = True
+        #     return Many
         if isinstance(request_data, dict) and request_data is not None:
             Many = False
             return Many
@@ -17,6 +21,9 @@ class ManyOrOne(APIView,APIResponse):
             return Many
         elif len(request_data)>1:
             Many=True
+            return Many
+        elif len(request_data)<=1:
+            Many=False
             return Many
         else:
             print("草你爹")

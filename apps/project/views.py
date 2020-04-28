@@ -6,7 +6,8 @@ from libs.api_response import APIResponse
 from libs.many_or_one import ManyOrOne
 # Create your views here.
 from  users.models import UserProfile
-
+import json
+from collections import OrderedDict
 
 from  libs.Pagination import Pagination
 
@@ -169,8 +170,7 @@ class  SelectFilesName(APIView):
         projectId=req.query_params["projectId"]
         obj=models.InterfaceFilesName.objects.filter(project_id=projectId)
         print(obj,"1111")
-        Many=ManyOrOne.IsMany(obj)
-        res_data=serializers.S_select_InterfaceFilesName(obj,many=Many)
+        res_data=serializers.S_select_InterfaceFilesName(obj,many=True)
         res_data=res_data.data
         print(res_data)
         return APIResponse(200,"sucess",results=res_data,status=status.HTTP_200_OK)
@@ -193,3 +193,74 @@ class  addFiles(APIView):
             res_data["res_header"]=json.loads( res_data["res_header"])
             res_data["res_data"]=json.loads(res_data["res_data"])
             return APIResponse(200,"sussces",results=res_data,status=status.HTTP_200_OK)
+class EditFiles(APIView):
+    """编辑接口文件"""
+    def post(self,req):
+        id=req.data["id"]
+        name=req.data["name"]
+        try:
+            models.InterfaceFiles.objects.filter(id=id).update(filesName=name)
+            return  APIResponse(200,"sucess",status=status.HTTP_200_OK)
+        except:
+            return  APIResponse(401,"修改失败,请联系管理员",status=status.HTTP_200_OK)
+
+class RmoveFiles(APIView):
+    """删除接口文件"""
+    def  post(self,req):
+        id=req.data["id"]
+        try:
+            models.InterfaceFiles.objects.filter(id=id).delete()
+            return  APIResponse(200,"sucess",status=status.HTTP_200_OK)
+        except:
+            return  APIResponse(401,"修改失败,请联系管理员",status=status.HTTP_200_OK)
+from django.forms.models import model_to_dict
+class CopyFiles(APIView):
+    """复制接口文件
+        :param 儿子id    项目id  oldFileId   newFileId
+        首先复制一个文件，然后复制一份数据，且数据关联到这个文件的id
+
+    """
+
+    def  post(self,req):
+        id=req.data["id"]
+        # projectId=req.data["projectId"]
+        fileId=req.data["fileId"]
+        oldObj=models.InterfaceFiles.objects.filter(id=int(id))
+        print(oldObj)
+        # Many=ManyOrOne.IsMany(oldObj)
+        data=serializers.S_CopyFiles(oldObj,many=True)
+        print(data)
+        print(data.data)
+        a=data.data
+
+        try:
+            b = json.loads(json.dumps(a))[0]
+            print(b)
+            b["resTypeId"]=b["res_type"]
+            b["postMethodsId"]=b["post_methods"]
+            b["postTypeId"]=b["post_type"]
+            b["fileId"]=fileId
+            b["projectId"]=b["project"]
+            b["createUserId"]=b["create_user"]
+            del b["res_type"]
+            del b["post_methods"]
+            del b["post_type"]
+            del b["file"]
+            del b["id"]
+            del b["update_time"]
+            del b["create_time"]
+            del b["project"]
+
+            print(b)
+            obj = serializers.S_AddFiles(data=b, many=False)
+            if obj.is_valid(raise_exception=True):
+                save_data = obj.save()
+                res_data = serializers.S_AddFiles(save_data).data
+                # 将数据库取出来的序列化列表数据读出来
+                res_data["post_header"] = json.loads(res_data["post_header"])
+                res_data["post_data"] = json.loads(res_data["post_data"])
+                res_data["res_header"] = json.loads(res_data["res_header"])
+                res_data["res_data"] = json.loads(res_data["res_data"])
+                return APIResponse(200, "sussces", results=res_data, status=status.HTTP_200_OK)
+        except:
+            return  APIResponse(200,"SUCESS",results=a,status=status.HTTP_200_OK)
