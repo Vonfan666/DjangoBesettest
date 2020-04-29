@@ -3,7 +3,7 @@
 # -*- coding:utf-8 -*-
 # @Author:von_fan
 # @Time:2020年04月16日22时50分19秒
-
+import  json
 from  rest_framework import serializers
 from  . import models
 from  rest_framework.validators import ValidationError
@@ -20,23 +20,19 @@ class S_Register(serializers.ModelSerializer):
     name = serializers.CharField( max_length=5,error_messages={
         "max_length":"最多输入五位数"
     })
-    #
     username=serializers.CharField(required=True,error_messages={
         "required":"账号已存在"
     })
-
-    class Meta:
-        model=models.UserProfile
-        # department=models.Department
-        fields=["username","name","password","det","grp"]
-
     def get_det(self,obj):   #处理自定义字段的返回值-OBJ就是当前的整个UserProfiled的对象
-        a=obj
-        print(a)
-        return {"name":obj.det.name,"department_id":obj.det.department_id}
+        obj=getattr(obj,"det")
+        return {"name": getattr(obj,"name",""), "department_id":getattr(obj,"department_id","")}
 
     def get_grp(self,obj):
-        return {"user_group_id":obj.grp.user_group_id}
+        obj=getattr(obj,"grp")  #
+        return {"user_group_id":getattr(obj,"user_group_id","")}
+    class Meta:
+        model=models.UserProfile
+        fields=["username","name","password","det","grp"]
     def  validate(self, attrs):
         username=attrs.get("username")
         password = attrs.get("password")
@@ -46,13 +42,14 @@ class S_Register(serializers.ModelSerializer):
             raise  ValidationError("密码长度过短")
         if models.UserProfile.objects.filter(username=username):
             raise  ValidationError("用户已存在")
+        print("det" in attrs.keys())
+        if "det" not in self.initial_data.keys():
+            raise  ValidationError("缺少部门ID")
+        # attrs["det"]=self.initial_data["det"]
         return attrs
-
-
-    # def validate(self, attrs):
-    #     attrs["det"]=attrs
-
     def create(self,  validated_data):
+        if  "det"  in  self.initial_data:
+            validated_data["det"]=models.Department.objects.get(id=self.initial_data["det"])
         user=super().create(validated_data=validated_data)
         user.set_password(validated_data["password"])
         user.save()

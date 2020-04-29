@@ -162,8 +162,7 @@ class RemoveFilesName(APIView):
 class  SelectFilesName(APIView):
     """
     查看接口文件夹，以及其下内容
-    :param
-    projectId
+    :param projectId
     """
     def get(self,req):
         projectId=req.query_params["projectId"]

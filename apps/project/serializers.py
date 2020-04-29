@@ -4,6 +4,7 @@ from  project import models
 from users.models import UserProfile
 from  rest_framework.exceptions import ValidationError
 
+from django.db.models import F
 
 class  S_ProjectList(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
@@ -169,9 +170,8 @@ class S_select_InterfaceFilesName(serializers.ModelSerializer):
     Clist=serializers.SerializerMethodField()
 
     def get_Clist(self,obj):
-        print(obj.files_name.all())
-        print(obj,"2222")
-        return obj.files_name.all().values("id","filesName","project__user__name")
+        return obj.files_name.all().annotate(createUserName=F('project__user__name')).values("id", "filesName", "createUserName",)
+
     class Meta:
         model=models.InterfaceFilesName
         fields = "__all__"
