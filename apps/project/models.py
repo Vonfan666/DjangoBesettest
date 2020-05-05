@@ -48,23 +48,30 @@ class InterfaceFiles(models.Model):
     create_user=models.ForeignKey("users.UserProfile", to_field="id", on_delete=models.SET_DEFAULT, default=None, related_name="create_user_id", verbose_name="创建用户")
     filesName=models.CharField(max_length=255, verbose_name="接口文档名称")
 
-    post_methods=models.ForeignKey("PostMethods",to_field="id",on_delete=models.SET_DEFAULT,default=None,verbose_name="该接口请求方法id")
-    post_type=models.ForeignKey("PostType",to_field="id",on_delete=models.SET_DEFAULT,default=None,verbose_name="该接口请求类型id")
+    post_methods=models.ForeignKey("PostMethods",to_field="id",on_delete=models.SET_NULL,null=True,verbose_name="该接口请求方法id")
+    post_type=models.ForeignKey("PostType",to_field="id",on_delete=models.SET_NULL,null=True,verbose_name="该接口请求类型id")
 
-    post_attr=models.CharField(max_length=255,verbose_name="请求地址")
-    interface_detail = models.CharField(max_length=255, verbose_name="接口描述")
-    mock_attr=models.CharField(max_length=255,verbose_name="mock地址")
-    post_header=models.CharField(max_length=255,verbose_name="请求头")
-    post_data = models.CharField(max_length=255, verbose_name="请求数据")
-    res_header = models.CharField(max_length=255, verbose_name="返回头部")
-    res_data = models.CharField(max_length=255, verbose_name="返回数据")
+    post_attr=models.CharField(max_length=255,verbose_name="请求地址",null=True)
+    interface_detail = models.CharField(max_length=255, verbose_name="接口描述",null=True)
+    mock_attr=models.CharField(max_length=255,verbose_name="mock地址",null=True)
+    post_header=models.TextField(verbose_name="请求头",null=True)
+    post_data = models.TextField( verbose_name="请求数据",null=True)
+    res_header = models.TextField( verbose_name="返回头部",null=True)
+    res_data = models.TextField( verbose_name="返回数据",null=True)
 
-    res_type=models.ForeignKey("ResType",to_field="id",on_delete=models.SET_DEFAULT,default=None,verbose_name="该接口返回方法id")
-
+    res_type=models.ForeignKey("ResType",to_field="id",on_delete=models.SET_NULL,null=True,verbose_name="该接口返回方法id")
     create_time=models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
     update_time=models.DateTimeField(auto_now=True, verbose_name="更新时间")
     class Meta:
         db_table= "interface_files"
+
+
+class Environments(models.Model):
+    name=models.CharField(verbose_name="变量名称",unique=True,max_length=128)
+    value=models.TextField(verbose_name="变量值",null=True)
+    is_eg=models.IntegerField(verbose_name="类型")  #1是环境变量  2是全局变量
+    create_time=models.DateTimeField(auto_now_add=True,verbose_name="创建时间")
+    update_time=models.DateTimeField(auto_now=True,verbose_name="更新时间")
 
 
 

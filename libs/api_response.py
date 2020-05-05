@@ -21,3 +21,14 @@ class APIResponse(Response):
 
         data.update(kwargs)
         super().__init__(data=data, status=status, headers=headers, content_type=content_type)
+
+
+class MockResponse(Response):
+    def __init__(self,  data,
+                 status=None, headers=None, content_type=None,*args ,**kwargs):
+
+        # if results is not None:
+        #     data['results'] = results
+
+
+        super().__init__(data=data, status=status, headers=headers, content_type=content_type)

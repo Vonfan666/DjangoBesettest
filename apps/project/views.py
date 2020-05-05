@@ -1,17 +1,14 @@
-import  json
+import  json,requests,os
 from django.shortcuts import render
 from  rest_framework.views import APIView,status
-from . import models,serializers
-from libs.api_response import APIResponse
-from libs.many_or_one import ManyOrOne
-# Create your views here.
 from  users.models import UserProfile
-import json
-from collections import OrderedDict
-
+from rest_framework import permissions
+# Create your views here.
 from  libs.Pagination import Pagination
-
-
+from . import models,serializers
+from libs.api_response import APIResponse,MockResponse
+from libs.many_or_one import ManyOrOne
+from  libs.public import Public
 class ProjectList(APIView):
     """查找项目"""
     def  get(self,req):
@@ -174,7 +171,9 @@ class  SelectFilesName(APIView):
         return APIResponse(200,"sucess",results=res_data,status=status.HTTP_200_OK)
 
 class  addFiles(APIView):
-    """新增接口文档"""
+    """新增接口文档
+    :param
+    """
     def post(self,req):
         data=req.data
         print(data)
@@ -185,10 +184,14 @@ class  addFiles(APIView):
             save_data=obj.save()
             res_data=serializers.S_AddFiles(save_data).data
             #将数据库取出来的序列化列表数据读出来
-            res_data["post_header"]=json.loads(res_data["post_header"])
-            res_data["post_data"]=json.loads(res_data["post_data"])
-            res_data["res_header"]=json.loads( res_data["res_header"])
-            res_data["res_data"]=json.loads(res_data["res_data"])
+            if res_data["post_header"]:
+                res_data["post_header"]=json.loads(res_data["post_header"])
+            if res_data["post_data"]:
+                res_data["post_data"]=json.loads(res_data["post_data"])
+            if res_data["res_header"]:
+                res_data["res_header"]=json.loads( res_data["res_header"])
+            if res_data["res_data"]:
+                res_data["res_data"]=json.loads(res_data["res_data"])
             return APIResponse(200,"sussces",results=res_data,status=status.HTTP_200_OK)
 class EditFiles(APIView):
     """编辑接口文件"""
@@ -255,3 +258,117 @@ class CopyFiles(APIView):
                 return APIResponse(200, "sussces", results=res_data, status=status.HTTP_200_OK)
         except:
             return  APIResponse(200,"SUCESS",results=a,status=status.HTTP_200_OK)
+
+
+
+#接口文档数据类型操作
+class  InterfaceDetailGet(APIView):
+    """查询接口文档数据"""
+    def get(self,req):
+        data=req.query_params
+        obj=models.InterfaceFiles.objects.filter(project=int(data["projectId"]),id=int(data["id"]))
+        obj=serializers.S_interfaceDetail(obj,many=True)
+        obj=obj.data
+
+        return APIResponse(200,"sucess",obj,status=status.HTTP_200_OK)
+
+class EditInterfaceDetail(APIView):
+    """修改接口文档数据"""
+    def  post(self,req):
+        data= req.data
+        print(data.dict())
+        id= req.data["id"]
+        # print(data["postMethodsId"])
+        # print(models.PostMethods.objects.get(id=data["postMethodsId"]))
+        # data["postMethodsId"]=models.PostMethods.objects.get(id=data["postMethodsId"])
+        oldObj=models.InterfaceFiles.objects.get(id=id)
+
+
+
+        valida_obj=serializers.S_updateFiles(data=data,instance=oldObj,partial=True,many=False)
+        if valida_obj.is_valid(raise_exception=True):
+            res_obj=valida_obj.save()
+            res_obj=serializers.S_updateFiles(res_obj)
+            res_data=res_obj.data
+            if res_data["post_header"]:
+                res_data["post_header"]=json.loads(res_data["post_header"])
+            if res_data["post_data"]:
+                res_data["post_data"]=json.loads(res_data["post_data"])
+            if res_data["res_header"]:
+                res_data["res_header"]=json.loads( res_data["res_header"])
+            if res_data["res_data"]:
+                res_data["res_data"]=json.loads(res_data["res_data"])
+
+            return APIResponse(200,"sucess",results=res_data,status=status.HTTP_200_OK)
+
+
+class MockPost(APIView):
+    """前端传一个mockattr  后端处理 resdata返回键值对格式数据
+    :param dada{url:"",data:"",headers:""}
+    """
+    permission_classes = (permissions.AllowAny,)
+    def post(self,req):
+        print(req)
+        data=req.data
+        headers=json.loads(data["headers"])
+        url=data["url"]
+        data=data["data"]
+        try:
+            res=requests.post(url,headers=headers,data=json.loads(data))
+        except:
+            res=requests.post(url,headers=headers,json=data)
+        return  MockResponse(res.json(),status=status.HTTP_200_OK)
+    def get(self,req):
+        data = req.data
+        headers = data["headers"]
+        url = data["url"]
+        data = data["data"]
+        try:
+            res=requests.get(url,headers=headers,data=json.loads(data))
+        except:
+            res=requests.get(url,headers=headers,json=data)
+        return  MockResponse(res.json(),status=status.HTTP_200_OK)
+class MockRes(APIView):
+    """前端请求url上加上一个mock，urls里面匹配到mock就走这个接口，然后判断路径返回指定的内容给到前端即可"""
+    permission_classes = (permissions.AllowAny,)
+
+    def  post(self,req):
+        path=req.path
+        obj=models.InterfaceFiles.objects.filter(mock_attr__contains=path).values("res_header","res_data")
+        res_data={}
+        print(list(obj)[0])
+        for  key , value  in  list(obj)[0].items():
+            print(key,value)
+            if len(value)==0:
+                res_data[key]=value
+            else:
+                res_data[key]=value
+        res_data=json.loads(res_data["res_data"])
+        res_data_c={}
+        res_data_c=Public().forData(res_data,res_data_c)
+        return MockResponse(res_data_c,status=status.HTTP_200_OK)
+
+
+class  EnvironmentsAdd(APIView):
+    """新增环境"""
+    def  post(self,req):
+        #加一个判断-如果存在就更新数据库
+        data=req.data
+        name=data["name"]
+        obj=models.Environments.objects.get(name=name)
+        if obj:
+            valid_data = serializers.S_Environments(data=data,instance=obj, many=False)
+            if valid_data.is_valid(raise_exception=True):
+                res_data = valid_data.save()
+                res_data=serializers.S_Environments(res_data)
+                data = res_data.data
+                return APIResponse(200, "更新成功",results=data, status=status.HTTP_200_OK)
+        else:
+            valid_data=serializers.S_Environments(data=data,many=False)
+            if valid_data.is_valid(raise_exception=True):
+                res_data=valid_data.save()
+                res_data=serializers.S_Environments(res_data)
+
+                data=res_data.data
+                return APIResponse(200,"添加成功",results=data,status=status.HTTP_200_OK)
+

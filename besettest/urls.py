@@ -26,7 +26,7 @@ urlpatterns = [
     url('admin/', admin.site.urls),  #admin后台url
     url(r"^docs/", include_docs_urls(title="infaterText")),  # 文档配置
     url(r"^api-auth/", include("rest_framework.urls", namespace="rest_framework")), #配置之后文档就可以登录了
-    url(r'^users/login/', obtain_jwt_token),  #生成token并验证
+    url(r'^users/login/$', obtain_jwt_token),  #生成token并验证
     url(r"^users/registers/", userViews.Registers.as_view(), name="Register"),
     url(r"^users/department/", userViews.Department.as_view(), name="Department"),
     #project
@@ -44,7 +44,15 @@ urlpatterns = [
     #接口文件操作
     url(r"^users/add_files/", projectViews.addFiles.as_view(), name="addFiles"),  # 新增接口文件
     url(r"^users/edit_files/", projectViews.EditFiles.as_view(), name="EditFiles"),  # 编辑接口文件
-    url(r"^users/remove_files/", projectViews.RmoveFiles.as_view(), name="RmoveFiles"),  # 编辑接口文件
+    url(r"^users/remove_files/", projectViews.RmoveFiles.as_view(), name="RmoveFiles"),  # 删除接口文件
     url(r"^users/copy_files/", projectViews.CopyFiles.as_view(), name="CopyFiles"),  # 复制接口文件
+    #接口文档详情
+    url(r"^users/interface_detail/", projectViews.InterfaceDetailGet.as_view(), name="InterfaceDetailGet"),  # 接口文档详情
+    url(r"^users/edit_interface_detail/", projectViews.EditInterfaceDetail.as_view(), name="EditInterfaceDetail"),  # 修改接口文档数据
+    #模拟请求数据
+    url(r"^users/mock_requests/", projectViews.MockPost.as_view(), name="MockPost"),#模拟请求数据
+    url(r"mock/$", projectViews.MockRes.as_view(), name="MockRes"), #模拟返回数据
+    #环境变量操作
+    url(r"^users/environment_add/", projectViews.EnvironmentsAdd.as_view(), name="EnvironmentsAdd"),#模拟请求数据
 
 ]
