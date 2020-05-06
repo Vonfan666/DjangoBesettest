@@ -156,8 +156,7 @@ REST_FRAMEWORK = {
     # 'NON_FIELD_ERRORS_KEY': 'error', #修改错误信息key
     'EXCEPTION_HANDLER':"libs.exception.custom_exception_handler",
     # 'DEFAULT_RENDERER_CLASSES':('libs.exception.customrenderer',)
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 2
+
 }
 
 
@@ -179,7 +178,7 @@ AUTH_USER_MODEL = 'users.UserProfile'   #路径
 
 MEDIA_URL='/images/'
 
-
+# LOGOUT_URL = '/users/logout/'
 
 
 LOGGING = {

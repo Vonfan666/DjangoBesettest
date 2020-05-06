@@ -22,9 +22,10 @@ from rest_framework_jwt.views import obtain_jwt_token
 from project import views as projectViews
 from users import  views as userViews
 
+
 urlpatterns = [
     url('admin/', admin.site.urls),  #admin后台url
-    url(r"^docs/", include_docs_urls(title="infaterText")),  # 文档配置
+    url(r"^docs/", include_docs_urls(title="InterfaceText")),  # 文档配置
     url(r"^api-auth/", include("rest_framework.urls", namespace="rest_framework")), #配置之后文档就可以登录了
     url(r'^users/login/$', obtain_jwt_token),  #生成token并验证
     url(r"^users/registers/", userViews.Registers.as_view(), name="Register"),
