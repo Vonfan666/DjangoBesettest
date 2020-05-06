@@ -319,7 +319,7 @@ class MockPost(APIView):
             res=requests.post(url,headers=headers,json=data)
         return  MockResponse(res.json(),status=status.HTTP_200_OK)
     def get(self,req):
-        data = req.data
+        data = req.query_params
         headers = data["headers"]
         url = data["url"]
         data = data["data"]
@@ -379,7 +379,6 @@ class MockResData(APIView):
             msg = "当前返回自定义mock数据"
             msg = "当前返回文档mock数据" if type=="1" else msg
             return APIResponse(200,msg,status=status.HTTP_200_OK)
-
 class  EnvironmentsAdd(APIView):
     """新增环境"""
     def  post(self,req):
