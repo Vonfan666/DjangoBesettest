@@ -360,7 +360,6 @@ class MockRes(APIView):
             res_data_c={}
             res_data_c=Public().forData(res_data,res_data_c)
         return MockResponse(res_data_c,status=status.HTTP_200_OK)
-
 class MockResData(APIView):
     """
     修改模拟返回数据的类型
