@@ -216,7 +216,10 @@ class RmoveFiles(APIView):
 from django.forms.models import model_to_dict
 class CopyFiles(APIView):
     """复制接口文件
-        :param 儿子id    项目id  oldFileId   newFileId
+        :param id         接口文件id
+        :param fileId     复制到的文件夹id
+        :param userId     复制用户id，相当于创建用户id
+
         首先复制一个文件，然后复制一份数据，且数据关联到这个文件的id
 
     """
@@ -335,6 +338,7 @@ class MockRes(APIView):
     def  post(self,req):
         path=req.path
         obj=models.InterfaceFiles.objects.filter(mock_attr__contains=path).values("res_header","res_data")
+
         res_data={}
         print(list(obj)[0])
         for  key , value  in  list(obj)[0].items():
