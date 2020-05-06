@@ -36,7 +36,10 @@ class Public():
                 if type(res_data_c) is dict:
                     res_data_c[item["cname"]] = item["mockValue"]
                 if type(res_data_c) is list:
-                    res_data_c.append({item["cname"]: item["mockValue"]})
+                    if len(res_data_c) > 0:
+                        res_data_c[0][item["cname"]] = item["mockValue"]
+                    else:
+                        res_data_c.append({item["cname"]: item["mockValue"]})
             if (item["type"] == "object" or item["type"] == 4):
                 # 如果当前对象是字典-判断上级对象是啥--
                 if type(res_data_c) is dict:
@@ -51,12 +54,23 @@ class Public():
                     # 以下这句是找到当前插入字典的索引然后传给下一子递归
                     index = [(index, item1) for index, item1 in enumerate(res_data_c) if
                              list(item1.keys())[0] == item["cname"]][0][0]
+                    # index=0
                     print(index)
                     self.forData(item["children"], res_data_c[index][item["cname"]])
             if (item["type"] == "Array" or item["type"] == 5):
-                res_data_c[item["cname"]] = []
-                if (len(item["children"]) > 0):
-                    self.forData(item["children"], res_data_c[item["cname"]])
+                if type(res_data_c) is dict:
+                    res_data_c[item["cname"]] = []
+                    if (len(item["children"]) > 0):
+                        self.forData(item["children"], res_data_c[item["cname"]])
+                if type(res_data_c) is list:
+                    res_data_c.append({item["cname"]: []})
+                    print(res_data_c)
+                    # 以下这句是找到当前插入字典的索引然后传给下一子递归
+                    index = [(index, item1) for index, item1 in enumerate(res_data_c) if
+                             list(item1.keys())[0] == item["cname"]][0][0]
+                    # index=0
+                    print(index)
+                    self.forData(item["children"], res_data_c[index][item["cname"]])
         return res_data_c
 if __name__=="__main__":
     Publics=Public()

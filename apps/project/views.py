@@ -103,7 +103,7 @@ class  LastProject(APIView):
         projectId=req.data["projectId"]
         UserProfile.objects.filter(id=userId).update(user_last_project=projectId)
         return APIResponse(200,"success",status=status.HTTP_200_OK)
-
+from django.forms.models import model_to_dict
 
 
 class PostMethods(APIView):
@@ -334,20 +334,51 @@ class MockRes(APIView):
 
     def  post(self,req):
         path=req.path
-        obj=models.InterfaceFiles.objects.filter(mock_attr__contains=path).values("res_header","res_data")
-        res_data={}
-        print(list(obj)[0])
-        for  key , value  in  list(obj)[0].items():
-            print(key,value)
-            if len(value)==0:
-                res_data[key]=value
-            else:
-                res_data[key]=value
-        res_data=json.loads(res_data["res_data"])
-        res_data_c={}
-        res_data_c=Public().forData(res_data,res_data_c)
+        obj=models.InterfaceFiles.objects.filter(mock_attr__contains=path).values("res_header","res_data","mock_type","mock_data")
+        print(obj[0])
+        # res_data={}
+        if str(obj[0]["mock_type"])=="2":
+            res_data_c=obj[0]["mock_data"]
+            res_data_c=json.loads(res_data_c)
+        else:
+            res_data=obj[0]["res_data"]
+            res_data=json.loads(res_data)
+            res_data_c={}
+            res_data_c=Public().forData(res_data,res_data_c)
+        return MockResponse(res_data_c,status=status.HTTP_200_OK)
+    def  get(self,req):
+        path=req.path
+        obj=models.InterfaceFiles.objects.filter(mock_attr__contains=path).values("res_header","res_data","mock_type","mock_data")
+        print(obj[0])
+        # res_data={}
+        if str(obj[0]["mock_type"])=="2":
+            res_data_c=obj[0]["mock_data"]
+            res_data_c=json.loads(res_data_c)
+        else:
+            res_data=obj[0]["res_data"]
+            res_data=json.loads(res_data)
+            res_data_c={}
+            res_data_c=Public().forData(res_data,res_data_c)
         return MockResponse(res_data_c,status=status.HTTP_200_OK)
 
+class MockResData(APIView):
+    """
+    修改模拟返回数据的类型
+    :param typpe  is  str  1返回文档  2返回自定义mockData字段
+    :param mockData   自定义mock字段--可以接受为空-但必须是标准jon数据
+    """
+    def  post(self,req):
+        data=req.data
+
+        id=data["id"]
+        obj=models.InterfaceFiles.objects.get(id=id)
+        validate_data=serializers.S_interfaceDetail(data=data,instance=obj,many=False,partial=True)
+        if validate_data.is_valid(raise_exception=True):
+            validate_data.save()
+            type = str(data["mock_type"])
+            msg = "当前返回自定义mock数据"
+            msg = "当前返回文档mock数据" if type=="1" else msg
+            return APIResponse(200,msg,status=status.HTTP_200_OK)
 
 class  EnvironmentsAdd(APIView):
     """新增环境"""

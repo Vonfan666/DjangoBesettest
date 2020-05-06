@@ -54,6 +54,8 @@ class InterfaceFiles(models.Model):
     post_attr=models.CharField(max_length=255,verbose_name="请求地址",null=True)
     interface_detail = models.CharField(max_length=255, verbose_name="接口描述",null=True)
     mock_attr=models.CharField(max_length=255,verbose_name="mock地址",null=True)
+    mock_type=models.CharField(max_length=10,verbose_name="返回数据类型")
+    mock_data=models.TextField(verbose_name="mock自定义数据",null=True)
     post_header=models.TextField(verbose_name="请求头",null=True)
     post_data = models.TextField( verbose_name="请求数据",null=True)
     res_header = models.TextField( verbose_name="返回头部",null=True)
