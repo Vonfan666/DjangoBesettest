@@ -294,4 +294,17 @@ class S_Environments(serializers.ModelSerializer):
     #     user.save()
     #     return user
 
+    def  validate(self, attrs):
+        is_eg=attrs.get("is_eg")
+        a=json.loads(json.dumps(attrs))
+        print(json.loads(json.dumps(attrs)))
+        if int(is_eg==2):  #环境变量必须有ename
+            if "ename" not  in  a.keys():
+                raise  ValidationError("环境名称为必填项")
+            if not  attrs.get("ename"):
+                raise ValidationError("环境名称为必填项")
+        return attrs
+
+
+
 

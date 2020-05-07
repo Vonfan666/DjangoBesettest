@@ -53,9 +53,9 @@ urlpatterns = [
     #模拟请求数据
     url(r"^users/mock_requests/", projectViews.MockPost.as_view(), name="MockPost"),#模拟请求数据
     url(r"mock/$", projectViews.MockRes.as_view(), name="MockRes"), #模拟返回数据
-    #环境变量操作
-    url(r"^users/environment_add/", projectViews.EnvironmentsAdd.as_view(), name="EnvironmentsAdd"),#模拟请求数据
     #修改mock返回类型以及对应的返回数据
     url(r"^users/mock_update_type/", projectViews.MockResData.as_view(), name="MockResData"),  # 修改mock返回类型以及对应的返回数据
+    #环境变量操作
+    url(r"^users/environment_add/", projectViews.EnvironmentsAdd.as_view(), name="EnvironmentsAdd"),#新增环境
 
 ]

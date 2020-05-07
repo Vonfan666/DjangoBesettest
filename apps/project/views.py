@@ -384,20 +384,17 @@ class  EnvironmentsAdd(APIView):
         #加一个判断-如果存在就更新数据库
         data=req.data
         name=data["name"]
-        obj=models.Environments.objects.get(name=name)
-        if obj:
-            valid_data = serializers.S_Environments(data=data,instance=obj, many=False)
-            if valid_data.is_valid(raise_exception=True):
-                res_data = valid_data.save()
-                res_data=serializers.S_Environments(res_data)
-                data = res_data.data
-                return APIResponse(200, "更新成功",results=data, status=status.HTTP_200_OK)
-        else:
-            valid_data=serializers.S_Environments(data=data,many=False)
-            if valid_data.is_valid(raise_exception=True):
-                res_data=valid_data.save()
-                res_data=serializers.S_Environments(res_data)
+        validate_data=serializers.S_Environments(data=data)
+        if validate_data.is_valid(raise_exception=True):
+        # is_eg=int(data["is_eg"])
+        # if is_eg==1:  #1是全局变量  2是环境变量
+            data=data.dict()
+            models.Environments.objects.update_or_create(name=name,defaults=data)
+            obj=models.Environments.objects.get(name=name)
+            res_obj=serializers.S_Environments(obj)
+            data=res_obj.data
 
-                data=res_data.data
-                return APIResponse(200,"添加成功",results=data,status=status.HTTP_200_OK)
+            return APIResponse(200,"操作成功",results=data,status=status.HTTP_200_OK)
 
+class  EnvironmentsSelect(APIView):
+    pass

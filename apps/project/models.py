@@ -69,6 +69,7 @@ class InterfaceFiles(models.Model):
 
 
 class Environments(models.Model):
+    ename=models.CharField(verbose_name="环境名称",null=True,max_length=128)
     name=models.CharField(verbose_name="变量名称",unique=True,max_length=128)
     value=models.TextField(verbose_name="变量值",null=True)
     is_eg=models.IntegerField(verbose_name="类型")  #1是环境变量  2是全局变量
