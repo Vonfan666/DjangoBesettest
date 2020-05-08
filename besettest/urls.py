@@ -57,5 +57,8 @@ urlpatterns = [
     url(r"^users/mock_update_type/", projectViews.MockResData.as_view(), name="MockResData"),  # 修改mock返回类型以及对应的返回数据
     #环境变量操作
     url(r"^users/environment_add/", projectViews.EnvironmentsAdd.as_view(), name="EnvironmentsAdd"),#新增环境
+    url(r"^users/environment_select/", projectViews.EnvironmentsSelect.as_view(), name="EnvironmentsSelect"),  # 查询环境
+
+    url(r"^users/environment_delete", projectViews.EnvironmentsDelete.as_view(), name="EnvironmentsDelete"),  # 查询环境
 
 ]

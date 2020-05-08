@@ -288,6 +288,7 @@ class S_interfaceDetail(serializers.ModelSerializer):
 class S_Environments(serializers.ModelSerializer):
     create_time = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
     update_time = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
+
     class Meta:
         model=models.Environments
         fields="__all__"
@@ -298,14 +299,26 @@ class S_Environments(serializers.ModelSerializer):
 
     def  validate(self, attrs):
         is_eg=attrs.get("is_eg")
-        a=json.loads(json.dumps(attrs))
+        # a=json.loads(json.dumps(attrs))
         print(json.loads(json.dumps(attrs)))
         if int(is_eg==2):  #环境变量必须有ename
-            if "ename" not  in  a.keys():
+            if "name" not  in  self.initial_data.keys():
                 raise  ValidationError("环境名称为必填项")
-            if not  attrs.get("ename"):
+            if not  self.initial_data["name"]:
                 raise ValidationError("环境名称为必填项")
+
         return attrs
+
+class S_EnvironmentsSelect(serializers.ModelSerializer):
+    create_time = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
+    update_time = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
+    value=serializers.SerializerMethodField()
+    def get_value(self,obj):
+        a=json.loads(obj.value)
+        return a
+    class Meta:
+        model=models.Environments
+        fields="__all__"
 
 
 

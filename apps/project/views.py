@@ -103,7 +103,7 @@ class  LastProject(APIView):
         projectId=req.data["projectId"]
         UserProfile.objects.filter(id=userId).update(user_last_project=projectId)
         return APIResponse(200,"success",status=status.HTTP_200_OK)
-from django.forms.models import model_to_dict
+# from django.forms.models import model_to_dict
 
 
 class PostMethods(APIView):
@@ -113,6 +113,7 @@ class PostMethods(APIView):
         postTypeObj=models.PostType.objects.all()
         resTypeObj=models.ResType.objects.all()
         res_post_methods=serializers.S_PostMethods(postMthodObj,many=True)
+        a=res_post_methods.data
         res_post_type=serializers.S_PostType(postTypeObj,many=True)
         res_res_type=serializers.S_ResType(resTypeObj,many=True)
         return  APIResponse(200,"sucess",res_post_methods=res_post_methods.data,
@@ -375,23 +376,58 @@ class MockResData(APIView):
             msg = "当前返回自定义mock数据"
             msg = "当前返回文档mock数据" if type=="1" else msg
             return APIResponse(200,msg,status=status.HTTP_200_OK)
+
+
 class  EnvironmentsAdd(APIView):
-    """新增环境"""
+    """新增环境/修改 新增 删除变量
+    :param id 环境变量id
+    :param  name  环境名称
+    :param  dict value  环境变量的值
+    :param  is_eg  变量类型   #1是全局变量  2是环境变量
+    """
     def  post(self,req):
         #加一个判断-如果存在就更新数据库
-        data=req.data
-        name=data["name"]
-        validate_data=serializers.S_Environments(data=data)
-        if validate_data.is_valid(raise_exception=True):
-        # is_eg=int(data["is_eg"])
-        # if is_eg==1:  #1是全局变量  2是环境变量
-            data=data.dict()
-            models.Environments.objects.update_or_create(name=name,defaults=data)
-            obj=models.Environments.objects.get(name=name)
-            res_obj=serializers.S_Environments(obj)
-            data=res_obj.data
+        data = req.data
+        id=None
+        if "id"  in data.keys():
+            print(data.keys())
+            id=data["id"]
 
+
+        validate_data = serializers.S_Environments(data=data)
+        if validate_data.is_valid(raise_exception=True):
+            # is_eg=int(data["is_eg"])
+            # if is_eg==1:  #1是全局变量  2是环境变量
+            data = json.loads(json.dumps(data))
+            obj, created=models.Environments.objects.update_or_create(defaults=data,id=id)
+            print(obj.id)
+            print(obj,created)
+            # obj = models.Environments.objects.get(id=id)
+            res_obj = serializers.S_Environments(obj)
+            data = res_obj.data
+            data["value"]=json.loads(data["value"])
             return APIResponse(200,"操作成功",results=data,status=status.HTTP_200_OK)
 
 class  EnvironmentsSelect(APIView):
-    pass
+    """查询环境
+    """
+    def  get(self,req):
+        globalEnt=models.Environments.objects.filter(is_eg=1) #查询全局变量
+        globalEnt=serializers.S_EnvironmentsSelect(globalEnt,many=True)
+        G_data= globalEnt.data
+        print(G_data)
+        Ent=models.Environments.objects.filter(is_eg=2) #查询环境变量
+        Ent = serializers.S_EnvironmentsSelect(Ent, many=True)
+        E_data= Ent.data
+        return APIResponse(200,"sucess",results={"G_data":G_data,"E_data":E_data},status=status.HTTP_200_OK)
+
+class  EnvironmentsDelete(APIView):
+    """删除环境"""
+    def post(self,req):
+        id=req.data["id"]
+        obj=models.Environments.objects.filter(id=id)
+        if obj:
+            models.Environments.objects.filter(id=id).delete()
+            return APIResponse(200,"删除成功",status=status.HTTP_200_OK)
+
+        return APIResponse(200, "删除失败,环境不存在", status=status.HTTP_200_OK)
