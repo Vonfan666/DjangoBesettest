@@ -282,9 +282,6 @@ class EditInterfaceDetail(APIView):
         # print(models.PostMethods.objects.get(id=data["postMethodsId"]))
         # data["postMethodsId"]=models.PostMethods.objects.get(id=data["postMethodsId"])
         oldObj=models.InterfaceFiles.objects.get(id=id)
-
-
-
         valida_obj=serializers.S_updateFiles(data=data,instance=oldObj,partial=True,many=False)
         if valida_obj.is_valid(raise_exception=True):
             res_obj=valida_obj.save()

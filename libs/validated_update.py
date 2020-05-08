@@ -10,8 +10,9 @@ class Validated_data():
         self.initial_data=initial_data
         # self.models=models
     def validated_data_add(self, validated_data,models, postKey, updateKey):
+        print(postKey  in self.validated_data.keys())
 
-        if postKey not in self.validated_data.keys() and self.initial_data[postKey]!= "":
+        if postKey in self.validated_data.keys() and self.initial_data[postKey]!= "":
             value = self.initial_data[postKey]
             obj = models.objects.get(id=value)
             validated_data[updateKey] = obj
