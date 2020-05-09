@@ -392,17 +392,10 @@ class  EnvironmentsAdd(APIView):
         if "id"  in data.keys():
             print(data.keys())
             id=data["id"]
-
-
         validate_data = serializers.S_Environments(data=data)
         if validate_data.is_valid(raise_exception=True):
-            # is_eg=int(data["is_eg"])
-            # if is_eg==1:  #1是全局变量  2是环境变量
             data = json.loads(json.dumps(data))
             obj, created=models.Environments.objects.update_or_create(defaults=data,id=id)
-            print(obj.id)
-            print(obj,created)
-            # obj = models.Environments.objects.get(id=id)
             res_obj = serializers.S_Environments(obj)
             data = res_obj.data
             data["value"]=json.loads(data["value"])
@@ -412,6 +405,8 @@ class  EnvironmentsSelect(APIView):
     """查询环境
     """
     def  get(self,req):
+        g = models.Environments.objects.all()  # 查询全局变量
+        print(g)
         globalEnt=models.Environments.objects.filter(is_eg=1) #查询全局变量
         globalEnt=serializers.S_EnvironmentsSelect(globalEnt,many=True)
         G_data= globalEnt.data
@@ -425,9 +420,16 @@ class  EnvironmentsDelete(APIView):
     """删除环境"""
     def post(self,req):
         id=req.data["id"]
+        a = models.Environments.objects.all()
         obj=models.Environments.objects.filter(id=id)
         if obj:
             models.Environments.objects.filter(id=id).delete()
             return APIResponse(200,"删除成功",status=status.HTTP_200_OK)
 
         return APIResponse(200, "删除失败,环境不存在", status=status.HTTP_200_OK)
+
+class MenuView(APIView):
+    def get(self, request, format=None):
+        menus = models.Menu.objects.filter(parent=None)
+        serializer = serializers.MenuSerializer(menus,context={"aa":[]}, many=True)
+        return APIResponse(200,"sucess",results=serializer.data,status=status.HTTP_200_OK)

@@ -202,6 +202,13 @@ class S_updateFiles(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         attr=Public().get_host_ip()
+        # v=validated_data
+        # print(v)
+        # a=validated_data.get("post_header",instance.post_header)
+        # instance.save()
+        # return instance
+        # print(a)
+        # print(a)
         s=Validated_data(validated_data, self.initial_data)
         s.validated_data_add(validated_data, models.PostMethods, "postMethodsId", "post_methods")
         s.validated_data_add(validated_data, models.PostType, "postTypeId", "post_type")
@@ -313,12 +320,41 @@ class S_EnvironmentsSelect(serializers.ModelSerializer):
     create_time = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
     update_time = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
     value=serializers.SerializerMethodField()
+    # parent_id=serializers.SerializerMethodField()
+    # def get_parent_id(self,obj):
+    #
+    #     return {"name":obj.parent_id.name}
     def get_value(self,obj):
         a=json.loads(obj.value)
         return a
     class Meta:
         model=models.Environments
         fields="__all__"
+
+
+class MenuSerializer(serializers.ModelSerializer):
+    parent = serializers.SerializerMethodField()
+
+    def get_parent(self, obj):
+        cc = obj.pc.all().values("name", "id", "parent")
+        for a  in cc:
+            self.childList(a)
+            return  cc
+
+    def childList(self,obj):
+        obj_s=models.Menu.objects.filter(parent=obj["id"]).values("name","id","parent")
+        if obj_s:
+            obj_s=list(obj_s)
+            if len(obj_s)>0:
+                obj["parent"] = []
+                for  item  in  obj_s:
+                    obj["parent"].append(item)
+                    self.childList(item)
+            return obj
+    class Meta:
+        model = models.Menu
+        fields = "__all__"
+        # deep=1
 
 
 

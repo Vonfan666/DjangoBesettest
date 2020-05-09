@@ -60,5 +60,6 @@ urlpatterns = [
     url(r"^users/environment_select/", projectViews.EnvironmentsSelect.as_view(), name="EnvironmentsSelect"),  # 查询环境
 
     url(r"^users/environment_delete", projectViews.EnvironmentsDelete.as_view(), name="EnvironmentsDelete"),  # 查询环境
+    url(r"^users/aa", projectViews.MenuView.as_view(), name="View"),  # 查询环境
 
 ]

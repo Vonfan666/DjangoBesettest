@@ -82,3 +82,19 @@ class Environments(models.Model):
 
 
 
+class Menu(models.Model):
+    name = models.CharField(verbose_name='名称', max_length=32)
+    icon = models.CharField(verbose_name='图标', max_length=32, null=True, blank=True)
+    first = models.BooleanField(verbose_name='是否为一级菜单', default=False)
+    url = models.CharField(verbose_name='路由(包含正则表达式)', max_length=32)
+    parent = models.ForeignKey('self',to_field="id" ,null=True, blank=True, on_delete=models.SET_NULL,related_name="pc") # on_delete 是否级联删除
+    menu_display_choices = (
+        (1, '显示'), (2, '隐藏')
+    )
+    display = models.IntegerField(choices=menu_display_choices, default=1)
+
+    class Meta:
+        verbose_name_plural = '菜单管理'
+
+    def __str__(self):
+        return self.name
