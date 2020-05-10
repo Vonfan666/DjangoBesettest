@@ -382,14 +382,14 @@ class  EnvironmentsAdd(APIView):
     """新增环境/修改 新增 删除变量
     :param id 环境变量id
     :param  name  环境名称
-    :param  dict value  环境变量的值
-    :param  is_eg  变量类型   #1是全局变量  2是环境变量
+    :param  value  环境变量的值  [{}]
+    :param  is_eg  变量类型   #1是全局变量  0是环境变量
     """
     def  post(self,req):
         #加一个判断-如果存在就更新数据库
         data = req.data
         id=None
-        if "id"  in data.keys():
+        if "id"  in data.keys() and data["id"]!="":
             print(data.keys())
             id=data["id"]
         validate_data = serializers.S_Environments(data=data)
@@ -411,7 +411,7 @@ class  EnvironmentsSelect(APIView):
         globalEnt=serializers.S_EnvironmentsSelect(globalEnt,many=True)
         G_data= globalEnt.data
         print(G_data)
-        Ent=models.Environments.objects.filter(is_eg=2) #查询环境变量
+        Ent=models.Environments.objects.filter(is_eg=0) #查询环境变量
         Ent = serializers.S_EnvironmentsSelect(Ent, many=True)
         E_data= Ent.data
         return APIResponse(200,"sucess",results={"G_data":G_data,"E_data":E_data},status=status.HTTP_200_OK)

@@ -308,7 +308,7 @@ class S_Environments(serializers.ModelSerializer):
         is_eg=attrs.get("is_eg")
         # a=json.loads(json.dumps(attrs))
         print(json.loads(json.dumps(attrs)))
-        if int(is_eg==2):  #环境变量必须有ename
+        if int(is_eg==0):  #环境变量必须有ename
             if "name" not  in  self.initial_data.keys():
                 raise  ValidationError("环境名称为必填项")
             if not  self.initial_data["name"]:
