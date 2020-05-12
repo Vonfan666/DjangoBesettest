@@ -7,12 +7,10 @@ from rest_framework import status
 def custom_exception_handler(exc, context):
     response = exception_handler(exc, context)
     message=""
-
     # 这个循环是取第一个错误的提示用于渲染
     print(exc.args)
-
     if response is None:
-        return APIResponse(400,"服务器错误",status=status.HTTP_500_INTERNAL_SERVER_ERROR,exception=True)
+        return APIResponse(400,"参数错误",status=status.HTTP_500_INTERNAL_SERVER_ERROR,exception=True)
     else:
         for index, value in enumerate(response.data):
             if index == 0:

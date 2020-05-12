@@ -143,13 +143,17 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         # 认证用户可以操作
         'rest_framework.permissions.IsAuthenticated', #设置认证权限
+         # 'rest_framework.permissions.IsAdminUser',  #仅管理员用户
         # 所有用户可以操作
         # 'rest_framework.permissions.AllowAny',
         # 认证的用户可以完全操作，否则只能get读取
-       # 'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+       # 'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',  # 上面两个用于DRF基本验证
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',  #完成token验证并返回user和token
+        # 'rest_framework_simplejwt.authentication.JWTAuthentication',  # djangorestframework_simplejwt JWT认证
     ),
 
     "DEFAULT_SCHEMA_CLASS":"rest_framework.schemas.AutoSchema", #接口文档docs配置

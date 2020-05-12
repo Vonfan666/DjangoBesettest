@@ -17,11 +17,11 @@ class  S_Department(serializers.ModelSerializer):
 class S_Register(serializers.ModelSerializer):
     det=serializers.SerializerMethodField()  #自定义字段
     grp=serializers.SerializerMethodField()
-    name = serializers.CharField( max_length=5,error_messages={
+    name = serializers.CharField( max_length=5,help_text="密码",error_messages={
         "max_length":"最多输入五位数"
     })
-    username=serializers.CharField(required=True,error_messages={
-        "required":"账号已存在"
+    username=serializers.CharField(required=True,help_text="账号",error_messages={
+        "required":"账号已存在",
     })
     def get_det(self,obj):   #处理自定义字段的返回值-OBJ就是当前的整个UserProfiled的对象
         obj=getattr(obj,"det")
