@@ -203,20 +203,12 @@ class S_updateFiles(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         attr=Public().get_host_ip()
-        # v=validated_data
-        # print(v)
-        # a=validated_data.get("post_header",instance.post_header)
-        # instance.save()
-        # return instance
-        # print(a)
-        # print(a)
         s=Validated_data(validated_data, self.initial_data)
         s.validated_data_add(validated_data, models.PostMethods, "postMethodsId", "post_methods")
         s.validated_data_add(validated_data, models.PostType, "postTypeId", "post_type")
         s.validated_data_add(validated_data, models.ResType, "resTypeId", "res_type")
         # validated_data["mock_attr"] = attr+self.initial_data["post_attr"]
         validated_data["mock_attr"] = "http://%s:8081%smock/"%(attr,self.initial_data["post_attr"])
-
         user = super().update(instance=instance, validated_data=validated_data)
         user.save()
         return user
@@ -309,7 +301,7 @@ class S_Environments(serializers.ModelSerializer):
         is_eg=attrs.get("is_eg")
         # a=json.loads(json.dumps(attrs))
         print(json.loads(json.dumps(attrs)))
-        if int(is_eg==0):  #环境变量必须有ename
+        if int(is_eg==0 ):  #环境变量必须有ename
             if "name" not  in  self.initial_data.keys():
                 raise  ValidationError("环境名称为必填项")
             if not  self.initial_data["name"]:
@@ -326,8 +318,14 @@ class S_EnvironmentsSelect(serializers.ModelSerializer):
     #
     #     return {"name":obj.parent_id.name}
     def get_value(self,obj):
-        a=json.loads(obj.value)
-        return a
+        c=obj
+        print(c)
+        try:
+            a=json.loads(obj.value)
+            return a
+        except Exception as f:
+            return []
+
     class Meta:
         model=models.Environments
         fields="__all__"
@@ -335,8 +333,7 @@ class S_EnvironmentsSelect(serializers.ModelSerializer):
 
 class MenuSerializer(serializers.ModelSerializer):
     parent = serializers.SerializerMethodField()
-
-    def get_parent(self, obj):
+    def get_parent(self,obj):
         cc = obj.pc.all().values("name", "id", "parent")
         for a  in cc:
             self.childList(a)

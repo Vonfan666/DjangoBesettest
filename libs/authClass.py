@@ -52,3 +52,9 @@ def jwt_error_response(serializer , request = None):
 
     }
     return data
+
+# def perform_authentication(self, request):
+#         """
+#         重写父类的用户验证方法，不在进入视图前就检查JWT
+#         """
+#         pass

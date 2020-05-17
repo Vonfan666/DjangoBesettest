@@ -327,7 +327,9 @@ class MockPost(APIView):
             res=requests.get(url,headers=headers,json=data)
         return  MockResponse(res.json(),status=status.HTTP_200_OK)
 class MockRes(APIView):
-    """前端请求url上加上一个mock，urls里面匹配到mock就走这个接口，然后判断路径返回指定的内容给到前端即可"""
+    """
+    ：:param   mock_type ==1  是文档返回  2是自定义返回  默认文档返回
+    """
     permission_classes = (permissions.AllowAny,)
 
     def  post(self,req):
@@ -421,7 +423,7 @@ class  EnvironmentsDelete(APIView):
     def post(self,req):
         id=req.data["id"]
         a = models.Environments.objects.all()
-        obj=models.Environments.objects.filter(id=id)
+        obj=models.Environments.objects.filter(id=id).select_related()
         if obj:
             models.Environments.objects.filter(id=id).delete()
             return APIResponse(200,"删除成功",status=status.HTTP_200_OK)
@@ -431,5 +433,5 @@ class  EnvironmentsDelete(APIView):
 class MenuView(APIView):
     def get(self, request, format=None):
         menus = models.Menu.objects.filter(parent=None)
-        serializer = serializers.MenuSerializer(menus,context={"aa":[]}, many=True)
+        serializer = serializers.MenuSerializer(menus, many=True)
         return APIResponse(200,"sucess",results=serializer.data,status=status.HTTP_200_OK)
