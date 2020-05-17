@@ -22,7 +22,8 @@ class S_AddProject(serializers.ModelSerializer):
     id=serializers.IntegerField(read_only=True)
     user=serializers.SerializerMethodField()
     create_time=serializers.DateTimeField(read_only=True,format='%Y-%m-%d %H:%M:%S')
-
+    def get_user(self,obj):
+        return {"id":obj.user.id,"userName":obj.user.name}
     class Meta:
         model= models.ProjectList
 
