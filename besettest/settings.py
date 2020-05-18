@@ -151,7 +151,7 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',  # 上面两个用于DRF基本验证
+        # 'rest_framework.authentication.SessionAuthentication',  # 上面两个用于DRF基本验证
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',  #完成token验证并返回user和token
         # 'rest_framework_simplejwt.authentication.JWTAuthentication',  # djangorestframework_simplejwt JWT认证
     ),

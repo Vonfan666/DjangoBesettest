@@ -9,6 +9,7 @@ from . import models,serializers
 from libs.api_response import APIResponse,MockResponse
 from libs.many_or_one import ManyOrOne
 from  libs.public import Public
+
 class ProjectList(APIView):
     """查找项目"""
     def  get(self,req):
@@ -44,7 +45,8 @@ class AddProject(APIView):
             a=obj.save()
             res_data=serializers.S_AddProject(a)
 
-            obj = models.ProjectList.objects.all().order_by("create_time").reverse()
+            obj = models.ProjectList.objects.select_related().all().order_by("create_time").reverse()
+            print(obj)
             Many1=ManyOrOne.IsMany(obj)
             valid_data = serializers.S_ProjectList(obj,many=Many1)
             totalCount = len(valid_data.data)  # 总数

@@ -19,16 +19,20 @@ class  S_ProjectList(serializers.ModelSerializer):
 
 
 class S_AddProject(serializers.ModelSerializer):
-    
     id=serializers.IntegerField(read_only=True)
     user=serializers.SerializerMethodField()
     create_time=serializers.DateTimeField(read_only=True,format='%Y-%m-%d %H:%M:%S')
+
+
     def get_user(self,obj):
+
         return {"id":obj.user.id,"userName":obj.user.name}
+
     class Meta:
         model= models.ProjectList
 
-        fields=["name","dev_attr","test_attr","product_attr","user","create_time","id"]
+        fields=["name","dev_attr","test_attr","product_attr","user","create_time","id",]
+
 
     def create(self, validated_data):
         a = self.initial_data["user"]
@@ -334,6 +338,7 @@ class S_EnvironmentsSelect(serializers.ModelSerializer):
 
 class MenuSerializer(serializers.ModelSerializer):
     parent = serializers.SerializerMethodField()
+
     def get_parent(self,obj):
         cc = obj.pc.all().values("name", "id", "parent")
         for a  in cc:
