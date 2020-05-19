@@ -19,7 +19,7 @@ class  S_ProjectList(serializers.ModelSerializer):
 
 
 class S_AddProject(serializers.ModelSerializer):
-    
+
     id=serializers.IntegerField(read_only=True)
     user=serializers.SerializerMethodField()
     create_time=serializers.DateTimeField(read_only=True,format='%Y-%m-%d %H:%M:%S')
