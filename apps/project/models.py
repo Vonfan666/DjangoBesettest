@@ -70,6 +70,7 @@ class InterfaceFiles(models.Model):
 
 
 class Environments(models.Model):
+    """环境变量"""
     name=models.CharField(verbose_name="环境名称",max_length=128,null=True)
     value=models.TextField(verbose_name="值",null=True)
     is_eg=models.IntegerField(verbose_name="类型")  #1是环境变量  2是全局变量
