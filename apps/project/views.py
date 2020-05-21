@@ -9,29 +9,82 @@ from . import models,serializers
 from libs.api_response import APIResponse,MockResponse
 from libs.many_or_one import ManyOrOne
 from  libs.public import Public
+from  case import  models as caseModels
+from django.db.models import  Q
 
 class ProjectList(APIView):
     """查找项目"""
     def  get(self,req):
         params=req.query_params
-        try:
-            obj=models.ProjectList.objects.all().order_by("create_time").reverse() #根据创建时间从大到小排序
-            currentPage = int(params["page"])  #当前请求的是第几页
-            size=int(params["page_size"])  #每页展示输了
-            totalCount=len(obj)  #总数
-            PaginationObj=Pagination(totalCount, currentPage, perPageNum=size,allPageNum=11)
-            all_page=PaginationObj.all_page()
-            Many = ManyOrOne.IsMany(obj)
-            valid_data=serializers.S_ProjectList(obj,many=Many)
-            res_data=valid_data.data[PaginationObj.start():PaginationObj.end()]
-            return APIResponse(200,"success",results=res_data,total=totalCount,page_size=all_page,status=status.HTTP_200_OK)
 
-        except:
-            obj = models.ProjectList.objects.all().order_by("create_time").reverse()  # 根据创建时间从大到小排序
-            Many = ManyOrOne.IsMany(obj)
-            valid_data = serializers.S_ProjectList(obj, many=Many)
-            return APIResponse(200, "success", results=valid_data.data,
-                               status=status.HTTP_200_OK)
+        print(params)
+        print(params.get("id"))
+        print(params.keys())
+        if "id"  in params:
+            id=params.get("id")
+            obj=models.ProjectList.objects.get(id=id)
+            res_data=serializers.S_ProjectList(obj,many=False)
+            obj=res_data.data
+            return  APIResponse(200,"",results=obj,status=status.HTTP_200_OK)
+        else:
+            try:
+                obj=models.ProjectList.objects.all().order_by("create_time").reverse() #根据创建时间从大到小排序
+                currentPage = int(params["page"])  #当前请求的是第几页
+                size=int(params["page_size"])  #每页展示输了
+                totalCount=len(obj)  #总数
+                PaginationObj=Pagination(totalCount, currentPage, perPageNum=size,allPageNum=11)
+                all_page=PaginationObj.all_page()
+                Many = ManyOrOne.IsMany(obj)
+                valid_data=serializers.S_ProjectList(obj,many=Many)
+                res_data=valid_data.data[PaginationObj.start():PaginationObj.end()]
+                return APIResponse(200,"success",results=res_data,total=totalCount,page_size=all_page,status=status.HTTP_200_OK)
+
+            except:
+                obj = models.ProjectList.objects.all().order_by("create_time").reverse()  # 根据创建时间从大到小排序
+                Many = ManyOrOne.IsMany(obj)
+                valid_data = serializers.S_ProjectList(obj, many=Many)
+                return APIResponse(200, "success", results=valid_data.data,
+                                   status=status.HTTP_200_OK)
+
+class ProjectUnityStatus(APIView):
+    """修改同步状态
+        :param id  项目id
+        :param key==1 放弃修改
+        :param key==2 下次修改
+        :param key==3 确认同步
+    """
+    def  post(self,req):
+        print(req)
+        key=req.data.get("key")
+        id=req.data.get("id")
+        if int(key)==1:
+            models.ProjectList.objects.filter(id=id).update(status=1)
+            return APIResponse(200, "操作成功", status=status.HTTP_200_OK)
+        if int(key)==2:
+            return APIResponse(200, "操作成功", status=status.HTTP_200_OK)
+        if int(key)==3:
+            #这里需要判断已经同步过了--防止接口请求过来搞乱数据
+            models.ProjectList.objects.filter(id=id).update(status=1)
+            #接口文件以及其下类容 为这个id的 name并 存入数据库
+            obj=models.InterfaceFilesName.objects.filter(project_id=id)
+            obj=serializers.S_ProjectUnityStatus(obj,many=True)
+            print(obj)
+            validate_data=serializers.S_ProjectUnityCreate(data=obj.data,many=True)
+            print(validate_data)
+            if validate_data.is_valid(raise_exception=True):
+                res_data=validate_data.save()
+                serializers.S_ProjectUnityCreate(res_data,many=True)
+            interfaceObj=models.InterfaceFiles.objects.filter(Q(project=id) & Q(file__isnull=False))
+            print("interfaceObj",interfaceObj)
+            Interface_obj=serializers.S_ProjectUnityInterface(interfaceObj,many=True)
+            Interface_obj=Interface_obj.data
+            print(Interface_obj)
+            Interface_validate_data=serializers.S_ProjectUnityInterfaceCreate(data=Interface_obj,many=True,context={"n":0})
+            if Interface_validate_data.is_valid(raise_exception=True):
+                Interface_validate_data.save()
+
+            return APIResponse(200, "同步成功", status=status.HTTP_200_OK)
+
 class AddProject(APIView):
     """新增项目"""
     def post(self,req):

@@ -7,6 +7,7 @@ class ProjectList(models.Model):
     dev_attr=models.CharField(max_length=100,verbose_name="开发地址")
     test_attr=models.CharField(max_length=100,verbose_name="测试地址")
     product_attr=models.CharField(max_length=100,verbose_name="生产地址")
+    status=models.IntegerField(verbose_name="是否同步",default=0)  #1则是已经被同步过得数据   0则是未同步过得数据
     create_time=models.DateTimeField(auto_now_add=True,verbose_name="创建时间")
     user=models.ForeignKey("users.UserProfile",to_field="id",on_delete=models.SET_NULL,null=True,verbose_name="创建用户id")
     class Meta:

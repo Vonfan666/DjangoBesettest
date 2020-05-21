@@ -4,7 +4,7 @@ from  project import models
 from users.models import UserProfile
 from  rest_framework.exceptions import ValidationError
 from  libs.public import Public
-
+from  case import  models as caseModels
 from django.db.models import F
 
 from  libs.validated_update import Validated_data
@@ -211,6 +211,64 @@ class S_updateFiles(serializers.ModelSerializer):
         # validated_data["mock_attr"] = attr+self.initial_data["post_attr"]
         validated_data["mock_attr"] = "http://%s:8081%smock/"%(attr,self.initial_data["post_attr"])
         user = super().update(instance=instance, validated_data=validated_data)
+        user.save()
+        return user
+
+
+class S_ProjectUnityStatus(serializers.ModelSerializer):
+
+    projectId=serializers.SerializerMethodField()
+    userId=serializers.SerializerMethodField()
+    interfaceId=serializers.SerializerMethodField()
+    def get_interfaceId(self,obj):
+        return  obj.id
+    def get_projectId(self,obj):
+        return obj.project_id.id
+    def get_userId(self,obj):
+        return obj.project_id.user.id
+    class Meta:
+        model=models.InterfaceFilesName
+        fields=("name","userId","projectId","interfaceId")
+
+
+
+class S_ProjectUnityCreate(serializers.ModelSerializer):
+    createTime = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
+    updateTime = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
+    class Meta:
+        model=caseModels.CaseGroupFiles
+        fields="__all__"
+    def create(self, validated_data):
+        user=super().create(validated_data=validated_data)
+        user.save()
+        return user
+
+class S_ProjectUnityInterface(serializers.ModelSerializer):
+    name=serializers.SerializerMethodField()
+    userId=serializers.SerializerMethodField()
+    fileId=serializers.SerializerMethodField()
+    def get_fileId(self,obj):
+        return obj.file.id
+    def get_name(self,obj):
+        return obj.filesName
+    def get_userId(self,obj):
+        return obj.create_user.id
+    class Meta:
+        model=models.InterfaceFiles
+        fields=("name","userId","fileId")
+
+class S_ProjectUnityInterfaceCreate(serializers.ModelSerializer):
+    createTime = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
+    updateTime = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
+    class Meta:
+        model=caseModels.CaseGroup
+        fields="__all__"
+    def create(self, validated_data):
+        obj=json.loads(json.dumps(self.initial_data))
+        print(obj)
+        validated_data["CaseGroupFilesId"]=caseModels.CaseGroupFiles.objects.get(interfaceId=obj[self.context["n"]]["fileId"])
+        self.context["n"]=self.context["n"]+1
+        user=super().create(validated_data=validated_data)
         user.save()
         return user
 
