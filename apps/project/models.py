@@ -13,7 +13,13 @@ class ProjectList(models.Model):
     class Meta:
         db_table= "project_list"
 
-
+class UsersToProject(models.Model):
+    """扩展表"""
+    userId=models.ForeignKey("users.UserProfile",to_field="id",on_delete=models.CASCADE,verbose_name="用户")
+    projectId=models.ForeignKey("ProjectList",to_field="id",on_delete=models.CASCADE,verbose_name="项目id")
+    status=models.IntegerField(verbose_name="是否同步",default=0)
+    class Meta:
+        db_table= "users_to_project"
 
 class PostMethods(models.Model):
     """请求方法"""

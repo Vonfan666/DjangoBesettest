@@ -21,6 +21,7 @@ from rest_framework_jwt.views import obtain_jwt_token
 
 from project import views as projectViews
 from users import  views as userViews
+from case import  views as caseViews
 
 
 urlpatterns = [
@@ -63,5 +64,8 @@ urlpatterns = [
 
     url(r"^users/environment_delete/", projectViews.EnvironmentsDelete.as_view(), name="EnvironmentsDelete"),  # 删除环境变量
     url(r"^users/aa/", projectViews.MenuView.as_view(), name="View"),  # 查询环境
+
+    #case操作
+    url(r"^users/select_caseGroup/", caseViews.CaseGroup.as_view(), name="CaseGroup"),  # 查询环境
 
 ]

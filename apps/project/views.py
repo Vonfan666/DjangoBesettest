@@ -10,6 +10,7 @@ from libs.api_response import APIResponse,MockResponse
 from libs.many_or_one import ManyOrOne
 from  libs.public import Public
 from  case import  models as caseModels
+from  users import  models as usersModels
 from django.db.models import  Q
 
 class ProjectList(APIView):
@@ -21,11 +22,16 @@ class ProjectList(APIView):
         print(params.get("id"))
         print(params.keys())
         if "id"  in params:
+            #查询当前用户是否为该项目的创建人--如果是创建人则返回1-可以允许同步 否则不允许同步
             id=params.get("id")
-            obj=models.ProjectList.objects.get(id=id)
-            res_data=serializers.S_ProjectList(obj,many=False)
-            obj=res_data.data
-            return  APIResponse(200,"",results=obj,status=status.HTTP_200_OK)
+            userId = params.get("userId")
+            obj=models.ProjectList.objects.filter(Q(id=id) & Q(user_id=userId) &Q(status=0))
+            if obj:
+                res_data=serializers.S_ProjectList(obj[0],many=False)
+                obj=res_data.data
+                return  APIResponse(200,"",results=obj,code=1,status=status.HTTP_200_OK)
+            else:
+                return APIResponse(200, "", code=0, status=status.HTTP_200_OK)
         else:
             try:
                 obj=models.ProjectList.objects.all().order_by("create_time").reverse() #根据创建时间从大到小排序
@@ -57,14 +63,15 @@ class ProjectUnityStatus(APIView):
         print(req)
         key=req.data.get("key")
         id=req.data.get("id")
+        userId=req.data.get("userId")
         if int(key)==1:
-            models.ProjectList.objects.filter(id=id).update(status=1)
+            models.ProjectList.objects.filter(Q(id=int(id)) & Q(user_id=int(userId))).update(status=1)
             return APIResponse(200, "操作成功", status=status.HTTP_200_OK)
         if int(key)==2:
             return APIResponse(200, "操作成功", status=status.HTTP_200_OK)
         if int(key)==3:
             #这里需要判断已经同步过了--防止接口请求过来搞乱数据
-            models.ProjectList.objects.filter(id=id).update(status=1)
+            models.ProjectList.objects.filter(Q(id=int(id)) & Q(user_id=int(userId))).update(status=1)
             #接口文件以及其下类容 为这个id的 name并 存入数据库
             obj=models.InterfaceFilesName.objects.filter(project_id=id)
             obj=serializers.S_ProjectUnityStatus(obj,many=True)
@@ -106,6 +113,16 @@ class AddProject(APIView):
 
             PaginationObj = Pagination(totalCount, currentPage, perPageNum=size, allPageNum=11)
             all_page = PaginationObj.all_page()
+            print(res_data)
+            print(res_data.data)
+            id=res_data.data["id"]
+            userId=res_data.data["user"]["id"]
+
+            #添加项目时,同步users和projectLsit多对多的表
+            # projectObj=models.ProjectList.objects.get(id=id)
+            # usersObj=usersModels.UserProfile.objects.get(id=userId)
+            # models.UsersToProject.objects.create(projectId=projectObj,userId=usersObj)
+
             return APIResponse(200,"新增成功",results=res_data.data,total=totalCount,page_size=all_page,status=status.HTTP_200_OK)
 class EditProject(APIView):
     """编辑项目"""
