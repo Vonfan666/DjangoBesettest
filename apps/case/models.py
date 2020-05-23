@@ -18,6 +18,8 @@ class CaseGroup(models.Model):
     name=models.CharField(max_length=255,verbose_name="接口名称")
     CaseGroupFilesId=models.ForeignKey("CaseGroupFiles",to_field="id",on_delete=models.SET_NULL,null=True,
                                         verbose_name="所属用例文件",related_name="idCaseGroupFiles")
+    projectId = models.ForeignKey("project.ProjectList", to_field="id", on_delete=models.SET_NULL, null=True,
+                                  verbose_name="项目id")
     userId = models.ForeignKey("users.UserProfile", to_field="id", on_delete=models.SET_NULL, null=True,
                                verbose_name="创建用户id")
     createTime=models.DateTimeField(auto_now_add=True,verbose_name="更新时间")
@@ -33,7 +35,8 @@ class CaseFile(models.Model):
     name=models.CharField(max_length=255,verbose_name="用例名称")
     order = models.IntegerField(verbose_name="执行顺序",unique=True)
     userId = models.ForeignKey("users.UserProfile", to_field="id", on_delete=models.SET_NULL, null=True,related_name="u_name",verbose_name="创建人")
-    interfaceId=models.ForeignKey("project.InterfaceFiles",to_field="id",on_delete=models.SET_NULL,null=True,related_name="id_interface",verbose_name="所属接口")
+    CaseGroupId=models.ForeignKey("CaseGroup",to_field="id",on_delete=models.SET_NULL,null=True,related_name="IdCaseGroup",verbose_name="所属接口用例")
+
     postMethod = models.ForeignKey("project.PostMethods",to_field="id",on_delete=models.SET_NULL,null=True,verbose_name="请求方法")
     dataType = models.ForeignKey("project.PostType", to_field="id", on_delete=models.SET_NULL, null=True,
                                  verbose_name="请求数据类型")

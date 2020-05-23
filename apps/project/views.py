@@ -97,7 +97,7 @@ class AddProject(APIView):
     def post(self,req):
         data=req.data
         Many = ManyOrOne.IsMany(data)
-        obj=serializers.S_AddProject(data=data,many=Many)
+        obj=serializers.S_AddProject(data=data)
         currentPage = int(data["page"])  # 当前请求的是第几页
         size = int(data["page_size"])  # 每页展示输了
 

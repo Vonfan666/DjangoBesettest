@@ -8,6 +8,9 @@ from  case import  models as caseModels
 from django.db.models import F
 
 from  libs.validated_update import Validated_data
+
+
+s=Validated_data()
 class  S_ProjectList(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
     create_time = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
@@ -204,10 +207,9 @@ class S_updateFiles(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         attr=Public().get_host_ip()
-        s=Validated_data(validated_data, self.initial_data)
-        s.validated_data_add(validated_data, models.PostMethods, "postMethodsId", "post_methods")
-        s.validated_data_add(validated_data, models.PostType, "postTypeId", "post_type")
-        s.validated_data_add(validated_data, models.ResType, "resTypeId", "res_type")
+        s.validated_data_add(validated_data,self.initial_data, models.PostMethods, "postMethodsId", "post_methods")
+        s.validated_data_add(validated_data,self.initial_data, models.PostType, "postTypeId", "post_type")
+        s.validated_data_add(validated_data,self.initial_data, models.ResType, "resTypeId", "res_type")
         # validated_data["mock_attr"] = attr+self.initial_data["post_attr"]
         validated_data["mock_attr"] = "http://%s:8081%smock/"%(attr,self.initial_data["post_attr"])
         user = super().update(instance=instance, validated_data=validated_data)
@@ -247,6 +249,10 @@ class S_ProjectUnityInterface(serializers.ModelSerializer):
     name=serializers.SerializerMethodField()
     userId=serializers.SerializerMethodField()
     fileId=serializers.SerializerMethodField()
+    projectId=serializers.SerializerMethodField()
+    def get_projectId(self,obj):
+
+        return obj.project.id
     def get_fileId(self,obj):
         return obj.file.id
     def get_name(self,obj):
@@ -255,7 +261,7 @@ class S_ProjectUnityInterface(serializers.ModelSerializer):
         return obj.create_user.id
     class Meta:
         model=models.InterfaceFiles
-        fields=("name","userId","fileId")
+        fields=("name","userId","fileId","projectId")
 
 class S_ProjectUnityInterfaceCreate(serializers.ModelSerializer):
     createTime = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
@@ -266,6 +272,7 @@ class S_ProjectUnityInterfaceCreate(serializers.ModelSerializer):
     def create(self, validated_data):
         obj=json.loads(json.dumps(self.initial_data))
         print(obj)
+        validated_data["projectId"]=models.ProjectList.objects.get(id=obj[self.context["n"]]["projectId"])
         validated_data["CaseGroupFilesId"]=caseModels.CaseGroupFiles.objects.get(interfaceId=obj[self.context["n"]]["fileId"])
         self.context["n"]=self.context["n"]+1
         user=super().create(validated_data=validated_data)

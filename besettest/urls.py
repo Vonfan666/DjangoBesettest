@@ -66,6 +66,14 @@ urlpatterns = [
     url(r"^users/aa/", projectViews.MenuView.as_view(), name="View"),  # 查询环境
 
     #case操作
-    url(r"^users/select_caseGroup/", caseViews.CaseGroup.as_view(), name="CaseGroup"),  # 查询环境
+    url(r"^users/unity_project/", projectViews.ProjectUnityStatus.as_view(), name="ProjectUnityStatus"),  # 查询用例以及用例文件下的用例
+
+    url(r"^users/select_caseGroup/", caseViews.CaseGroup.as_view(), name="CaseGroup"),  # 查询用例以及用例文件下的用例
+    url(r"^users/caseGroup_add/", caseViews.AddGroup.as_view(), name="AddGroup"),  # 新增用例文件夹
+    url(r"^users/caseGroup_edit/", caseViews.EditGroup.as_view(), name="EditGroup"),  # 修改用例文件夹
+    url(r"^users/caseGroup_remove/", caseViews.RemoveGroup.as_view(), name="RemoveGroup"),  # 删除用例文件夹
+    url(r"^users/caseInterface_add/", caseViews.AddCase.as_view(), name="AddCase"),  # 新增用例文件
+    url(r"^users/caseInterface_edit/", caseViews.EditCase.as_view(), name="EditCase"),  # 新增用例文件
+    url(r"^users/caseInterface_remove/", caseViews.RemoveCase.as_view(), name="EditCase"),  # 新增用例文件
 
 ]
