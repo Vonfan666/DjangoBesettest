@@ -74,6 +74,10 @@ urlpatterns = [
     url(r"^users/caseGroup_remove/", caseViews.RemoveGroup.as_view(), name="RemoveGroup"),  # 删除用例文件夹
     url(r"^users/caseInterface_add/", caseViews.AddCase.as_view(), name="AddCase"),  # 新增用例文件
     url(r"^users/caseInterface_edit/", caseViews.EditCase.as_view(), name="EditCase"),  # 新增用例文件
-    url(r"^users/caseInterface_remove/", caseViews.RemoveCase.as_view(), name="EditCase"),  # 新增用例文件
+    url(r"^users/caseInterface_remove/", caseViews.RemoveCase.as_view(), name="RemoveCase"),  # 新增用例文件
+    url(r"^users/case_add/", caseViews.AddInterface.as_view(), name="AddInterface"),  # 新增用例文件
+    url(r"^users/case_list/", caseViews.CaseList.as_view(), name="CaseList"),  # 查看用例列表
+    url(r"^users/case_remove/", caseViews.CaseRemove.as_view(), name="CaseRemove"),  # 删除用例
+    url(r"^users/case_edit/", caseViews.CaseEdit.as_view(), name="CaseEdit"),  # 编辑用例
 
 ]

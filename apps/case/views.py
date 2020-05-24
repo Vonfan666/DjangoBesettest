@@ -87,3 +87,53 @@ class RemoveCase(APIView):
         return APIResponse(200, "删除成功", status=status.HTTP_200_OK)
 
 
+class AddInterface(APIView):
+    """新增用例"""
+    def  post(self,req):
+        data=req.data
+
+        if data["id"]:
+            obj=models.CaseFile.objects.get(id=data["id"])
+            serializersObj = serializers.S_AddInterface(data=data,instance=obj, many=False,partial=True)
+            if serializersObj.is_valid(raise_exception=True):
+                validate_data = serializersObj.save()
+                res_data = serializers.S_AddInterface(validate_data)
+                res_obj = res_data.data
+                return APIResponse(200, "更新成功", results=res_obj, status=status.HTTP_200_OK)
+        else:
+            serializersObj=serializers.S_AddInterface(data=data,many=False)
+            if serializersObj.is_valid(raise_exception=True):
+                validate_data=serializersObj.save()
+                res_data=serializers.S_AddInterface(validate_data)
+                res_obj=res_data.data
+                return  APIResponse(200,"添加成功",results=res_obj,status=status.HTTP_200_OK)
+
+class  CaseList(APIView):
+    """查看用例列表
+        :param id  用例id
+    """
+    def get(self,req):
+        param= req.query_params
+        id=param["id"]
+        obj=models.CaseFile.objects.select_related("userId","CaseGroupId","postMethod","dataType","environmentId").filter(CaseGroupId_id=id).order_by("order")
+        serializersObj=serializers.S_AddInterface(obj,many=True)
+        res_obj=serializersObj.data
+        return  APIResponse(200,"sucess",results=res_obj,status=status.HTTP_200_OK)
+
+class CaseRemove(APIView):
+    """删除用例
+       :param id 用例id
+    """
+    def post(self,req):
+        id=req.data["id"]
+        models.CaseFile.objects.get(id=id).delete()
+        return APIResponse(200,"删除成功",status=status.HTTP_200_OK)
+class CaseEdit(APIView):
+    """编辑用例"""
+    def get(self,req):
+        param= req.query_params
+        id=param["id"]
+        obj=models.CaseFile.objects.select_related("userId","CaseGroupId","postMethod","dataType","environmentId").filter(id=id)
+        serializersObj=serializers.S_AddInterface(obj,many=True)
+        res_obj=serializersObj.data
+        return  APIResponse(200,"sucess",results=res_obj,status=status.HTTP_200_OK)

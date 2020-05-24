@@ -40,6 +40,7 @@ class CaseFile(models.Model):
     postMethod = models.ForeignKey("project.PostMethods",to_field="id",on_delete=models.SET_NULL,null=True,verbose_name="请求方法")
     dataType = models.ForeignKey("project.PostType", to_field="id", on_delete=models.SET_NULL, null=True,
                                  verbose_name="请求数据类型")
+    environmentId =models.ForeignKey("project.Environments",to_field="id",on_delete=models.SET_NULL,null=True,verbose_name="关联的环境变量id")
     attr=models.CharField(max_length=255,verbose_name="请求地址")
     status=models.IntegerField(choices=status_Choices,default=0,verbose_name="用例状态")
     detail=models.TextField(verbose_name="用例描述",null=True)
