@@ -6,6 +6,16 @@ from . import models,serializers
 import  json,requests,os
 # Create your views here
 
+class RunCase(APIView):
+    """单条用例执行"""
+    def post(self,req):
+        #1封装环境变量取值---返回url  headers data
+        pass
+
+
+
+
+
 
 class CaseGroup(APIView):
     """查询当前项目的用例文件夹以及用例
