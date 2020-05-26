@@ -115,3 +115,41 @@ class S_AddInterface(serializers.ModelSerializer):
             user = super().update(instance=instance,validated_data=validated_data)
             user.save()
             return user
+
+class S_CaseRun(serializers.ModelSerializer):
+    """"""
+    createTime = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
+    updateTime = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
+    CaseGroupId = serializers.SerializerMethodField()
+    environmentId=serializers.SerializerMethodField()
+    data = serializers.SerializerMethodField()
+    headers = serializers.SerializerMethodField()
+    userId = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+    def get_environmentId(self,obj):
+        item = projectModels.Environments.objects.get(is_eg=1).value
+        if not obj.environmentId:
+
+            return {"environment":[],"global":json.loads(item)}
+        return {"environment":json.loads(obj.environmentId.value),"global":json.loads(item)}
+
+    def get_data(self, obj):
+        if obj.data:
+            return json.loads(obj.data)
+
+    def get_headers(self, obj):
+        if obj.headers:
+            print(obj.headers)
+            return json.loads(obj.headers)
+
+    def get_CaseGroupId(self, obj):
+        return {"id": obj.CaseGroupId.id, "name": obj.CaseGroupId.name}
+
+    def get_userId(self, obj):
+        return {"id": obj.userId.id, "name": obj.userId.name}
+
+    def get_status(self, obj):
+        return {"id": obj.status, "name": obj.get_status_display()}
+    class Meta:
+        model=models.CaseFile
+        fields="__all__"

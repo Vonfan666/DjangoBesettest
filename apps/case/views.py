@@ -4,13 +4,34 @@ from django.db.models import  Q
 from libs.api_response import APIResponse
 from . import models,serializers
 import  json,requests,os
+from case.libs.toRequests import InRequests
 # Create your views here
 
 class RunCase(APIView):
-    """单条用例执行"""
+    """单条用例执行
+        全部id传o 部分传id列表
+        :param projectId
+        :param fidList=[]  用例集--一个项目下可能存在多个用例集
+        :param idList=[]
+        :param userId  执行人
+        :id
+    """
     def post(self,req):
         #1封装环境变量取值---返回url  headers data
-        pass
+        # idList=req.query_params.get("idList")
+        # if isinstance(idList,list):
+        id = req.data.get("id")
+        obj=models.CaseFile.objects.select_related("userId","CaseGroupId","postMethod","dataType","environmentId").filter(id=id)
+        serializersObj=serializers.S_CaseRun(obj,many=True)
+        res_data=serializersObj.data
+        res_data=json.loads(json.dumps(res_data))
+        res_data=res_data[0]
+        print(res_data)
+        print(res_data["environmentId"])
+        s = InRequests(res_data["postMethod"],res_data["dataType"],res_data["environmentId"])
+        response=s.run(res_data["attr"],res_data["headers"],res_data["data"])
+        print(response)
+        return  APIResponse(200,"sucess",results=response,status=status.HTTP_200_OK)
 
 
 
@@ -147,3 +168,5 @@ class CaseEdit(APIView):
         serializersObj=serializers.S_AddInterface(obj,many=True)
         res_obj=serializersObj.data
         return  APIResponse(200,"sucess",results=res_obj,status=status.HTTP_200_OK)
+
+
