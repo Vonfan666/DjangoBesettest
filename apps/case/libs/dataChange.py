@@ -51,6 +51,7 @@ class dataChange(object):
                 item=self.itemDataRe(item)
                 print(item)
                 #取出item的值去数据库里面查-查到之后--作为替换字符进去替换到花括号
+
                 data=re_s.sub(item,data,1)
         else:
             data=data
@@ -66,19 +67,31 @@ class dataChange(object):
     def itemDataRe(self,item):
         re_s = re.compile(r"{{(.+?)}}")
         res = re_s.findall(item)
-        print(type(self.environment))
-        print(self.environment)
-        envi=self.environment["environment"][0]
-        glob = self.environment["global"][0]
-        if res[0] in envi.keys():
-            value = envi[res[0]]
-            return value
-        elif res[0] in glob.keys():
-            value = glob[res[0]]
-            return value
-        else:
-            errorsMsg["Message"]="%s变量不存在"%(res[0])
-            raise Exception("%s变量不存在啊"%(res[0]))
+        envi=self.environment["environment"] if len(self.environment["environment"][0])>0 else False
+        value=None
+        if envi:
+            enviKeysList=list(map(lambda x:list(x.keys())[0],envi))
+            if res[0] in enviKeysList:
+                enviIndex=enviKeysList.index(res[0])
+                value = envi[enviIndex][res[0]]
+        if not value:#如果在环境变量没找到则取全局变量找
+            value=self.globalDataRe(res)
+        if not value: #如果全局变量没找到-则抛出异常
+            errorsMsg["Message"] = "%s变量不存在" % (res[0])
+            raise Exception("%s变量不存在啊" % (res))
+
+        return value
+
+    def globalDataRe(self,res ):
+        value=None
+        glob = self.environment["global"] if len(self.environment["global"][0]) > 0 else False
+        if glob:
+            globKeysList = list(map(lambda x: list(x.keys())[0], glob))
+            if res[0] in globKeysList:
+                globIndex = globKeysList.index(res[0])
+                value = glob[globIndex][res[0]]
+
+        return value
 
 
 

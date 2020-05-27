@@ -27,20 +27,12 @@ class InRequests():
             return res
     def post(self,url,headers,data=None):
         """如果type==1则是标准的form表单请求,如果是form-data则type传3"""
-
         res=None
         if self.dataType==1:
-            print(url)
-            print(headers)
-            print(data)
             res=requests.post(url,headers=headers,data=data,verify=False,timeout=30)
-            print(res.json())
         if self.dataType==3:
             res=requests.post(url,headers=headers,data=data,verify=False,timeout=30)
-            print("res.headers",res.headers)
-
         return res.json()
-
     def get(self,url,headers,data=None):
         res=None
         if self.dataType==1:
