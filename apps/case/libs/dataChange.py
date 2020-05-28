@@ -67,7 +67,8 @@ class dataChange(object):
     def itemDataRe(self,item):
         re_s = re.compile(r"{{(.+?)}}")
         res = re_s.findall(item)
-        envi=self.environment["environment"] if len(self.environment["environment"][0])>0 else False
+
+        envi=self.environment["environment"] if len(self.environment["environment"])>0 else False
         value=None
         if envi:
             enviKeysList=list(map(lambda x:list(x.keys())[0],envi))
@@ -84,7 +85,7 @@ class dataChange(object):
 
     def globalDataRe(self,res ):
         value=None
-        glob = self.environment["global"] if len(self.environment["global"][0]) > 0 else False
+        glob = self.environment["global"] if len(self.environment["global"]) > 0 else False
         if glob:
             globKeysList = list(map(lambda x: list(x.keys())[0], glob))
             if res[0] in globKeysList:
