@@ -41,6 +41,7 @@ class dataChange(object):
         return dataCode
 
     def replaceEnvironment(self,data):
+
         """将用户填写的环境变量替换成具体字符串"""
         print(data)
         re_s=re.compile(r"{{.+?}}")

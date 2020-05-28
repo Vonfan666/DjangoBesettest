@@ -4,8 +4,7 @@ import  logging,os,time
 
 def logger(name):
     logger=logging.getLogger(os.path.basename(name))
-    print("__name————na",__name__)
-
+    print(os.path.split(os.path.abspath(__file__))[0])
     consoleLog=logging.StreamHandler()
     fileLog=logging.FileHandler(os.path.split(os.path.abspath(__file__))[0]+"\\logs\\test.log")
 
