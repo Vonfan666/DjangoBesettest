@@ -1,5 +1,8 @@
 import  re,json
 from libs.errors import errorsMsg
+import  logging
+logger =  logging.getLogger("log")
+
 class dataChange(object):
     def __init__(self,headers,data,environment=None):
         self.headers=headers
@@ -10,11 +13,11 @@ class dataChange(object):
 
     def run(self):
         """执行方法"""
+
         self.isDataType(self.headers,self.data)
         headers=self.replaceEnvironment(self.headers)
         data=self.replaceEnvironment(self.data)
-        print(headers,data)
-        print(type(headers),type(data))
+
         return json.loads(headers),json.loads(data)
 
     def headerChange(self):
@@ -23,7 +26,6 @@ class dataChange(object):
             return {}
         if len(self.headers["keys"])>=0  and self.headers["keys"][-1]["headerKey"]=="":
             self.headers["keys"].pop()
-        print(self.headers)
         headersCode = {}
         for item in self.headers["keys"]:
             headersCode[item["headerKey"].strip()] = item["headerValue"].strip()
@@ -43,14 +45,11 @@ class dataChange(object):
     def replaceEnvironment(self,data):
 
         """将用户填写的环境变量替换成具体字符串"""
-        print(data)
         re_s=re.compile(r"{{.+?}}")
         res=re_s.findall(data)
-        print(res)
         if len(res)>0:
             for  item in res:
                 item=self.itemDataRe(item)
-                print(item)
                 #取出item的值去数据库里面查-查到之后--作为替换字符进去替换到花括号
 
                 data=re_s.sub(item,data,1)

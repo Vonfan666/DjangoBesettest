@@ -6,11 +6,12 @@
 
 import requests,json
 from case.libs.dataChange import dataChange
-from log.logFile import logger
+import  logging
+logger =  logging.getLogger("log")
+
 
 # from requests.packages import urllib3
 # urllib3.disable_warnings()
-logger = logger(__file__)
 class InRequests():
 
     def __init__(self,postMethod,dataType,environmentId):
@@ -29,12 +30,10 @@ class InRequests():
         if self.postMethod==1:
             logger.info("执行get请求")
             res=self.get(url,headers,data)
-            print("_____", res)
             return res
         if self.postMethod==2:
             logger.info("执行post请求")
             res=self.post(url, headers, data)
-            print("_____",res)
             return res
     def post(self,url,headers,data=None):
         """如果type==1则是标准的form表单请求,如果是form-data则type传3"""
