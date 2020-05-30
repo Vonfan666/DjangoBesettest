@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     "rest_framework",
     "django_filters",
     'rest_framework.authtoken',  # token验证
+    # 'django.contrib.staticfiles',
+    'channels',
 
 ]
 
@@ -74,8 +76,21 @@ TEMPLATES = [
         },
     },
 ]
-
+# 指定WSGI的路由地址
 WSGI_APPLICATION = 'besettest.wsgi.application'
+# 指定ASGI的路由地址
+ASGI_APPLICATION = 'besettest.routing.application'
+
+
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels_redis.core.RedisChannelLayer",
+#         "CONFIG": {
+#             "hosts": ["redis://localhost:6379"],
+#         },
+#
+#     },
+# }
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
@@ -266,12 +281,12 @@ LOGGING = {
             'level': 'DEBUG',
             # 'formatter': 'verbose'
         },
-        'django': {  #记录系统日志
-            'handlers': ['django',"error"],
-            'level': 'DEBUG',
-            'propagate': True,  # 是否继承父类的log信息
-            # 'formatter': 'simple'
-        },  # handlers 来自于上面的 handlers 定义的内容
+        # 'django': {  #记录系统日志
+        #     'handlers': ['django',"error"],
+        #     'level': 'DEBUG',
+        #     'propagate': True,  # 是否继承父类的log信息
+        #     # 'formatter': 'simple'
+        # },  # handlers 来自于上面的 handlers 定义的内容
 
     }
 }

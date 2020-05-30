@@ -153,3 +153,44 @@ class S_CaseRun(serializers.ModelSerializer):
     class Meta:
         model=models.CaseFile
         fields="__all__"
+
+
+class S_Environments(serializers.ModelSerializer):
+    create_time = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
+    update_time = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
+
+    def validate(self, attrs):
+        if attrs.get("postMethod")=="":
+            raise ValidationError("请求类型为必须填写")
+    class Meta:
+        model=projectModels.Environments
+        fields="__all__"
+    # def create(self, validated_data):
+    #     user=super().create(validated_data=validated_data)
+    #     user.save()
+    #     return user
+
+class S_debugCase(serializers.Serializer):
+    # name=serializers.CharField(required=False)
+    # order=serializers.IntegerField(required=False)
+    # postMethod=serializers.CharField()
+    # dataType = serializers.CharField()
+    # attr = serializers.CharField()
+    # headers = serializers.CharField()
+    # data = serializers.CharField()
+    def validate(self, attrs):
+        print(self.initial_data)
+        postMethod=self.initial_data.get("postMethod")
+        dataType=self.initial_data.get("dataType")
+        attr=self.initial_data.get("attr")
+        if postMethod == "" or postMethod == None:
+            raise ValidationError("请求方法必须填写")
+        if dataType == "" or dataType == None:
+            raise ValidationError("请求数据类型必须填写")
+        if attr == "" or attr == None:
+            raise ValidationError("请求地址必须填写")
+        # if attrs.get("headers") == "":
+        #     raise ValidationError("请求类型为必须填写")
+        # if attrs.get("data")=="":
+        #     raise ValidationError("请求类型为必须填写")
+        return attrs

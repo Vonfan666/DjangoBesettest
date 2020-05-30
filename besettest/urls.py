@@ -15,6 +15,7 @@ Including another URLconf
 """
 
 from django.conf.urls import url,include
+# from django.urls import path,
 from django.contrib import admin
 from rest_framework.documentation import include_docs_urls
 from rest_framework_jwt.views import obtain_jwt_token
@@ -26,6 +27,8 @@ from case import  views as caseViews
 
 urlpatterns = [
     url('admin/', admin.site.urls),  #admin后台url
+    #将websocket协议指向websocketUrls
+    # url(r'^ws/', include('besettest.websocketUrls')),
     url(r"^docs/", include_docs_urls(title="InterfaceText")),  # 文档配置
     url(r"^api-auth/", include("rest_framework.urls", namespace="rest_framework")), #配置之后文档就可以登录了
     url(r'^users/login/$', obtain_jwt_token),  #生成token并验证
@@ -80,5 +83,6 @@ urlpatterns = [
     url(r"^users/case_remove/", caseViews.CaseRemove.as_view(), name="CaseRemove"),  # 删除用例
     url(r"^users/case_edit/", caseViews.CaseEdit.as_view(), name="CaseEdit"),  # 编辑用例
     url(r"^users/case_run/", caseViews.RunCase.as_view(), name="RunCase"),  # 编辑用例
+    url(r"^users/case_debug/", caseViews.DebugCase.as_view(), name="DebugCase"),  # 用例调试
 
 ]

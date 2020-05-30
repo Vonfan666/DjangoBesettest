@@ -5,6 +5,7 @@ from libs.api_response import APIResponse
 from . import models,serializers
 import  json,requests,os
 from case.libs.toRequests import InRequests
+from project.models import Environments
 # Create your views here
 import  logging
 logger =  logging.getLogger("log")
@@ -30,16 +31,46 @@ class RunCase(APIView):
         res_data=res_data[0]
 
         logger.info("单位开始执行")
-        print("caocaocao",logging.StreamHandler.handle(record="info"))
         s = InRequests(res_data["postMethod"],res_data["dataType"],res_data["environmentId"])
         response=s.run(res_data["attr"],res_data["headers"],res_data["data"])
 
         logger.info("单位执行结束")
         return  APIResponse(200,"sucess",results=response,status=status.HTTP_200_OK)
 
+class DebugCase(APIView):
+    def post(self, req):
+        data=req.data
+        res_data=req.data.dict()
 
+        validateObj=serializers.S_debugCase(data=data,many=False)
+        if validateObj.is_valid(raise_exception=True):
 
+            environmentsObj={}
+            if  res_data["environmentId"]=="":
+                res_data["environmentId"] = 1
+            else: pass
+            environments=Environments.objects.filter(id=res_data["environmentId"])
+            if  len(environments)>0:
+                environments =serializers.S_Environments(environments, many=True)
 
+                environments = json.loads(json.dumps(environments.data))
+
+                environmentsObj["environment"] = json.loads(environments[0]["value"])
+            else:environments["environment"]=[]
+            globals=Environments.objects.filter(id=1)
+            if len(globals)>0:
+                globals = serializers.S_Environments(globals, many=True)
+                globals = json.loads(json.dumps(globals.data))
+                environmentsObj["global"] = json.loads(globals[0]["value"])
+            else:environments["global"] = []
+
+            print(environmentsObj)
+            print(type(environmentsObj))
+            logger.info("单位开始执行")
+            s = InRequests(res_data["postMethod"], res_data["dataType"], environmentsObj)
+            response = s.run(res_data["attr"], res_data["headers"], res_data["data"])
+            logger.info("单位执行结束")
+            return APIResponse(200, "sucess", results=response, status=status.HTTP_200_OK)
 
 
 class CaseGroup(APIView):
