@@ -32,7 +32,7 @@ class dataChange(object):
                 errorsMsg["Message"] = "请求头数据非JSON数据"
                 return {}
 
-        if len(self.headers["keys"])>=0  and self.headers["keys"][-1]["headerKey"]=="":
+        if len(self.headers["keys"])>0  and self.headers["keys"][-1]["headerKey"]=="":
             self.headers["keys"].pop()
         headersCode = {}
         for item in self.headers["keys"]:
@@ -41,7 +41,7 @@ class dataChange(object):
 
     def dataChange(self):
         """处理请求数据格式"""
-        if self.data == None or self.data == "":
+        if self.data == None or self.data == "" :
             return {}
         if type(self.data)==str:
             try:
@@ -50,7 +50,7 @@ class dataChange(object):
                 errorsMsg["Message"] = "请求数据非JSON数据"
                 return {}
 
-        if len(self.data["keys"])>=0  and self.data["keys"][-1]["dataKey"]=="":
+        if len(self.data["keys"])>0  and self.data["keys"][-1]["dataKey"]=="":
             self.data["keys"].pop()
         dataCode={}
         for item in self.data["keys"]:

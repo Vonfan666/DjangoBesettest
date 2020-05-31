@@ -20,59 +20,67 @@ class RunCase(APIView):
         :id
     """
     def post(self,req):
+        responses=[]
+        listId=json.loads(req.data.get("id"))
+
+        for id in listId:
+
         #1封装环境变量取值---返回url  headers data
         # idList=req.query_params.get("idList")
         # if isinstance(idList,list):
-        id = req.data.get("id")
-        obj=models.CaseFile.objects.select_related("userId","CaseGroupId","postMethod","dataType","environmentId").filter(id=id)
-        serializersObj=serializers.S_CaseRun(obj,many=True)
-        res_data=serializersObj.data
-        res_data=json.loads(json.dumps(res_data))
-        res_data=res_data[0]
-
-        logger.info("单位开始执行")
-        s = InRequests(res_data["postMethod"],res_data["dataType"],res_data["environmentId"])
-        response=s.run(res_data["attr"],res_data["headers"],res_data["data"])
-
-        logger.info("单位执行结束")
-        return  APIResponse(200,"sucess",results=response,status=status.HTTP_200_OK)
+        # id = req.data.get("id")
+            obj=models.CaseFile.objects.select_related("userId","CaseGroupId","postMethod","dataType","environmentId").filter(id=id)
+            serializersObj=serializers.S_CaseRun(obj,many=True)
+            res_data=serializersObj.data
+            res_data=json.loads(json.dumps(res_data))
+            res_data=res_data[0]
+            logger.info("单位开始执行")
+            s = InRequests(res_data["postMethod"],res_data["dataType"],res_data["environmentId"],res_data["name"])
+            response=s.run(res_data["attr"],res_data["headers"],res_data["data"])
+            responses.append(response)
+            logger.info("单位执行结束")
+        return  APIResponse(200,"sucess",results=responses,status=status.HTTP_200_OK)
 
 class DebugCase(APIView):
     def post(self, req):
         data=req.data
         res_data=req.data.dict()
-
         validateObj=serializers.S_debugCase(data=data,many=False)
+        environmentsObj=self.Environmented(validateObj,res_data)
+        logger.info("单位开始执行")
+        s = InRequests(res_data["postMethod"], res_data["dataType"], environmentsObj,res_data["name"])
+        response = s.run(res_data["attr"], res_data["headers"], res_data["data"])
+        logger.info("单位执行结束")
+        return APIResponse(200, "sucess", results=response, status=status.HTTP_200_OK)
+
+    def Environmented(self,validateObj,res_data):
+
+
         if validateObj.is_valid(raise_exception=True):
 
-            environmentsObj={}
-            if  res_data["environmentId"]=="":
+            environmentsObj = {}
+            if res_data["environmentId"] == "":
                 res_data["environmentId"] = 1
-            else: pass
-            environments=Environments.objects.filter(id=res_data["environmentId"])
-            if  len(environments)>0:
-                environments =serializers.S_Environments(environments, many=True)
+            else:
+                pass
+            environments = Environments.objects.filter(id=res_data["environmentId"])
+            if len(environments) > 0:
+                environments = serializers.S_Environments(environments, many=True)
 
                 environments = json.loads(json.dumps(environments.data))
 
                 environmentsObj["environment"] = json.loads(environments[0]["value"])
-            else:environments["environment"]=[]
-            globals=Environments.objects.filter(id=1)
-            if len(globals)>0:
+            else:
+                environments["environment"] = []
+            globals = Environments.objects.filter(id=1)
+            if len(globals) > 0:
                 globals = serializers.S_Environments(globals, many=True)
                 globals = json.loads(json.dumps(globals.data))
                 environmentsObj["global"] = json.loads(globals[0]["value"])
-            else:environments["global"] = []
+            else:
+                environments["global"] = []
 
-            print(environmentsObj)
-            print(type(environmentsObj))
-            logger.info("单位开始执行")
-            s = InRequests(res_data["postMethod"], res_data["dataType"], environmentsObj)
-            response = s.run(res_data["attr"], res_data["headers"], res_data["data"])
-            logger.info("单位执行结束")
-            return APIResponse(200, "sucess", results=response, status=status.HTTP_200_OK)
-
-
+            return environmentsObj
 class CaseGroup(APIView):
     """查询当前项目的用例文件夹以及用例
     :param id  项目id

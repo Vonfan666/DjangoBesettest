@@ -14,16 +14,19 @@ logger =  logging.getLogger("log")
 # urllib3.disable_warnings()
 class InRequests():
 
-    def __init__(self,postMethod,dataType,environmentId,requestsMethods=None):
+    def __init__(self,postMethod,dataType,environmentId,name,requestsMethods=None):
         self.postMethod=int(postMethod)
         self.dataType=int(dataType)
+        self.name=name
         self.environmentId=environmentId
         self.requestsMethods=requestsMethods
 
     def run(self,url,headers,data=None):
-
-        s = dataChange(headers, data,self.environmentId)
-        obj = s.run()
+        try:
+            s = dataChange(headers, data,self.environmentId)
+            obj = s.run()
+        except:
+            return {"name":self.name}
         headers = obj[0]
         logger.info("传入headers值为:%s"%headers)
         data = obj[1]
@@ -52,7 +55,15 @@ class InRequests():
             logger.info("接口响应头为:%s" % res.headers)
             logger.info("接口响应结果为:%s" % res.json())
 
-        return {"postUrl":res.url,"postMethods":self.requestsMethods,"resStatus":res.status_code,"postHeader":headers,"postData":data,"resHeaders":res.headers,"resData":res.json(),"resText":res.text}
+        return {"name":self.name,
+                "postUrl":res.url,
+                "postMethods":self.requestsMethods,
+                "resStatus":res.status_code,
+                "postHeader":headers,
+                "postData":data,
+                "resHeaders":json.loads(json.dumps(dict(res.headers))),
+                "resData":res.json(),
+                "resText":res.text}
     def get(self,url,headers,data=None):
         res=None
         if self.dataType==1:
@@ -68,6 +79,14 @@ class InRequests():
             res=requests.get(url,headers=headers,params=data,verify=False,timeout=30)
             logger.info("接口响应头为:%s" % res.headers)
             logger.info("接口响应结果为:%s" % res.json())
-        return {"postUrl":res.url,"postMethods":self.requestsMethods,"resStatus":res.status_code,"postHeader":headers,"postData":data,"resHeaders":res.headers,"resData":res.json(),"resText":res.text}
+        return {"name":self.name,
+                "postUrl":res.url,
+                "postMethods":self.requestsMethods,
+                "resStatus":res.status_code,
+                "postHeader":headers,
+                "postData":data,
+                "resHeaders":json.loads(json.dumps(dict(res.headers))),
+                "resData":res.json(),
+                "resText":res.text}
 
 

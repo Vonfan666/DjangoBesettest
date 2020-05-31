@@ -11,7 +11,9 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os, sys
-
+import logging
+import django.utils.log
+import logging.handlers
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BASE_DIR)  # 将根目录临时添加到环境变量
@@ -82,15 +84,16 @@ WSGI_APPLICATION = 'besettest.wsgi.application'
 ASGI_APPLICATION = 'besettest.routing.application'
 
 
-# CHANNEL_LAYERS = {
-#     "default": {
-#         "BACKEND": "channels_redis.core.RedisChannelLayer",
-#         "CONFIG": {
-#             "hosts": ["redis://localhost:6379"],
-#         },
-#
-#     },
-# }
+CHANNEL_LAYERS = {
+    'default': {
+        # 这里用到了 channels_redis
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('127.0.0.1', 6379)],  # 配置你自己的 redis 服务信息
+        },
+    }
+}
+
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
@@ -203,23 +206,47 @@ LOGGING = {
     'disable_existing_loggers': False,  # 禁用所有已经存在的日志配置
     "formatters": {  # 格式器
         'verbose': {  # 详细
-            'format': '[%(asctime)s](%(levelname)s)%(filename)s : %(message)s '
+            'format': '[%(asctime)s](%(levelname)s)(%(module)s)(%(funcName)s) : %(message)s '
         },
         'simple': {  # 简单
             'format': '[%(asctime)s](%(levelname)s): %(message)s '
         },
 
     },
-
+    'filters': {
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
     'handlers': {  # 处理器，在这里定义了三个处理器
+
         'console': {  #打印到控制台
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
-            'formatter': 'simple',
+            'formatter': 'verbose',
             # "filename": os.path.join(BASE_DIR, "log", "sysLogs", "test.log"),
             # 'maxBytes': 1024 * 1024 * 5,  # 日志大小 50M
             # 'backupCount': 3,  # 最多备份几个
             # 'encoding': 'utf-8',
+        },
+
+        "requests": {  # 存到文件
+            "level": "DEBUG",
+            "class": "logging.handlers.RotatingFileHandler",
+            "formatter": "verbose",
+            "filename": os.path.join(BASE_DIR, "log", "sysLogs", "test.log"),
+            'maxBytes': 1024 * 1024 * 5,  # 日志大小 50M
+            'backupCount': 10,  # 最多备份几个
+            'encoding': 'utf-8',
+        },
+        "myLog": {  # 存到文件
+            "level": "DEBUG",
+            "class": "logging.handlers.RotatingFileHandler",
+            "formatter": "verbose",
+            "filename": os.path.join(BASE_DIR, "log", "logs", "test.log"),
+            'maxBytes': 1024 * 1024 * 5,  # 日志大小 50M
+            'backupCount': 3,  # 最多备份几个
+            'encoding': 'utf-8',
         },
         "files": { #存到文件
             "level": "DEBUG",
@@ -229,24 +256,7 @@ LOGGING = {
             'maxBytes': 1024 * 1024 * 5,  # 日志大小 50M
             'backupCount': 10,  # 最多备份几个
             'encoding': 'utf-8',
-        },
-        "django": { #存到文件
-            "level": "DEBUG",
-            "class": "logging.handlers.RotatingFileHandler",
-            "formatter": "verbose",
-            "filename": os.path.join(BASE_DIR, "log", "sysLogs", "test.log"),
-            'maxBytes': 1024 * 1024 * 5,  # 日志大小 50M
-            'backupCount': 10,  # 最多备份几个
-            'encoding': 'utf-8',
-        },
-        "myLog": { #存到文件
-            "level": "DEBUG",
-            "class": "logging.handlers.RotatingFileHandler",
-            "formatter": "verbose",
-            "filename": os.path.join(BASE_DIR, "log", "logs", "test.log"),
-            'maxBytes': 1024 * 1024 * 5,  # 日志大小 50M
-            'backupCount': 3,  # 最多备份几个
-            'encoding': 'utf-8',
+
         },
         # 'default': {
         #     'level': 'DEBUG',
@@ -257,6 +267,8 @@ LOGGING = {
         #     'formatter': 'verbose',
         #
         # },
+
+
         'error': {
             'level': 'ERROR',
             'class': 'logging.handlers.RotatingFileHandler',  # 保存到文件，自动切
@@ -268,25 +280,33 @@ LOGGING = {
         },
 
     },
+
     'loggers': {
-         "":{   #记录所有日志
-            'handlers': ["console","files"],
+        "":{   #记录所有日志
+            'handlers': ["files"],
             'propagate': True,
             'level': 'DEBUG',
             # 'formatter': 'verbose'
         },
-        "log":{   #记录我自己打印的日志
-            'handlers': ["myLog"],
+        "django.db.backends":{   #记录所有日志
+            'handlers': ["requests","console"],
             'propagate': True,
             'level': 'DEBUG',
             # 'formatter': 'verbose'
         },
-        # 'django': {  #记录系统日志
-        #     'handlers': ['django',"error"],
-        #     'level': 'DEBUG',
-        #     'propagate': True,  # 是否继承父类的log信息
-        #     # 'formatter': 'simple'
-        # },  # handlers 来自于上面的 handlers 定义的内容
+         'django.request': {  #记录系统日志
+            'handlers': ["error","console"],
+            'level': 'ERROR',
+            'propagate': False,  # 是否继承父类的log信息
+            # 'formatter': 'simple'
+        },  # handlers 来自于上面的 handlers 定义的内容
+         "log":{   #记录所有日志
+            'handlers': ["myLog","console"],
+            'propagate': True,
+            'level': 'INFO',
+            # 'formatter': 'verbose'
+        },
+
 
     }
 }
