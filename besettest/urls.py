@@ -82,7 +82,8 @@ urlpatterns = [
     url(r"^users/case_list/", caseViews.CaseList.as_view(), name="CaseList"),  # 查看用例列表
     url(r"^users/case_remove/", caseViews.CaseRemove.as_view(), name="CaseRemove"),  # 删除用例
     url(r"^users/case_edit/", caseViews.CaseEdit.as_view(), name="CaseEdit"),  # 编辑用例
-    url(r"^users/case_run/", caseViews.RunCase.as_view(), name="RunCase"),  # 编辑用例
+    url(r"^users/case_run/", caseViews.RunCase.as_view(), name="RunCase"),  # 执行单个接口下所有用例
     url(r"^users/case_debug/", caseViews.DebugCase.as_view(), name="DebugCase"),  # 用例调试
+    url(r"^users/case_run_all/", caseViews.RunCaseAll.as_view(), name="RunCaseAll"),  # 用例调试
 
 ]

@@ -7,10 +7,18 @@ import  json,requests,os
 from case.libs.toRequests import InRequests
 from project.models import Environments
 # Create your views here
-import  logging
+import  logging,unittest
 logger =  logging.getLogger("log")
-class RunCase(APIView):
 
+class RunCaseAll(APIView):
+    def post(self,req):
+        case_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),r"interface")
+        allTest=unittest.defaultTestLoader.discover(case_dir,pattern="test*.py",top_level_dir=None)
+        print(allTest)
+        print(case_dir)
+
+        return APIResponse(200, "sucess", status=status.HTTP_200_OK)
+class RunCase(APIView):
     """单条用例执行
         全部id传o 部分传id列表
         :param projectId
@@ -19,6 +27,8 @@ class RunCase(APIView):
         :param userId  执行人
         :id
     """
+
+
     def post(self,req):
         responses=[]
         listId=json.loads(req.data.get("id"))

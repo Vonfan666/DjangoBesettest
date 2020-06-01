@@ -69,7 +69,7 @@ class InRequests():
             return fixRes
 
         logger.info("接口响应ResHeader为%s" % res.headers)
-        logger.info("接口响应data为%s" % res.json())
+        logger.info("接口响应data为%s" %res.json())
 
         return self.resResults(fixRes,res)
 
@@ -89,8 +89,8 @@ class InRequests():
             fixRes["code"]=0
             return fixRes
 
-        logger.info("接口响应ResHeader为%s" % res.headers)
-        logger.info("接口响应data为%s" % res.json())
+        logger.info("接口响应ResHeader为%s" %res.headers)
+        logger.info("接口响应data为%s" %res.json())
 
         return self.resResults(fixRes, res)
 
