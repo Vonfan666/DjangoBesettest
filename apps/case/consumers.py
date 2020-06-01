@@ -12,7 +12,7 @@ from . import models,serializers
 from case.libs.toRequests import InRequests
 from libs.api_response import APIResponse
 from  rest_framework.views import APIView,status
-
+import time
 logger =  logging.getLogger("log")
 #
 # class EchoConsumer(WebsocketConsumer):
@@ -47,9 +47,15 @@ class RunCase(WebsocketConsumer):
         print(text_data)
         print(type(text_data))
         listId=json.loads(text_data)
+        listIdSort=[]
+        for id in listId:
+            order=models.CaseFile.objects.get(id=id).order
+            print(order)
+            listIdSort.append((order,id))
+        listId=sorted(listIdSort,key=lambda x:x[0])
         for id in listId:
             # 1封装环境变量取值---返回url  headers data
-
+            id=id[1]
             obj = models.CaseFile.objects.select_related("userId", "CaseGroupId", "postMethod", "dataType",
                                                          "environmentId").filter(id=id)
             serializersObj = serializers.S_CaseRun(obj, many=True)
@@ -59,27 +65,10 @@ class RunCase(WebsocketConsumer):
             logger.info("单位开始执行")
             s = InRequests(res_data["postMethod"], res_data["dataType"], res_data["environmentId"], res_data["name"])
             res= s.run(res_data["attr"], res_data["headers"], res_data["data"])
-
-            # try:
-            #     resc=json.loads(json.dumps(res))
-            #     print(resc)
-            # except:
-            #     pass
-            # print(res)
-            print(res)
             logger.info("单位执行结束")
             self.send(json.dumps(res))
+            time.sleep(1)
     def disconnect(self, close_code):
         pass
 
-from datetime import date, datetime
-
-class ComplexEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, datetime):
-            return obj.strftime('%Y-%m-%d %H:%M:%S')
-        elif isinstance(obj, date):
-            return obj.strftime('%Y-%m-%d')
-        else:
-            return json.JSONEncoder.default(self, obj)
 

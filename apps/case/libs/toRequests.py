@@ -7,6 +7,8 @@
 import requests,json
 from case.libs.dataChange import dataChange
 import  logging
+from rest_framework.validators import ValidationError
+
 logger =  logging.getLogger("log")
 
 
@@ -42,51 +44,81 @@ class InRequests():
             res=self.post(url, headers, data)
             return res
     def post(self,url,headers,data=None):
-        """如果type==1则是标准的form表单请求,如果是form-data则type传3"""
-        res=None
-        if self.dataType==1:
-            logger.info("校验传参类型为:x-www-form-urlencoded")
-            res=requests.post(url,headers=headers,data=data,verify=False,timeout=30)
-            logger.info("接口响应头为:%s"%res.headers)
-            logger.info("接口响应结果为:%s" % res.json())
-        if self.dataType==3:
-            logger.info("校验传参类型为:form-data")
-            res=requests.post(url,headers=headers,data=data,verify=False,timeout=30)
-            logger.info("接口响应头为:%s" % res.headers)
-            logger.info("接口响应结果为:%s" % res.json())
-
-        return {"name":self.name,
-                "postUrl":res.url,
-                "postMethods":self.requestsMethods,
-                "resStatus":res.status_code,
-                "postHeader":headers,
-                "postData":data,
-                "resHeaders":json.loads(json.dumps(dict(res.headers))),
-                "resData":res.json(),
-                "resText":res.text}
+        self.url=url
+        self.headers=headers
+        self.data=data
+        return self.postCode()
     def get(self,url,headers,data=None):
-        res=None
-        if self.dataType==1:
-            logger.info("校验传参类型为:x-www-form-urlencoded")
+        self.url=url
+        self.headers=headers
+        self.data=data
+        return self.getCode()
+    def getCode(self):
+        fixRes = self.resData()
+        res={}
+        try:
+            if  self.dataType==1:
+                res=self.form_get()
 
-            res=requests.get(url,headers=headers,params=data,verify=False,timeout=30)
-            logger.info("接口响应ResHeader为%s" % res.headers)
-            logger.info("接口响应data为%s" % res.json())
+            if  self.dataType==3:
+                res=self.data_get()
+        except Exception as f:
+            logger.info("requests请求报错,错误信息为：%s" % f.args[0])
+            fixRes["errors"] = f.args[0]
+            fixRes["code"] = 0
+            return fixRes
 
-        if self.dataType==3:
+        logger.info("接口响应ResHeader为%s" % res.headers)
+        logger.info("接口响应data为%s" % res.json())
 
-            logger.info("校验传参类型为:form-data")
-            res=requests.get(url,headers=headers,params=data,verify=False,timeout=30)
-            logger.info("接口响应头为:%s" % res.headers)
-            logger.info("接口响应结果为:%s" % res.json())
-        return {"name":self.name,
-                "postUrl":res.url,
-                "postMethods":self.requestsMethods,
-                "resStatus":res.status_code,
-                "postHeader":headers,
-                "postData":data,
-                "resHeaders":json.loads(json.dumps(dict(res.headers))),
-                "resData":res.json(),
-                "resText":res.text}
+        return self.resResults(fixRes,res)
 
+    def postCode(self):
+        fixRes = self.resData()
+        res = {}
+        try:
+            if self.dataType == 1:
+                res = self.form_post()
 
+            if self.dataType == 3:
+                res = self.data_post()
+        except Exception as f:
+            logger.info("requests请求报错,错误信息为：%s" % f.args[0])
+
+            fixRes["errors"] = f.args[0]
+            fixRes["code"]=0
+            return fixRes
+
+        logger.info("接口响应ResHeader为%s" % res.headers)
+        logger.info("接口响应data为%s" % res.json())
+
+        return self.resResults(fixRes, res)
+
+    def resData(self):
+        """正常是返回1  报错返回0 断言失败返回2"""
+        return {"name": self.name,"postMethods": self.requestsMethods,"code":1,
+                "postHeader": self.headers,"postData": self.data,"postUrl":self.url}
+
+    def resResults(self,fixRes,res):
+        fixRes["postUrl"] = res.url
+        fixRes["resStatus"] = res.status_code
+        fixRes["resHeaders"] = json.loads(json.dumps(dict(res.headers)))
+        fixRes["resData"] = res.json()
+        fixRes["resText"] = res.text
+
+        return fixRes
+
+    def form_get(self):
+        logger.info("校验传参类型为:x-www-form-urlencoded")
+        return requests.get(self.url, headers=self.headers, params=self.data, verify=False, timeout=30)
+
+    def data_get(self):
+        logger.info("校验传参类型为:form-data")
+        return  requests.get(self.url, headers=self.headers, params=self.data, verify=False, timeout=30)
+    def form_post(self):
+        logger.info("校验传参类型为:x-www-form-urlencoded")
+        return requests.post(self.url, headers=self.headers, data=self.data, verify=False, timeout=30)
+
+    def data_post(self):
+        logger.info("校验传参类型为:form-data")
+        return  requests.post(self.url, headers=self.headers, data=self.data, verify=False, timeout=30)

@@ -22,7 +22,6 @@ class RunCase(APIView):
     def post(self,req):
         responses=[]
         listId=json.loads(req.data.get("id"))
-
         for id in listId:
 
         #1封装环境变量取值---返回url  headers data
