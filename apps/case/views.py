@@ -7,15 +7,35 @@ import  json,requests,os
 from case.libs.toRequests import InRequests
 from project.models import Environments
 # Create your views here
-import  logging,unittest
+import  logging,unittest,time
+from project.models import ProjectList
+from libs import HTMLTestRunner
+
 logger =  logging.getLogger("log")
 
+
 class RunCaseAll(APIView):
+
+    def allCase(self):
+        suite = unittest.TestSuite()
+
+
+        case_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), r"interface")
+        allTest = unittest.defaultTestLoader.discover(case_dir, pattern="test*.py", top_level_dir=None)
+
+
+        suite.addTests(allTest)
+        return suite
     def post(self,req):
-        case_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),r"interface")
-        allTest=unittest.defaultTestLoader.discover(case_dir,pattern="test*.py",top_level_dir=None)
-        print(allTest)
-        print(case_dir)
+        """需要传一个项目id 然后通过项目id找到name"""
+        name=ProjectList.objects.get(id=req.data["id"]).name
+        case_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), r"interface")
+        curtime = time.strftime('%Y%m%d%H%M%S', time.localtime())
+        report_path =os.path.join(case_dir,'%s_%s.html'%(name,curtime ))
+        report_set = open(report_path, 'wb')
+        runner=HTMLTestRunner.HTMLTestRunner(report_set)
+        runner.run(self.allCase())
+        report_set.close()
 
         return APIResponse(200, "sucess", status=status.HTTP_200_OK)
 class RunCase(APIView):
