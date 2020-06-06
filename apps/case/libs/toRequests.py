@@ -24,34 +24,36 @@ class InRequests():
         self.requestsMethods=requestsMethods
 
     def run(self,url,headers,data=None):
+        self.url = url
+
         try:
             s = dataChange(headers, data,self.environmentId)
             obj = s.run()
-        except:
-            return {"name":self.name}
-        headers = obj[0]
-        logger.info("传入headers值为:%s"%headers)
-        data = obj[1]
-        logger.info("传入data值为:%s" % data)
+        except Exception as f:
+            res=self.resData(code=0)["errors"]
+            res["errors"] = f.args[0]
+            return res
+        self.headers = obj[0]
+        logger.info("传入headers值为:%s"%self.headers)
+        self.data = obj[1]
+        logger.info("传入data值为:%s" % self.data)
         if self.postMethod==1:
             self.requestsMethods="GET"
             logger.info("执行get请求")
-            res=self.get(url,headers,data)
+            res=self.get()
             return res
         if self.postMethod==2:
             self.requestsMethods = "POST"
             logger.info("执行post请求")
-            res=self.post(url, headers, data)
+            res=self.post()
             return res
-    def post(self,url,headers,data=None):
-        self.url=url
-        self.headers=headers
-        self.data=data
+    def post(self):
+
         return self.postCode()
-    def get(self,url,headers,data=None):
-        self.url=url
-        self.headers=headers
-        self.data=data
+    def get(self):
+        # self.url=url
+        # self.headers=headers
+        # self.data=data
         return self.getCode()
     def getCode(self):
         fixRes = self.resData()
@@ -94,9 +96,11 @@ class InRequests():
 
         return self.resResults(fixRes, res)
 
-    def resData(self):
+    def resData(self,code=None):
         """正常是返回1  报错返回0 断言失败返回2"""
-        return {"name": self.name,"postMethods": self.requestsMethods,"code":1,
+        if code==None:
+            code=1
+        return {"name": self.name,"postMethods": self.requestsMethods,"code":code,
                 "postHeader": self.headers,"postData": self.data,"postUrl":self.url}
 
     def resResults(self,fixRes,res):

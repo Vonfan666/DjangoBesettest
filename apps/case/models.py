@@ -16,6 +16,7 @@ class CaseGroup(models.Model):
     """  接口名称
     新建接口文档时这里就需要新增一个---前端加一个按钮是否同步接口文档分类"""
     name=models.CharField(max_length=255,verbose_name="接口名称")
+    order = models.IntegerField(verbose_name="执行顺序", unique=True,null=True)
     CaseGroupFilesId=models.ForeignKey("CaseGroupFiles",to_field="id",on_delete=models.SET_NULL,null=True,
                                         verbose_name="所属用例文件",related_name="idCaseGroupFiles")
     projectId = models.ForeignKey("project.ProjectList", to_field="id", on_delete=models.SET_NULL, null=True,

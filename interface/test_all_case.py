@@ -10,19 +10,21 @@ from case.libs.toRequests import InRequests
 from libs.api_response import APIResponse
 from  rest_framework.views import APIView,status
 import time
-
 logger =  logging.getLogger("log")
 
 class class_name_code(unittest.TestCase):
 
     def setUp(self):
+
         self.__class__.__name__ = "搞飞机"
         logger.info("执行前置操作")
+
     def tearDown(self):
         logger.info("后置操作")
     def test1(self):
         self.__dict__["_testMethodName"]="登录注册"
-    def test2(self):
-        self.__dict__["_testMethodName"] = "退出登录"
+        """传一个id"""
+        """通过id找相关数据"""
+
 
 

@@ -802,7 +802,7 @@ a.popup_link:hover {
         <a onfocus='this.blur();' onclick="document.getElementById('div_%(tid)s').style.display = 'none' " >
            [x]</a>
         </div>
-        <pre>
+        <pre style="overflow-y: hidden">
         %(script_out)s
         </pre>
     </div>

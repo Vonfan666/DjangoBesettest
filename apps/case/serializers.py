@@ -194,3 +194,52 @@ class S_debugCase(serializers.Serializer):
         # if attrs.get("data")=="":
         #     raise ValidationError("请求类型为必须填写")
         return attrs
+
+
+class  S_CaseFilesDetail(serializers.ModelSerializer):
+    """获取接口文档下面的用例以及其他数据"""
+    caseGroup=serializers.SerializerMethodField()
+    # environmentId=serializers.SerializerMethodField()
+    #
+    # def get_environmentId(self,obj):
+    #     item = projectModels.Environments.objects.get(is_eg=1).value
+    #     if not obj.environmentId:
+    #
+    #         return {"environment":[],"global":json.loads(item)}
+    #     return {"environment":json.loads(obj.environmentId.value),"global":json.loads(item)}
+    def get_caseGroup(self,obj):
+        # obj.get_status_display()
+        res=[]
+
+        CaseGroupObj=obj.idCaseGroupFiles.all()
+        for  item  in CaseGroupObj:
+            code = {"child":[]}
+            code["name"] = item.name
+            code["order"] = item.order
+            caseObj=item.IdCaseGroup.all()
+            for rows in  caseObj:
+                Env = projectModels.Environments.objects.get(is_eg=1).value
+                if not rows.environmentId:
+                    a={"environment":[],"global":json.loads(Env)}
+                    print(a)
+                else:
+                    a={"environment":json.loads(rows.environmentId.value),"global":json.loads(Env)}
+                    print(a)
+                dict_obj = {
+                    "name": rows.name,
+                    "order": rows.order,
+                    "status": rows.get_status_display(),
+                    "postMethod": rows.postMethod.id,
+                    "dataType": rows.dataType.id,
+                    "attr": rows.attr,
+                    "detail": rows.detail,
+                    "headers": json.loads(rows.headers),
+                    "data": json.loads(rows.data),
+                    "environmentId":a
+                }
+                code["child"].append(dict_obj)
+            res.append(code)
+        return  res
+    class Meta:
+        model=models.CaseGroupFiles
+        fields=("id","caseGroup")

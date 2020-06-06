@@ -1,43 +1,47 @@
 from django.shortcuts import render
 from  rest_framework.views import APIView,status
-from django.db.models import  Q
 from libs.api_response import APIResponse
 from . import models,serializers
-import  json,requests,os
+import  json,os
 from case.libs.toRequests import InRequests
+from case.libs.findeSqlCase import FindCase
 from project.models import Environments
 # Create your views here
 import  logging,unittest,time
-from project.models import ProjectList
 from libs import HTMLTestRunner
+from libs.writeScript import MakeScript
 
 logger =  logging.getLogger("log")
 
 
 class RunCaseAll(APIView):
 
-    def allCase(self):
-        suite = unittest.TestSuite()
-
-
+    def allCase(self,fileName):
         case_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), r"interface")
-        allTest = unittest.defaultTestLoader.discover(case_dir, pattern="test*.py", top_level_dir=None)
-
-
-        suite.addTests(allTest)
-        return suite
+        allTest = unittest.defaultTestLoader.discover(case_dir, pattern="{}.py".format(fileName), top_level_dir=None)
+        return allTest
     def post(self,req):
         """需要传一个项目id 然后通过项目id找到name"""
-        name=ProjectList.objects.get(id=req.data["id"]).name
+        projectId=req.data["id"]
+        fileName=req.data["name"]
+        #这里需要判断该目录下是否存在同名的fileName.py文件
+        obj=models.CaseGroupFiles.objects.filter(projectId_id=projectId)
+        serializersObj=serializers.S_CaseFilesDetail(obj,many=True)
+        orderDictObj=serializersObj.data
+        dictObj=json.loads(json.dumps(orderDictObj))
+        print(dictObj)  #传给写入文件的方法
+        res_list=FindCase(dictObj).run()
+        MakeScript().make_file(res_list,fileName)  #给创建用例的方法 传入数据以及文件名称
+        name="待定"
         case_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), r"interface")
         curtime = time.strftime('%Y%m%d%H%M%S', time.localtime())
         report_path =os.path.join(case_dir,'%s_%s.html'%(name,curtime ))
         report_set = open(report_path, 'wb')
         runner=HTMLTestRunner.HTMLTestRunner(report_set)
-        runner.run(self.allCase())
+        runner.run(self.allCase(fileName))
         report_set.close()
 
-        return APIResponse(200, "sucess", status=status.HTTP_200_OK)
+        return APIResponse(200, "sucess",results=dictObj, status=status.HTTP_200_OK)
 class RunCase(APIView):
     """单条用例执行
         全部id传o 部分传id列表
