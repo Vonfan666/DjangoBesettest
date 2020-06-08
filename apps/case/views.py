@@ -245,4 +245,12 @@ class CaseEdit(APIView):
         res_obj=serializersObj.data
         return  APIResponse(200,"sucess",results=res_obj,status=status.HTTP_200_OK)
 
-
+class CaseOrder(APIView):
+    """修改用例执行顺序"""
+    def post(self,req):
+        models.CaseGroup.objects.filter(id=req.data["id"]).update(order=req.data["order"])
+        order=models.CaseGroup.objects.get(id=req.data["id"]).order
+        return APIResponse(200,"修改成功",order=order,status=status.HTTP_200_OK)
+    def get(self,req):
+        order = models.CaseGroup.objects.get(id=req.query_params["id"]).order
+        return APIResponse(200, "修改成功", order=order, status=status.HTTP_200_OK)

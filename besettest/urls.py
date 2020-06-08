@@ -85,5 +85,5 @@ urlpatterns = [
     url(r"^users/case_run/", caseViews.RunCase.as_view(), name="RunCase"),  # 执行单个接口下所有用例
     url(r"^users/case_debug/", caseViews.DebugCase.as_view(), name="DebugCase"),  # 用例调试
     url(r"^users/case_run_all/", caseViews.RunCaseAll.as_view(), name="RunCaseAll"),  # 用例调试
-
+    url(r"^users/case_order/", caseViews.CaseOrder.as_view(), name="CaseOrder"),  # 修改该接口的执行顺序
 ]

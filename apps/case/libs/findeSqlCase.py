@@ -25,9 +25,9 @@ class FindCase():
         pass
 
     def run(self):
-        for  item  in self.obj:
-            for row in item["caseGroup"]:
-                if row["order"]==None:
+        for  item  in self.obj:  #遍历接口分类
+            for row in item["caseGroup"]:  #遍历接口文档
+                if row["order"]==None:   #如果没有排序排序则默认1
                     row["order"]=1
                 self.listGroup.append(row)
         a=self.listGroup
