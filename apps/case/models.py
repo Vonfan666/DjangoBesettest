@@ -53,3 +53,24 @@ class CaseFile(models.Model):
     updateTime = models.DateTimeField(auto_now=True, verbose_name="更新时间")
     class Meta:
         db_table="case_file"
+
+class CasePlan(models.Model):
+    status_Choices=(
+        (0,"未执行"),
+        (1,"执行中"),
+        (2,"已完成")
+    )
+
+    name=models.CharField(max_length=255,verbose_name="计划名称")
+    cname=models.CharField(max_length=255,verbose_name="脚本名称")
+    projectId=models.ForeignKey("project.ProjectList",to_field="id",on_delete=models.SET_NULL,null=True,verbose_name="项目id")
+    userId = models.ForeignKey("users.UserProfile", to_field="id", on_delete=models.SET_NULL, null=True,related_name="c_name",verbose_name="创建人")
+    status=models.IntegerField(choices=status_Choices,default=0,verbose_name="执行状态")
+    CaseCount=models.IntegerField(null=True,verbose_name="用例数量")
+    caseStartTime=models.DateTimeField(verbose_name="计划开始时间",null=True)
+    caseEndtTime = models.DateTimeField(verbose_name="计划结束时间", null=True)
+    detail=models.TextField(verbose_name="计划描述",null=True)
+    createTime = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
+    updateTime = models.DateTimeField(auto_now=True, verbose_name="更新时间")
+    class Meta:
+        db_table="case_plan"
