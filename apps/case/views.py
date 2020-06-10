@@ -10,7 +10,8 @@ from project.models import Environments
 import  logging,unittest,time
 from libs import HTMLTestRunner
 from libs.writeScript import MakeScript
-
+from libs.Pagination import Pagination
+from django.db.models import Q
 logger =  logging.getLogger("log")
 
 
@@ -192,8 +193,6 @@ class RemoveCase(APIView):
         id = req.data["id"]
         models.CaseGroup.objects.get(id=id).delete()
         return APIResponse(200, "删除成功", status=status.HTTP_200_OK)
-
-
 class AddInterface(APIView):
     """新增用例"""
     def  post(self,req):
@@ -214,7 +213,6 @@ class AddInterface(APIView):
                 res_data=serializers.S_AddInterface(validate_data)
                 res_obj=res_data.data
                 return  APIResponse(200,"添加成功",results=res_obj,status=status.HTTP_200_OK)
-
 class  CaseList(APIView):
     """查看用例列表
         :param id  用例id
@@ -226,7 +224,6 @@ class  CaseList(APIView):
         serializersObj=serializers.S_AddInterface(obj,many=True)
         res_obj=serializersObj.data
         return  APIResponse(200,"sucess",results=res_obj,status=status.HTTP_200_OK)
-
 class CaseRemove(APIView):
     """删除用例
        :param id 用例id
@@ -244,7 +241,6 @@ class CaseEdit(APIView):
         serializersObj=serializers.S_AddInterface(obj,many=True)
         res_obj=serializersObj.data
         return  APIResponse(200,"sucess",results=res_obj,status=status.HTTP_200_OK)
-
 class CaseOrder(APIView):
     """修改用例执行顺序"""
     def post(self,req):
@@ -254,3 +250,61 @@ class CaseOrder(APIView):
     def get(self,req):
         order = models.CaseGroup.objects.get(id=req.query_params["id"]).order
         return APIResponse(200, "修改成功", order=order, status=status.HTTP_200_OK)
+class AddCasePlan(APIView):
+    """新增测试计划
+    :param projectId项目id
+    :param userId用户id
+    :param name  计划名称
+    :param cname 脚本名称
+    :param runType执行类型
+    :param detail 描述
+    """
+    def post(self,req):
+        print("objl")
+        data=req.data
+        serializersObj=serializers.S_AddCasePlan(data=data,many=False)
+        if serializersObj.is_valid(raise_exception=True):
+            res_obj=serializersObj.save()
+            res_data_obj=serializers.S_AddCasePlan(res_obj,many=False)
+            res_data=res_data_obj.data
+            return APIResponse(200,"计划创建成功",results=res_data,status=status.HTTP_200_OK)
+
+class  UpdateCasePlan(APIView):
+    def post(self,req):
+        data=req.data
+        id=req.data["id"]
+        obj=models.CasePlan.objects.get(id=id)
+        serializersObj=serializers.S_AddCasePlan(data=data, instance=obj,partial=True,many=False)
+        if serializersObj.is_valid(raise_exception=True):
+            res_obj=serializersObj.save()
+            res_data_obj=serializers.S_AddCasePlan(res_obj)
+            res_data=res_data_obj.data
+            return APIResponse(200,"计划创建成功",results=res_data,status=status.HTTP_200_OK)
+
+
+class GetCasePlan(APIView):
+    """查看执行计划
+    :param projectId
+    :page 当前请求的页面
+    :pageSize 每页展示的数量
+    """
+
+    def get(self,req):
+        id=req.query_params["projectId"]
+        page=req.query_params["page"]
+        pageSize=req.query_params["pageSize"]
+        obj=models.CasePlan.objects.select_related("projectId","userId").filter(projectId=id).order_by("createTime").reverse()
+        serializersObj=serializers.S_AddCasePlan(obj,many=True)
+        res_data=serializersObj.data
+        total=len(res_data)  #数据总数
+        PaginationObj = Pagination(total, page, perPageNum=pageSize, allPageNum=11)
+        all_page = PaginationObj.all_page()
+        res_data = res_data[PaginationObj.start():PaginationObj.end()]
+
+        return APIResponse(200, "success", results=res_data, total=total,page_size=all_page,
+                           status=status.HTTP_200_OK)
+
+class  DeleteCasePlan(APIView):
+    def post(self,req):
+        models.CasePlan.objects.get(id=req.data["id"]).delete()
+        return APIResponse(200,"删除成功",status=status.HTTP_200_OK)

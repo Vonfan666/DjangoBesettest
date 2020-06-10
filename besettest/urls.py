@@ -86,4 +86,9 @@ urlpatterns = [
     url(r"^users/case_debug/", caseViews.DebugCase.as_view(), name="DebugCase"),  # 用例调试
     url(r"^users/case_run_all/", caseViews.RunCaseAll.as_view(), name="RunCaseAll"),  # 用例调试
     url(r"^users/case_order/", caseViews.CaseOrder.as_view(), name="CaseOrder"),  # 修改该接口的执行顺序
+    url(r"^users/casePlan_add/", caseViews.AddCasePlan.as_view(), name="AddCasePlan"),  # 新建测试计划
+    url(r"^users/casePlan_get/", caseViews.GetCasePlan.as_view(), name="GetCasePlan"),  # 查看测试计划
+    url(r"^users/casePlan_edit/", caseViews.UpdateCasePlan.as_view(), name="UpdateCasePlan"),  # 编辑测试计划
+    url(r"^users/casePlan_delete/", caseViews.DeleteCasePlan.as_view(), name="DeleteCasePlan"),  # 删除测试计划
+
 ]
