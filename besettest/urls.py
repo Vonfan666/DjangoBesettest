@@ -90,5 +90,5 @@ urlpatterns = [
     url(r"^users/casePlan_get/", caseViews.GetCasePlan.as_view(), name="GetCasePlan"),  # 查看测试计划
     url(r"^users/casePlan_edit/", caseViews.UpdateCasePlan.as_view(), name="UpdateCasePlan"),  # 编辑测试计划
     url(r"^users/casePlan_delete/", caseViews.DeleteCasePlan.as_view(), name="DeleteCasePlan"),  # 删除测试计划
-
+    url(r"^users/caseList_get/", caseViews.GetCaseList.as_view(), name="GetCaseList"),  # 删除测试计划
 ]

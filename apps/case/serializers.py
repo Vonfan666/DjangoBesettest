@@ -108,6 +108,8 @@ class S_AddInterface(serializers.ModelSerializer):
             validated_data["status"] = self.initial_data["status"]
             validated_data["data"] = self.initial_data["data"]
             validated_data["headers"] = self.initial_data["headers"]
+            s.validated_data_add(validated_data,self.initial_data,  usersModels.UserProfile,"userId","update_userId")
+
             s.validated_data_add(validated_data, self.initial_data, models.CaseGroup, "CaseGroupId", "CaseGroupId")
             s.validated_data_add(validated_data, self.initial_data, projectModels.PostType, "dataType", "dataType")
             s.validated_data_add(validated_data, self.initial_data, projectModels.Environments, "environmentId",
@@ -278,7 +280,41 @@ class S_AddCasePlan(serializers.ModelSerializer):
         user.save()
         return user
 
-    # def update(self, instance, validated_data):
-    #     user=super().update(instance=instance,validated_data=validated_data)
-    #     user.save()
-    #     return user
+    def update(self, instance, validated_data):
+        validated_data["CaseCount"] = models.CaseFile.objects.filter(
+            Q(CaseGroupId__projectId=int(self.initial_data["projectId"])) & Q(status=1)).count()
+        user=super().update(instance=instance,validated_data=validated_data)
+        user.save()
+        return user
+
+class  S_GetCaseList(serializers.ModelSerializer):
+    createTime = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
+    updateTime = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
+    isInterface=serializers.SerializerMethodField()
+    isClass = serializers.SerializerMethodField()
+    user=serializers.SerializerMethodField()
+    updateUser = serializers.SerializerMethodField()
+    postMethod=serializers.SerializerMethodField()
+    order=serializers.SerializerMethodField()
+    def get_isInterface(self,obj):
+        return {"id":obj.CaseGroupId.id,"name":obj.CaseGroupId.name,"order":obj.CaseGroupId.order}
+    def get_isClass(self,obj):
+       return {"id": obj.CaseGroupId.CaseGroupFilesId.id, "name": obj.CaseGroupId.CaseGroupFilesId.name, }
+    def get_user(self,obj):
+        return {"id":obj.userId.id,"name":obj.userId.name}
+    def get_updateUser(self,obj):
+        res=getattr(obj, "update_userId", None)
+        if  res:
+            return {"id":res.id,"name":res.name}
+        else:
+            return {"id": obj.userId.id, "name": obj.userId.name}
+    def get_postMethod(self,obj):
+        return {"id":obj.postMethod.id,"name":obj.postMethod.name}
+
+    def get_order(self,obj):
+        order_1=obj.CaseGroupId.order
+        order_2=obj.order
+        return  "{0}-{1}".format(order_1,order_2)
+    class  Meta:
+        model=models.CaseFile
+        fields=("id","name","postMethod","isInterface","isClass","detail","user","updateUser","createTime","updateTime","order")
