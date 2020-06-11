@@ -275,7 +275,7 @@ class S_AddCasePlan(serializers.ModelSerializer):
     def  create(self, validated_data):
         s.validated_data_add(validated_data, self.initial_data, projectModels.ProjectList, "projectId", "projectId")
         s.validated_data_add(validated_data, self.initial_data, usersModels.UserProfile, "userId", "userId")
-        validated_data["CaseCount"]=models.CaseFile.objects.filter(Q(CaseGroupId__projectId=int(self.initial_data["projectId"])) & Q(status=1)).count()
+        validated_data["CaseCount"]=models.CaseFile.objects.select_related("CaseGroupId__CaseGroupFilesId__projectId","CaseGroupId__CaseGroupFilesId","CaseGroupId").filter(Q(CaseGroupId__CaseGroupFilesId__projectId=int(self.initial_data["projectId"])) & Q(status=1)).count()
         user= super().create(validated_data=validated_data)
         user.save()
         return user

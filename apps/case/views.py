@@ -329,16 +329,35 @@ class SearchCasePlan(APIView):
     pass
 class GetCaseList(APIView):
     def get(self,req):
-        projectId=req.query_params["projectId"]
-        page = req.query_params["page"]
-        pageSize = req.query_params["pageSize"]
-        obj=models.CaseFile.objects.filter(CaseGroupId__projectId=projectId).order_by("CaseGroupId__order","order")
+        data=req.query_params
+        projectId = data["projectId"]
+        name=""
+        isInterface=""
+        postMethod=None
+        ctime=""
+        utime=""
+        kwargs = {
+
+        }
+        if "name" in data.keys():
+            kwargs["name__icontains"] = data["name"]
+        if "isInterface" in data.keys():
+            kwargs["CaseGroupId__name__icontains"] = data["isInterface"]
+        if "postMethods" in data.keys():
+            kwargs["postMethod"] = data["postMethods"]
+        kwargs["CaseGroupId__CaseGroupFilesId__projectId"]=projectId
+        obj=models.CaseFile.objects.select_related\
+            ("CaseGroupId","userId","postMethod","environmentId","update_userId","CaseGroupId__CaseGroupFilesId","CaseGroupId__CaseGroupFilesId__projectId")\
+            .filter(**kwargs).order_by("CaseGroupId__order","order")
         serializersObj=serializers.S_GetCaseList(obj,many=True)
         res_data=serializersObj.data
-
+        page = req.query_params["page"]
+        pageSize = req.query_params["pageSize"]
         total = len(res_data)  # 数据总数
         PaginationObj = Pagination(total, page, perPageNum=pageSize, allPageNum=11)
         all_page = PaginationObj.all_page()
+        if  int(all_page)<int(page):
+            PaginationObj = Pagination(total, all_page, perPageNum=pageSize, allPageNum=11)
         res_data = res_data[PaginationObj.start():PaginationObj.end()]
         return APIResponse(200, "success", results=res_data, total=total, allPage=all_page,
                            status=status.HTTP_200_OK)

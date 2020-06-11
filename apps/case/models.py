@@ -5,7 +5,7 @@ from django.db import models
 class CaseGroupFiles(models.Model):
     """用例文件夹"""
     name=models.CharField(max_length=255,verbose_name="用例文件夹名称")
-    interfaceId=models.IntegerField(verbose_name="同步过来文件的id",null=True)
+    interfaceId=models.IntegerField(verbose_name="同步过来文件的id",null=True,db_index=True,)
     projectId=models.ForeignKey("project.ProjectList",to_field="id",on_delete=models.SET_NULL,null=True,verbose_name="项目id")
     userId=models.ForeignKey("users.UserProfile",to_field="id",on_delete=models.SET_NULL,null=True,verbose_name="创建用户id")
     createTime = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
@@ -17,7 +17,7 @@ class CaseGroup(models.Model):
     新建接口文档时这里就需要新增一个---前端加一个按钮是否同步接口文档分类"""
     name=models.CharField(max_length=255,verbose_name="接口名称")
     order = models.IntegerField(verbose_name="执行顺序",null=True,default=1)
-    CaseGroupFilesId=models.ForeignKey("CaseGroupFiles",to_field="id",on_delete=models.SET_NULL,null=True,
+    CaseGroupFilesId=models.ForeignKey("CaseGroupFiles",to_field="id",on_delete=models.SET_NULL,null=True,db_index=True,
                                         verbose_name="所属用例文件",related_name="idCaseGroupFiles")
     projectId = models.ForeignKey("project.ProjectList", to_field="id", on_delete=models.SET_NULL, null=True,
                                   verbose_name="项目id")
