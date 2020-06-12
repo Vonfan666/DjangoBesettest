@@ -16,33 +16,49 @@ logger =  logging.getLogger("log")
 
 
 class RunCaseAll(APIView):
-
+    def distinctFileName(self,file):
+        # 这里需要判断该目录下是否存在同名的fileName.py文件
+        files=[]
+        dirPath=os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        DIR=os.path.join(dirPath,"interface\\testFiles")
+        for  fileName in  os.listdir(DIR):
+            files.append(os.path.splitext(fileName)[0] )
+        if file in files:
+             return False
+        return True
     def allCase(self,fileName):
-        case_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), r"interface")
+        case_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), r"interface/testFiles")
         allTest = unittest.defaultTestLoader.discover(case_dir, pattern="{}.py".format(fileName), top_level_dir=None)
         return allTest
     def post(self,req):
         """需要传一个项目id 然后通过项目id找到name"""
         projectId=req.data["id"]
         fileName=req.data["name"]
-        #这里需要判断该目录下是否存在同名的fileName.py文件
-        obj=models.CaseGroupFiles.objects.filter(projectId_id=projectId)
+        if not self.distinctFileName(fileName):
+            return APIResponse(200, "已存在相同脚本名称>【{}】".format(fileName), status=status.HTTP_200_OK)
+        obj=models.CaseGroupFiles.objects.select_related(
+            "projectId","userId"
+        ).filter(projectId_id=projectId)
         serializersObj=serializers.S_CaseFilesDetail(obj,many=True)
         orderDictObj=serializersObj.data
         dictObj=json.loads(json.dumps(orderDictObj))
         print(dictObj)  #传给写入文件的方法
         res_list=FindCase(dictObj).run()
-        MakeScript().make_file(res_list,fileName)  #给创建用例的方法 传入数据以及文件名称
-        name="待定"
-        case_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), r"interface")
-        curtime = time.strftime('%Y%m%d%H%M%S', time.localtime())
-        report_path =os.path.join(case_dir,'%s_%s.html'%(name,curtime ))
-        report_set = open(report_path, 'wb')
-        runner=HTMLTestRunner.HTMLTestRunner(report_set)
-        runner.run(self.allCase(fileName))
-        report_set.close()
+        if not res_list["code"]:  #如果有接口或者用例执行顺序重复则直接返回
+            return APIResponse(200, res_list["msg"], results=res_list["msg"], status=status.HTTP_200_OK)
+        else:
+            res_list=res_list["msg"]
+            MakeScript().make_file(res_list,fileName)  #给创建用例的方法 传入数据以及文件名称
+            name="待定"
+            case_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), r"interface/results")
+            curtime = time.strftime('%Y%m%d%H%M%S', time.localtime())
+            report_path =os.path.join(case_dir,'%s_%s.html'%(name,curtime ))
+            report_set = open(report_path, 'wb')
+            runner=HTMLTestRunner.HTMLTestRunner(report_set)
+            runner.run(self.allCase(fileName))
+            report_set.close()
 
-        return APIResponse(200, "sucess",results=dictObj, status=status.HTTP_200_OK)
+            return APIResponse(200, "sucess",results=dictObj, status=status.HTTP_200_OK)
 class RunCase(APIView):
     """单条用例执行
         全部id传o 部分传id列表
@@ -165,7 +181,7 @@ class RemoveGroup(APIView):
         return APIResponse(200, "删除成功",status=status.HTTP_200_OK)
 
 
-class AddCase(APIView):
+class AddInterface(APIView):
     """新增用例接口"""
     def post(self,req):
         serializersObj=serializers.S_AddCase(data=req.data)
@@ -177,7 +193,7 @@ class AddCase(APIView):
 
 
 class EditCase(APIView):
-    """编辑用例文件"""
+    """编辑接口文件名称"""
     def post(self,req):
         id = req.data["id"]
         obj = models.CaseGroup.objects.get(id=id)
@@ -193,7 +209,7 @@ class RemoveCase(APIView):
         id = req.data["id"]
         models.CaseGroup.objects.get(id=id).delete()
         return APIResponse(200, "删除成功", status=status.HTTP_200_OK)
-class AddInterface(APIView):
+class AddCase(APIView):
     """新增用例"""
     def  post(self,req):
         data=req.data
@@ -213,7 +229,7 @@ class AddInterface(APIView):
                 res_data=serializers.S_AddInterface(validate_data)
                 res_obj=res_data.data
                 return  APIResponse(200,"添加成功",results=res_obj,status=status.HTTP_200_OK)
-class  CaseList(APIView):
+class CaseList(APIView):
     """查看用例列表
         :param id  用例id
     """
@@ -342,8 +358,8 @@ class GetCaseList(APIView):
             kwargs["createTime__gt"] = json.loads(data["ctime"])[0]
             kwargs["createTime__lt"] = json.loads(data["ctime"])[1]
         if "utime" in data.keys():
-            kwargs["createTime__gt"] = json.loads(data["utime"])[0]
-            kwargs["createTime__lt"] = json.loads(data["utime"])[1]
+            kwargs["updateTime__gt"] = json.loads(data["utime"])[0]
+            kwargs["updateTime__lt"] = json.loads(data["utime"])[1]
         kwargs["CaseGroupId__CaseGroupFilesId__projectId"]=projectId
         obj=models.CaseFile.objects.select_related\
             ("CaseGroupId","userId","postMethod","environmentId","update_userId","CaseGroupId__CaseGroupFilesId","CaseGroupId__CaseGroupFilesId__projectId")\
@@ -360,3 +376,7 @@ class GetCaseList(APIView):
         res_data = res_data[PaginationObj.start():PaginationObj.end()]
         return APIResponse(200, "success", results=res_data, total=total, allPage=all_page,
                            status=status.HTTP_200_OK)
+
+class EditCaseOrder(APIView):
+    pass
+

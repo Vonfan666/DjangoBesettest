@@ -213,7 +213,7 @@ class  S_CaseFilesDetail(serializers.ModelSerializer):
         # obj.get_status_display()
         res=[]
 
-        CaseGroupObj=obj.idCaseGroupFiles.all()
+        CaseGroupObj=obj.idCaseGroupFiles.select_related("projectId","userId","CaseGroupFilesId").all()
         for  item  in CaseGroupObj:
             code = {"child":[]}
             code["name"] = item.name
@@ -223,10 +223,8 @@ class  S_CaseFilesDetail(serializers.ModelSerializer):
                 Env = projectModels.Environments.objects.get(is_eg=1).value
                 if not rows.environmentId:
                     a={"environment":[],"global":json.loads(Env)}
-                    print(a)
                 else:
                     a={"environment":json.loads(rows.environmentId.value),"global":json.loads(Env)}
-                    print(a)
                 dict_obj = {
                     "name": rows.name,
                     "order": rows.order,
@@ -244,7 +242,7 @@ class  S_CaseFilesDetail(serializers.ModelSerializer):
         return  res
     class Meta:
         model=models.CaseGroupFiles
-        fields=("id","caseGroup")
+        fields=("id","caseGroup","name")
 
 
 class S_AddCasePlan(serializers.ModelSerializer):

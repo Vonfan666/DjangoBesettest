@@ -11,13 +11,13 @@ class MakeScript(object):
         self.classSample=open("{}/interface/CaseScriptSample/classSample.py".format(BASE_DIR),"r",encoding="utf8")
         self.importSample=open("{}/interface/CaseScriptSample/importSample.py".format(BASE_DIR),"r",encoding="utf8")
         self.methodSample=open("{}/interface/CaseScriptSample/methodSample.py".format(BASE_DIR),"r",encoding="utf8")
-        self.file=open("{}/interface/test_all.py".format(BASE_DIR),"a",encoding='utf8')
+        # self.file=open("{}/interface/test_all.py".format(BASE_DIR),"a",encoding='utf8')
 
         self.classSampleText=self.classSample.readlines()
         self.importSampleText = self.importSample.readlines()
         self.methodSampleText = self.methodSample.readlines()
     def write(self, s):
-        self.file.write(s)
+        pass
 
     def make_replace_class(self,classNameC,order):
 
@@ -47,7 +47,7 @@ class MakeScript(object):
 
         #写入断言--数据库直接存 assertEqual(a, b)  这种格式
     def writelines(self, lines):
-        self.file.writelines(lines)
+        pass
 
     def make_close(self):
         self.makeFile.close()
@@ -62,7 +62,7 @@ class MakeScript(object):
     def make_file(self,data,name):
         """执行函数"""
 
-        self.makeFile=open("{}/interface/{}.py".format(BASE_DIR,name),"a",encoding="utf8")
+        self.makeFile=open("{}/interface/testFiles/{}.py".format(BASE_DIR,name),"a",encoding="utf8")
         #添加import
         self.make_replace_import()
         for item in data:

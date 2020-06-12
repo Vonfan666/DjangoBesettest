@@ -438,6 +438,7 @@ class MockResData(APIView):
     :param typpe  is  str  1返回文档  2返回自定义mockData字段
     :param mockData   自定义mock字段--可以接受为空-但必须是标准jon数据
     """
+    permission_classes = (permissions.AllowAny,)
     def  post(self,req):
         data=req.data
 

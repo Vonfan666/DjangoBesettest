@@ -23,15 +23,29 @@ class FindCase():
 
     def forObj(self,item):
         pass
-
+    def distinct(self,row,name):
+        """判断接口下的用例order是否重复"""
+        order = []
+        data=row[name]
+        for  item in  data:
+            order.append(item["order"])
+        if not len(set(order))==len(order):
+            return False
     def run(self):
+
         for  item  in self.obj:  #遍历接口分类
+            if  not  self.distinct(item, "caseGroup"):
+                return {"msg": "分类【{}】下存在相同执行顺序接口".format(item["name"]),"code":False}
+
             for row in item["caseGroup"]:  #遍历接口文档
                 if row["order"]==None:   #如果没有排序排序则默认1
                     row["order"]=1
+                if not self.distinct(row,"child"):
+                    return {"msg": "接口【{}】下存在相同执行顺序用例".format(row["name"]),"code":False}
+
                 self.listGroup.append(row)
         a=self.listGroup
-        return sorted(a,key=lambda a:a["order"])
+        return {"msg":sorted(a,key=lambda a:a["order"]),"code":True}
 
 
 class CaseAction():
