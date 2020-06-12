@@ -331,20 +331,19 @@ class GetCaseList(APIView):
     def get(self,req):
         data=req.query_params
         projectId = data["projectId"]
-        name=""
-        isInterface=""
-        postMethod=None
-        ctime=""
-        utime=""
-        kwargs = {
-
-        }
+        kwargs = {}
         if "name" in data.keys():
             kwargs["name__icontains"] = data["name"]
         if "isInterface" in data.keys():
             kwargs["CaseGroupId__name__icontains"] = data["isInterface"]
         if "postMethods" in data.keys():
             kwargs["postMethod"] = data["postMethods"]
+        if "ctime" in data.keys():
+            kwargs["createTime__gt"] = json.loads(data["ctime"])[0]
+            kwargs["createTime__lt"] = json.loads(data["ctime"])[1]
+        if "utime" in data.keys():
+            kwargs["createTime__gt"] = json.loads(data["utime"])[0]
+            kwargs["createTime__lt"] = json.loads(data["utime"])[1]
         kwargs["CaseGroupId__CaseGroupFilesId__projectId"]=projectId
         obj=models.CaseFile.objects.select_related\
             ("CaseGroupId","userId","postMethod","environmentId","update_userId","CaseGroupId__CaseGroupFilesId","CaseGroupId__CaseGroupFilesId__projectId")\
