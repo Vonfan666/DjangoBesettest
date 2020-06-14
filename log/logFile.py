@@ -6,7 +6,7 @@ def logger(file):
     logger=logging.getLogger(os.path.basename(file))
     print(os.path.split(os.path.abspath(__file__))[0])
     consoleLog=logging.StreamHandler()
-    fileLog=logging.FileHandler(os.path.split(os.path.abspath(__file__))[0]+"\\logs\\test.log")
+    fileLog=logging.FileHandler(os.path.split(os.path.abspath(__file__))[0]+"\\myLog\\test.log")
     if not logger.handlers:
         logger.addHandler(consoleLog)
         logger.addHandler(fileLog)
@@ -19,11 +19,12 @@ def logger(file):
         # logger.removeFilter(fileLog) #日志文件去掉重复
         logger.setLevel('INFO')
 
-        return logger
+    return logger
 
 
 if __name__=="__main__":
 
-    logger=logger(__file__)
+    logger=logger(__name__)
     logger.info('hehe')
     logger.warning('haha1')
+    print(os.path.split(os.path.abspath(__file__)))

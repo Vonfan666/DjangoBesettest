@@ -203,7 +203,7 @@ MEDIA_URL = '/images/'
 LOGGING = {
 
     'version': 1,
-    'disable_existing_loggers': False,  # 禁用所有已经存在的日志配置
+    'disable_existing_loggers': True,  # 禁用所有已经存在的日志配置
     "formatters": {  # 格式器
         'verbose': {  # 详细
             'format': '[%(asctime)s](%(levelname)s)(%(module)s)(%(funcName)s) : %(message)s '
@@ -240,12 +240,12 @@ LOGGING = {
             'encoding': 'utf-8',
         },
         "myLog": {  # 存到文件
-            "level": "DEBUG",
+            "level": "INFO",
             "class": "logging.handlers.RotatingFileHandler",
             "formatter": "verbose",
             "filename": os.path.join(BASE_DIR, "log", "logs", "test.log"),
             'maxBytes': 1024 * 1024 * 5,  # 日志大小 50M
-            'backupCount': 3,  # 最多备份几个
+            'backupCount': 10,  # 最多备份几个
             'encoding': 'utf-8',
         },
         "files": { #存到文件
@@ -300,9 +300,9 @@ LOGGING = {
             'propagate': False,  # 是否继承父类的log信息
             # 'formatter': 'simple'
         },  # handlers 来自于上面的 handlers 定义的内容
-         "log":{   #记录所有日志
+         "log":{   #记录我的日志
             'handlers': ["myLog","console"],
-            'propagate': True,
+            'propagate': False,
             'level': 'INFO',
             # 'formatter': 'verbose'
         },

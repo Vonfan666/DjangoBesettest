@@ -23,6 +23,7 @@ from rest_framework_jwt.views import obtain_jwt_token
 from project import views as projectViews
 from users import  views as userViews
 from case import  views as caseViews
+from case  import  runCase
 
 
 urlpatterns = [
@@ -77,14 +78,14 @@ urlpatterns = [
     url(r"^users/caseGroup_remove/", caseViews.RemoveGroup.as_view(), name="RemoveGroup"),  # 删除用例文件夹
     url(r"^users/caseInterface_add/", caseViews.AddInterface.as_view(), name="AddCase"),  # 新增用例接口
     url(r"^users/caseInterface_edit/", caseViews.EditCase.as_view(), name="EditCase"),  # 编辑接口名称
-    url(r"^users/caseInterface_remove/", caseViews.RemoveCase.as_view(), name="RemoveCase"),  # 新增用例文件
+    url(r"^users/caseInterface_remove/", caseViews.RemoveInterface.as_view(), name="RemoveInterface"),  # 删除接口
     url(r"^users/case_add/", caseViews.AddCase.as_view(), name="AddInterface"),  # 新增用例文件
     url(r"^users/case_list/", caseViews.CaseList.as_view(), name="CaseList"),  # 查看用例列表
     url(r"^users/case_remove/", caseViews.CaseRemove.as_view(), name="CaseRemove"),  # 删除用例
     url(r"^users/case_edit/", caseViews.CaseEdit.as_view(), name="CaseEdit"),  # 点击编辑用例
     url(r"^users/case_run/", caseViews.RunCase.as_view(), name="RunCase"),  # 执行单个接口下所有用例
     url(r"^users/case_debug/", caseViews.DebugCase.as_view(), name="DebugCase"),  # 用例调试
-    url(r"^users/case_run_all/", caseViews.RunCaseAll.as_view(), name="RunCaseAll"),  # 用例调试
+    url(r"^users/case_run_all/", runCase.RunCaseAll.as_view(), name="RunCaseAll"),  # 执行测试计划
     url(r"^users/case_order/", caseViews.CaseOrder.as_view(), name="CaseOrder"),  # 修改该接口的执行顺序
     url(r"^users/casePlan_add/", caseViews.AddCasePlan.as_view(), name="AddCasePlan"),  # 新建测试计划
     url(r"^users/casePlan_get/", caseViews.GetCasePlan.as_view(), name="GetCasePlan"),  # 查看测试计划

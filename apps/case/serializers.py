@@ -265,6 +265,13 @@ class S_AddCasePlan(serializers.ModelSerializer):
 
     def get_runType(self,obj):
         return {"id":obj.runType,"name":obj.get_runType_display()}
+
+    def validate(self, attrs):
+        cname=attrs.get("cname")
+        idCode=self.initial_data["id"]
+        if  models.CasePlan.objects.filter(Q(cname=cname) & ~Q(id=idCode)):
+           raise  ValidationError("脚本名称不能重复")
+        return attrs
     class Meta:
         model=models.CasePlan
         fields="__all__"
@@ -280,7 +287,7 @@ class S_AddCasePlan(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         validated_data["CaseCount"] = models.CaseFile.objects.filter(
-            Q(CaseGroupId__projectId=int(self.initial_data["projectId"])) & Q(status=1)).count()
+            Q(CaseGroupId__CaseGroupFilesId__projectId=int(self.initial_data["projectId"])) & Q(status=1)).count()
         user=super().update(instance=instance,validated_data=validated_data)
         user.save()
         return user
@@ -316,3 +323,64 @@ class  S_GetCaseList(serializers.ModelSerializer):
     class  Meta:
         model=models.CaseFile
         fields=("id","name","postMethod","isInterface","isClass","detail","user","updateUser","createTime","updateTime","order")
+
+class S_EditCaseOrder(serializers.ModelSerializer):
+    createTime = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
+    updateTime = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
+    isInterface = serializers.SerializerMethodField()
+    isClass = serializers.SerializerMethodField()
+    user = serializers.SerializerMethodField()
+    updateUser = serializers.SerializerMethodField()
+    postMethod = serializers.SerializerMethodField()
+    order = serializers.SerializerMethodField()
+    def get_isInterface(self,obj):
+        return {"id":obj.CaseGroupId.id,"name":obj.CaseGroupId.name,"order":obj.CaseGroupId.order}
+    def get_isClass(self,obj):
+       return {"id": obj.CaseGroupId.CaseGroupFilesId.id, "name": obj.CaseGroupId.CaseGroupFilesId.name, }
+    def get_user(self,obj):
+        return {"id":obj.userId.id,"name":obj.userId.name}
+    def get_updateUser(self,obj):
+        res=getattr(obj, "update_userId", None)
+        if  res:
+            return {"id":res.id,"name":res.name}
+        else:
+            return {"id": obj.userId.id, "name": obj.userId.name}
+    def get_postMethod(self,obj):
+        return {"id":obj.postMethod.id,"name":obj.postMethod.name}
+
+    def get_order(self,obj):
+        order_1=obj.CaseGroupId.order
+        order_2=obj.order
+        return  "{0}-{1}".format(order_1,order_2)
+
+    class Meta:
+        model=models.CaseFile
+        fields=("id","name","postMethod","isInterface","isClass","detail","user","updateUser","createTime","updateTime","order")
+
+    def validate(self, attrs):
+        data=self.initial_data.dict()
+        if isinstance(data.get("corder"),str):
+            if data.get("corder") in (None, ""):
+                raise ValidationError("用例执行顺序为必填项")
+            elif not isinstance(eval(data.get("corder")),int):
+                raise ValidationError("用例执行顺序必须是整数")
+        if isinstance(data.get("iorder"),str):
+            if data.get("iorder") in  (None,""):
+                 raise ValidationError("接口执行顺序为必填项")
+            elif not isinstance(eval(data.get("iorder")),int) :
+                raise ValidationError("接口执行顺序必须是整数")
+
+        return attrs
+    def update(self, instance, validated_data):
+        s.validated_data_add(validated_data, self.initial_data, projectModels.PostMethods, "postMethod", "postMethod")
+        s.validated_data_add(validated_data, self.initial_data, models.CaseGroup, "isInterface", "CaseGroupId")
+        s.validated_data_add(validated_data, self.initial_data, usersModels.UserProfile, "updateUser", "update_userId")
+        #跨表修改接口表的执行顺序
+        print(validated_data["CaseGroupId"].order)
+        validated_data["CaseGroupId"].order=self.initial_data["iorder"]
+        validated_data["CaseGroupId"].save()
+        print(validated_data["CaseGroupId"].order)
+        validated_data["order"]=self.initial_data["corder"]
+        user=super().update(instance=instance,validated_data=validated_data)
+        user.save()
+        return user

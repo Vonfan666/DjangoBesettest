@@ -36,6 +36,9 @@ class MakeScript(object):
         for text in self.methodSampleText:
             if "__method_name__" in text:
                 text =text.replace("__method_name__",row["name"])
+            # if "暂无注释" in text:
+            #     if row["detail"]:
+            #         text = text.replace("暂无注释", "{}".format(row["detail"]))
             if "test_method_name" in text:
                 text =text.replace("test_method_name","test_{}".format(str(row["order"]).zfill(7)))
             if "data={}" in text:

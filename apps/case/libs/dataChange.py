@@ -1,12 +1,13 @@
 import  re,json
 from libs.errors import errorsMsg
 import  logging
-logger =  logging.getLogger("log")
+# logger =  logging.getLogger("log")
 
 class dataChange(object):
-    def __init__(self,headers,data,environment=None):
+    def __init__(self,headers,data,logger,environment=None):
         self.headers=headers
         self.data=data
+        self.logger=logger
         self.environment=environment
         self.headers = self.headerChange()
         self.data = self.dataChange()

@@ -31,6 +31,7 @@ class FindCase():
             order.append(item["order"])
         if not len(set(order))==len(order):
             return False
+        return True
     def run(self):
 
         for  item  in self.obj:  #遍历接口分类
@@ -62,13 +63,42 @@ class CaseAction():
     def assertAction(self):
         """断言操作"""
         pass
-    def action(self,data):
+    def action(self,data,logger):
         """执行函数"""
         self.beforeAction()
         try:
-            s = InRequests(data["postMethod"], data["dataType"], data["environmentId"], data["name"])
+            s = InRequests(data["postMethod"], data["dataType"], data["environmentId"], data["name"],logger)
             response = s.run(data["attr"], data["headers"],data["data"])
             print(response["resData"])
             return response["resData"]
         except:
             pass
+
+
+class OutputRedirector(object):
+    """ Wrapper to redirect stdout or stderr """
+
+    def __init__(self, fp):
+        self.fp = fp
+
+    def write(self, s):
+        self.fp.write(s)
+
+    def writelines(self, lines):
+        self.fp.writelines(lines)
+
+    def flush(self):
+        self.fp.flush()
+
+
+
+class cc(object):
+    def __init__(self,fp):
+        self.fp=fp
+
+    def c(self,s):
+        print(self.fp)
+        print(s)
+import sys
+stdout_redirector = cc(sys.stdout)
+stderr_redirector = cc(sys.stderr)

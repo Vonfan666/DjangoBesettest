@@ -13,7 +13,8 @@ class Validated_data():
 
         print(postKey  in validated_data.keys())
 
-        if postKey not in validated_data.keys() and initial_data[postKey]!= "":
-            value = initial_data[postKey]
-            obj = models.objects.get(id=value)
-            validated_data[updateKey] = obj
+        if postKey not in validated_data.keys() and  postKey in initial_data.keys()  :
+            if initial_data[postKey]!= "":
+                value = initial_data[postKey]
+                obj = models.objects.get(id=value)
+                validated_data[updateKey] = obj

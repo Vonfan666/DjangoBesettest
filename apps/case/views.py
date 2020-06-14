@@ -4,61 +4,15 @@ from libs.api_response import APIResponse
 from . import models,serializers
 import  json,os
 from case.libs.toRequests import InRequests
-from case.libs.findeSqlCase import FindCase
 from project.models import Environments
 # Create your views here
-import  logging,unittest,time
-from libs import HTMLTestRunner
-from libs.writeScript import MakeScript
+import  logging
 from libs.Pagination import Pagination
 from django.db.models import Q
 logger =  logging.getLogger("log")
 
 
-class RunCaseAll(APIView):
-    def distinctFileName(self,file):
-        # 这里需要判断该目录下是否存在同名的fileName.py文件
-        files=[]
-        dirPath=os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-        DIR=os.path.join(dirPath,"interface\\testFiles")
-        for  fileName in  os.listdir(DIR):
-            files.append(os.path.splitext(fileName)[0] )
-        if file in files:
-             return False
-        return True
-    def allCase(self,fileName):
-        case_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), r"interface/testFiles")
-        allTest = unittest.defaultTestLoader.discover(case_dir, pattern="{}.py".format(fileName), top_level_dir=None)
-        return allTest
-    def post(self,req):
-        """需要传一个项目id 然后通过项目id找到name"""
-        projectId=req.data["id"]
-        fileName=req.data["name"]
-        if not self.distinctFileName(fileName):
-            return APIResponse(200, "已存在相同脚本名称>【{}】".format(fileName), status=status.HTTP_200_OK)
-        obj=models.CaseGroupFiles.objects.select_related(
-            "projectId","userId"
-        ).filter(projectId_id=projectId)
-        serializersObj=serializers.S_CaseFilesDetail(obj,many=True)
-        orderDictObj=serializersObj.data
-        dictObj=json.loads(json.dumps(orderDictObj))
-        print(dictObj)  #传给写入文件的方法
-        res_list=FindCase(dictObj).run()
-        if not res_list["code"]:  #如果有接口或者用例执行顺序重复则直接返回
-            return APIResponse(200, res_list["msg"], results=res_list["msg"], status=status.HTTP_200_OK)
-        else:
-            res_list=res_list["msg"]
-            MakeScript().make_file(res_list,fileName)  #给创建用例的方法 传入数据以及文件名称
-            name="待定"
-            case_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), r"interface/results")
-            curtime = time.strftime('%Y%m%d%H%M%S', time.localtime())
-            report_path =os.path.join(case_dir,'%s_%s.html'%(name,curtime ))
-            report_set = open(report_path, 'wb')
-            runner=HTMLTestRunner.HTMLTestRunner(report_set)
-            runner.run(self.allCase(fileName))
-            report_set.close()
 
-            return APIResponse(200, "sucess",results=dictObj, status=status.HTTP_200_OK)
 class RunCase(APIView):
     """单条用例执行
         全部id传o 部分传id列表
@@ -204,7 +158,8 @@ class EditCase(APIView):
             res_data = res_data.data
             return APIResponse(200, "修改成功", results=res_data, status=status.HTTP_200_OK)
 
-class RemoveCase(APIView):
+class RemoveInterface(APIView):
+    """删除接口"""
     def post(self,req):
         id = req.data["id"]
         models.CaseGroup.objects.get(id=id).delete()
@@ -378,5 +333,20 @@ class GetCaseList(APIView):
                            status=status.HTTP_200_OK)
 
 class EditCaseOrder(APIView):
-    pass
+    """用例列表编辑用例
+       :param id  用例id
+       :param  corder 用例执行顺序
+       :param   postMethod=None  请求类型
+       :param   isInterface=None 所属接口
+       :param  uUser
+    """
+    def post(self,req):
+        id=req.data.get("id")
+        obj=models.CaseFile.objects.get(id=id)
+        serializersObj=serializers.S_EditCaseOrder(data=req.data,instance=obj,partial=True,many=False)
+        if serializersObj.is_valid(raise_exception=True):
+            res_obj=serializersObj.save()
+            res_data=serializers.S_EditCaseOrder(res_obj)
+            data=res_data.data
+            return APIResponse(200,"编辑成功",results=data,status=status.HTTP_200_OK)
 

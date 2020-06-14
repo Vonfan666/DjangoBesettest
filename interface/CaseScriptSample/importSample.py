@@ -5,5 +5,5 @@ from libs.api_response import APIResponse
 from  rest_framework.views import APIView,status
 import time
 from case.libs.findeSqlCase import CaseAction
-logger =  logging.getLogger()
+from log.logFile import logger as logs
 s=CaseAction()

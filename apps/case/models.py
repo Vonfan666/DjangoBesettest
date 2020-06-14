@@ -68,6 +68,7 @@ class CasePlan(models.Model):
     )
     name=models.CharField(max_length=255,verbose_name="计划名称")
     cname=models.CharField(max_length=255,verbose_name="脚本名称")
+    againScript=models.IntegerField(verbose_name="是否重新创建脚本")
     projectId=models.ForeignKey("project.ProjectList",to_field="id",on_delete=models.SET_NULL,null=True,verbose_name="项目id")
     userId = models.ForeignKey("users.UserProfile", to_field="id", on_delete=models.SET_NULL, null=True,related_name="c_name",verbose_name="创建人")
     status=models.IntegerField(choices=status_Choices,default=0,null=True,verbose_name="执行状态")
