@@ -120,25 +120,32 @@ from case import testss
 
 import sys,django,os
 from unittest import case
-suiteClass=testss.TestSuite
+suiteClass=testss.A
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE","besettest.settings")
 django.setup()
-sys.path.insert(0,os.path.abspath("E:\\PyFiles\\Besettest\\besettest\\interface\\testFiles"))
-__import__('againScript2')
-Module=sys.modules["againScript2"]
-print(Module)
+sys.path.insert(0,os.path.abspath(r"E:\PyFiles\DjangoBesettest\apps\case"))
+__import__('testss')
+Module=sys.modules["testss"]
+print(sys.modules)
+print(Module,"Module")
 testMethodPrefix="test"
 for  testClass in dir(Module):
-    obj=getattr(Module,testClass,None)
-    if isinstance(obj, type) and issubclass(obj, case.TestCase):
-
+    # if  testClass.startswith("test"):
+    obj=getattr(Module,testClass,None)   #
+    if isinstance(obj, type)  :
         def isTestMethod(attrname, testCaseClass=obj,
                          prefix=testMethodPrefix):
             return attrname.startswith(prefix) and \
                 callable(getattr(testCaseClass, attrname))
+
         testCase=list(filter(isTestMethod, dir(obj)))
         print(testCase)
-        a=list(map(obj,testCase))
-        suite=suiteClass(a)
-        print(suite)
+        List=[]
+        for  name in testCase:
+            List.append(getattr(obj,name))
+        print(List)
+        print(suiteClass(List))
+        # a = list(map(obj, testCase))
+        # print(suiteClass(a))
+# <case.testss.A tests=[<testss.test_C testMethod=test_1>, <testss.test_C testMethod=test_2>, <testss.test_C testMethod=test_3>]>
