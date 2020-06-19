@@ -1047,6 +1047,7 @@ class HTMLTestRunner(Template_mixin):
     def run(self, test, caseinfo={}):
         "Run the given test case or test suite."
         result = _TestResult(self.verbosity)
+        print(test)
         test(result)
         self.stopTime = datetime.datetime.now()
         self.generateReport(test, result, caseinfo)
