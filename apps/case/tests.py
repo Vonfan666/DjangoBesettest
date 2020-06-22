@@ -218,10 +218,6 @@ print(fileName)
 
 
 print(list(map(obj,fileName)))
-a=map(obj,fileName)
-n=0
-for  v  in  a:
-    print(v)
 print(A(1))
 print(getattr(obj("test"),"add")())
 print("_________________________________________________________________")

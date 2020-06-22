@@ -13,7 +13,7 @@ from case.libs.toRequests import InRequests
 from libs.api_response import APIResponse
 from  rest_framework.views import APIView,status
 import time
-logger =  logging.getLogger("log")
+
 #
 # class EchoConsumer(WebsocketConsumer):
 #     def connect(self):
@@ -39,7 +39,7 @@ logger =  logging.getLogger("log")
 class RunCase(WebsocketConsumer):
     def connect(self):
         self.accept()
-
+        self.logger =  logging.getLogger("log")
     def receive(self, text_data=None, bytes_data=None):
         user = self.scope['user']  # 获取当前用户，没有登录显示匿名用户
         path = self.scope['path']  # Request请求的路径，HTTP，WebSocket
@@ -62,10 +62,10 @@ class RunCase(WebsocketConsumer):
             res_data = serializersObj.data
             res_data = json.loads(json.dumps(res_data))
             res_data = res_data[0]
-            logger.info("单位开始执行")
-            s = InRequests(res_data["postMethod"], res_data["dataType"], res_data["environmentId"], res_data["name"])
+            self.logger.info("单位开始执行")
+            s = InRequests(res_data["postMethod"], res_data["dataType"], res_data["environmentId"], res_data["name"],self.logger)
             res= s.run(res_data["attr"], res_data["headers"], res_data["data"])
-            logger.info("单位执行结束")
+            self.logger.info("单位执行结束")
             self.send(json.dumps(res))
             time.sleep(1)
     def disconnect(self, close_code):

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/interface/text.txt" charset="GBK" />
     <file url="file://$PROJECT_DIR$/log/logs/test.log" charset="GBK" />
     <file url="file://$PROJECT_DIR$/log/myLog/test.log" charset="GBK" />
     <file url="file://$PROJECT_DIR$/log/sysLogs/test.log" charset="GBK" />

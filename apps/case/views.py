@@ -39,7 +39,7 @@ class RunCase(APIView):
             res_data=json.loads(json.dumps(res_data))
             res_data=res_data[0]
             logger.info("单位开始执行")
-            s = InRequests(res_data["postMethod"],res_data["dataType"],res_data["environmentId"],res_data["name"])
+            s = InRequests(res_data["postMethod"],res_data["dataType"],res_data["environmentId"],res_data["name"],logger)
             response=s.run(res_data["attr"],res_data["headers"],res_data["data"])
             responses.append(response)
             logger.info("单位执行结束")
@@ -52,7 +52,7 @@ class DebugCase(APIView):
         validateObj=serializers.S_debugCase(data=data,many=False)
         environmentsObj=self.Environmented(validateObj,res_data)
         logger.info("单位开始执行")
-        s = InRequests(res_data["postMethod"], res_data["dataType"], environmentsObj,res_data["name"])
+        s = InRequests(res_data["postMethod"], res_data["dataType"], environmentsObj,res_data["name"],logger)
         response = s.run(res_data["attr"], res_data["headers"], res_data["data"])
         logger.info("单位执行结束")
         return APIResponse(200, "sucess", results=response, status=status.HTTP_200_OK)

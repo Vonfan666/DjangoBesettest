@@ -27,7 +27,7 @@ class InRequests():
         self.url = url
 
         try:
-            s = dataChange(headers, data,self.environmentId,self.logger)
+            s = dataChange(headers, data,self.logger,self.environmentId)
             obj = s.run()
         except Exception as f:
             res=self.resData(code=0)["errors"]

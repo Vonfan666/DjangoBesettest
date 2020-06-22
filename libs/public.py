@@ -37,10 +37,17 @@ class Public():
                 if type(res_data_c) is dict:
                     res_data_c[item["cname"]] = item["mockValue"]
                 if type(res_data_c) is list:
-                    if len(res_data_c) > 0:
-                        res_data_c[0][item["cname"]] = item["mockValue"]
-                    else:
+                    if item["type"]=="object" or item["type"]==4:
                         res_data_c.append({item["cname"]: item["mockValue"]})
+                    else:#判断列表里面的是字符串还是-字典或者列表
+                        res_data_c.append(item["cname"])
+                    # if (item["type"]=="Array" or  item["type"]==5):
+                    #     pass
+
+                        # if len(res_data_c) > 0:
+                        #     res_data_c[0][item["cname"]] = item["mockValue"]
+                        # else:
+
             if (item["type"] == "object" or item["type"] == 4):
                 # 如果当前对象是字典-判断上级对象是啥--
                 if type(res_data_c) is dict:
