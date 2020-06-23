@@ -1,51 +1,56 @@
 from log.logFile import logger as logs
 import  logging,time
-import sys,io,os
+import sys,io,os,django
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE","besettest.settings")
+django.setup()
+from django_redis import get_redis_connection  as conn
+# conn = conn('default')
+logRedis=conn("log")
+logRedis.rpush("log:user_id_time1","log")
+
+
+
 class OutputRedirector(object):
     """ Wrapper to redirect stdout or stderr """
-    def __init__(self, fp):
+    def __init__(self,fp,projectId,userId,runTime):
+        self.projectId = projectId
+        self.userId = userId
+        self.runTime = runTime
         self.start=sys.stdout
+        self.logRedis = conn("log")
         self.fp = fp
-
     def write(self, s):
         self.fp.write(s)
-        # a=sys.stdout
-        self.file = open("text.txt", "a+")
-        self.file.write(s)
-        self.file.flush()
+        key="%s_%s_%s"%(self.projectId,self.userId,self.runTime)
+        self.logRedis.rpush("log:%s"%key, s)
         sys.stdout = self.start
-        print(s)
-        # sys.stdout=a
-
-
-        # self.file.close()
     def writelines(self, lines):
         self.fp.writelines(lines)
     def flush(self):
         self.fp.flush()
-
-
-stdout_redirector = OutputRedirector(sys.stdout)
-stderr_redirector = OutputRedirector(sys.stderr)
-class  A():
-    def __init__(self):
-        self.stdout0 = None
-        self.stderr0 = None
-        # self.logger= logging.getLogger(__name__)
-        # self.stream = open(r"E:\PyFiles\Besettest\besettest\log\myLog\test.log","ab+")
+class StartMethod(object):
+    def __init__(self, projectId, userId, runTime):
+        self.projectId = projectId
+        self.userId = userId
+        self.runTime = runTime
+        self.stdout_redirector = OutputRedirector(sys.stdout, self.projectId, self.userId, self.runTime)
+        self.stderr_redirector = OutputRedirector(sys.stderr, self.projectId, self.userId, self.runTime)
         self.startTest()
-        self.logger = logs(self.__class__.__name__)
+        self.logger=logs(self.__class__.__module__)
+    def __call__(self, *args, **kwargs):
+        return self.c()
     def startTest(self):
-
-        self.outputBuffer=io.StringIO()
-
-        stdout_redirector.fp=self.outputBuffer
-        stderr_redirector.fp=self.outputBuffer
+        self.outputBuffer = io.StringIO()
+        self.stdout_redirector.fp = self.outputBuffer
+        self.stderr_redirector.fp = self.outputBuffer
         # self.stdout0 = sys.stdout  # 记录标准输出原始位置
         # self.stderr0 = sys.stderr
+        sys.stdout = self.stdout_redirector
+        sys.stderr = self.stderr_redirector
 
-        sys.stdout = stdout_redirector
-        sys.stderr = stderr_redirector
+        sys.stdout = self.stdout_redirector
+        sys.stderr = self.stderr_redirector
 
     def c(self):
 
@@ -70,5 +75,6 @@ class  A():
 
 
 
-a=A()
+a=StartMethod("这是项目","这是所属用例3","这是时间")
 a.c()
+print(21212121)

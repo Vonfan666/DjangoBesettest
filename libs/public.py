@@ -5,7 +5,11 @@
 # @Time:2020年05月04日22时03分18秒
 
 # -*- coding: utf-8 -*-
-import socket
+import socket,sys,io
+from django_redis import get_redis_connection  as conn
+from log.logFile import logger as logs
+
+
 class Public():
     def get_host_ip(self):
         """获取ip地址"""
@@ -30,7 +34,6 @@ class Public():
                    ],
         """
         for item in data:
-            print(res_data_c)
             if (item["type"] == "string" or item["type"] == 1 or item["type"] == 2 or item["type"] == 3 or item[
                 "type"] == 6 or item["type"] == 7):
                 # 如果当前对象是键值对-value是字符串则直接加进去-但是分上级是什么类型---
@@ -58,12 +61,10 @@ class Public():
                 if (type(res_data_c) is list):
                     # 如果当前是字典-上级对象是list--则插入一个字典
                     res_data_c.append({item["cname"]: {}})
-                    print(res_data_c)
                     # 以下这句是找到当前插入字典的索引然后传给下一子递归
                     index = [(index, item1) for index, item1 in enumerate(res_data_c) if
                              list(item1.keys())[0] == item["cname"]][0][0]
                     # index=0
-                    print(index)
                     self.forData(item["children"], res_data_c[index][item["cname"]])
             if (item["type"] == "Array" or item["type"] == 5):
                 if type(res_data_c) is dict:
@@ -72,13 +73,55 @@ class Public():
                         self.forData(item["children"], res_data_c[item["cname"]])
                 if type(res_data_c) is list:
                     res_data_c.append({item["cname"]: []})
-                    print(res_data_c)
                     # 以下这句是找到当前插入字典的索引然后传给下一子递归
                     index = [(index, item1) for index, item1 in enumerate(res_data_c) if
                              list(item1.keys())[0] == item["cname"]][0][0]
                     # index=0
-                    print(index)
                     self.forData(item["children"], res_data_c[index][item["cname"]])
         return res_data_c
+
+
+
+class OutputRedirector(object):
+    """ Wrapper to redirect stdout or stderr """
+    def __init__(self,fp,projectId,userId,runTime):
+        self.projectId = projectId
+        self.userId = userId
+        self.runTime = runTime
+        self.start=sys.stdout
+        self.logRedis = conn("log")
+        self.fp = fp
+    def write(self, s):
+        self.fp.write(s)
+        key="%s_%s_%s"%(self.projectId,self.userId,self.runTime)
+        self.logRedis.rpush("log:%s"%key, s)
+        sys.stdout = self.start
+    def writelines(self, lines):
+        self.fp.writelines(lines)
+    def flush(self):
+        self.fp.flush()
+class StartMethod(object):
+    def __init__(self, projectId, userId, runTime):
+        self.projectId = projectId
+        self.userId = userId
+        self.runTime = runTime
+        self.stdout_redirector = OutputRedirector(sys.stdout, self.projectId, self.userId, self.runTime)
+        self.stderr_redirector = OutputRedirector(sys.stderr, self.projectId, self.userId, self.runTime)
+        # self.startTest()
+        # self.logger=logs(self.__class__.__module__)
+    def __call__(self, *args, **kwargs):
+        return self.startTest()
+    def startTest(self,*args, **kwargs):
+        self.outputBuffer = io.StringIO()
+        self.stdout_redirector.fp = self.outputBuffer
+        self.stderr_redirector.fp = self.outputBuffer
+        # self.stdout0 = sys.stdout  # 记录标准输出原始位置
+        # self.stderr0 = sys.stderr
+        sys.stdout = self.stdout_redirector
+        sys.stderr = self.stderr_redirector
+    def case(self,case):
+        case()
+
+
 if __name__=="__main__":
     Publics=Public()

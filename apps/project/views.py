@@ -12,7 +12,8 @@ from  libs.public import Public
 from  case import  models as caseModels
 from  users import  models as usersModels
 from django.db.models import  Q
-
+from log.logFile import logger as logs
+logger=logs(__name__)
 class ProjectList(APIView):
     """查找项目"""
     def  get(self,req):
@@ -378,8 +379,8 @@ class MockPost(APIView):
     """
     permission_classes = (permissions.AllowAny,)
     def post(self,req):
-        print(req)
         data=req.data
+        print(data)
         headers=json.loads(data["headers"])
         url=data["url"]
         data=data["data"]
@@ -390,6 +391,7 @@ class MockPost(APIView):
         return  MockResponse(res.json(),status=status.HTTP_200_OK)
     def get(self,req):
         data = req.query_params
+        print(data)
         headers = data["headers"]
         url = data["url"]
         data = data["data"]
@@ -405,9 +407,10 @@ class MockRes(APIView):
     permission_classes = (permissions.AllowAny,)
 
     def  post(self,req):
+        # logger.info("哲哥传入参数:%s"%req.data.dict())
+        logger.info("哲哥传入参数:%s" % json.load(req))
         path=req.path
         obj=models.InterfaceFiles.objects.filter(mock_attr__contains=path).values("res_header","res_data","mock_type","mock_data")
-        print(obj[0])
         # res_data={}
         if str(obj[0]["mock_type"])=="2":
             res_data_c=obj[0]["mock_data"]
@@ -419,6 +422,8 @@ class MockRes(APIView):
             res_data_c=Public().forData(res_data,res_data_c)
         return MockResponse(res_data_c,status=status.HTTP_200_OK)
     def  get(self,req):
+        # logger.info("哲哥传入参数:%s"%req.query_params.dict())
+        logger.info("哲哥传入参数:%s" % json.load(req))
         path=req.path
         obj=models.InterfaceFiles.objects.filter(mock_attr__contains=path).values("res_header","res_data","mock_type","mock_data")
         print(obj[0])
@@ -441,7 +446,7 @@ class MockResData(APIView):
     permission_classes = (permissions.AllowAny,)
     def  post(self,req):
         data=req.data
-
+        print(data)
         id=data["id"]
         obj=models.InterfaceFiles.objects.get(id=id)
         validate_data=serializers.S_interfaceDetail(data=data,instance=obj,many=False,partial=True)

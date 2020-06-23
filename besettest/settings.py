@@ -84,14 +84,30 @@ WSGI_APPLICATION = 'besettest.wsgi.application'
 ASGI_APPLICATION = 'besettest.routing.application'
 
 
-CHANNEL_LAYERS = {
+CACHES = {
     'default': {
-        # 这里用到了 channels_redis
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            'hosts': [('127.0.0.1', 6379)],  # 配置你自己的 redis 服务信息
-        },
-    }
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/0',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'CONNECTION_POOL_KWARGS': {  #最大连接数
+                'max_connections': 1000
+            },
+            # 'PASSWORD': 'xxx', # 如果有设置了redis-server密码在这里设置
+        }
+    },
+    'log': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': 'redis://127.0.0.1:6379/1/log',
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+                'CONNECTION_POOL_KWARGS': {  #最大连接数
+                    'max_connections': 1000
+                },
+                # 'PASSWORD': 'xxx', # 如果有设置了redis-server密码在这里设置
+            }
+        }
+
 }
 
 

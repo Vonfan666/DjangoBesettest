@@ -13,6 +13,8 @@ from case.libs.toRequests import InRequests
 from libs.api_response import APIResponse
 from  rest_framework.views import APIView,status
 import time
+from libs.public import StartMethod
+from log.logFile import logger as logs
 
 #
 # class EchoConsumer(WebsocketConsumer):
@@ -39,20 +41,22 @@ import time
 class RunCase(WebsocketConsumer):
     def connect(self):
         self.accept()
-        self.logger =  logging.getLogger("log")
+
     def receive(self, text_data=None, bytes_data=None):
         user = self.scope['user']  # 获取当前用户，没有登录显示匿名用户
         path = self.scope['path']  # Request请求的路径，HTTP，WebSocket
-        print(user,path)
-        print(text_data)
-        print(type(text_data))
         listId=json.loads(text_data)
         listIdSort=[]
+
         for id in listId:
+            caseName=models.CaseFile.objects.get(id=id).name
             order=models.CaseFile.objects.get(id=id).order
-            print(order)
+            start=StartMethod(caseName, "23", "3")
+            start()
+            self.logger = logs(self.__class__.__module__)
             listIdSort.append((order,id))
         listId=sorted(listIdSort,key=lambda x:x[0])
+        #开始执行的时候插入数据--但是状态还是执行中-- 前端查看数据时用websockt 五秒获取一次状态---获取之后自动断开
         for id in listId:
             # 1封装环境变量取值---返回url  headers data
             id=id[1]
@@ -68,7 +72,9 @@ class RunCase(WebsocketConsumer):
             self.logger.info("单位执行结束")
             self.send(json.dumps(res))
             time.sleep(1)
+            #执行完成之后把状态改成执行完成-
     def disconnect(self, close_code):
         pass
+
 
 
