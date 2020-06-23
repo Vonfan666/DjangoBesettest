@@ -85,6 +85,8 @@ class Public():
 class OutputRedirector(object):
     """ Wrapper to redirect stdout or stderr """
     def __init__(self,fp,projectId,userId,runTime):
+        self.stdout0 = None
+        self.stderr0 = None
         self.projectId = projectId
         self.userId = userId
         self.runTime = runTime
@@ -115,12 +117,21 @@ class StartMethod(object):
         self.outputBuffer = io.StringIO()
         self.stdout_redirector.fp = self.outputBuffer
         self.stderr_redirector.fp = self.outputBuffer
-        # self.stdout0 = sys.stdout  # 记录标准输出原始位置
-        # self.stderr0 = sys.stderr
+        self.stdout0 = sys.stdout  # 记录标准输出原始位置
+        self.stderr0 = sys.stderr
         sys.stdout = self.stdout_redirector
         sys.stderr = self.stderr_redirector
-    def case(self,case):
-        case()
+    def complete_output(self):
+        """
+        Disconnect output redirection and return buffer.
+        Safe to call multiple times.
+        """
+        if self.stdout0:
+            sys.stdout = self.stdout0
+            sys.stderr = self.stderr0
+            self.stdout0 = None
+            self.stderr0 = None
+        return self.outputBuffer.getvalue()
 
 
 if __name__=="__main__":

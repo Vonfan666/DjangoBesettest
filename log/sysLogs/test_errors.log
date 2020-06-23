@@ -1,0 +1,633 @@
+[2020-06-01 09:51:30,187](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+[2020-06-01 09:55:34,764](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+[2020-06-01 10:53:31,022](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+[2020-06-01 10:53:53,203](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+[2020-06-01 10:54:18,740](ERROR)(log)(log_response) : Internal Server Error: /users/case_debug/ 
+[2020-06-01 10:55:54,161](ERROR)(log)(log_response) : Internal Server Error: /users/case_debug/ 
+[2020-06-01 10:58:52,159](ERROR)(log)(log_response) : Internal Server Error: /users/case_debug/ 
+[2020-06-01 11:27:55,988](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+Traceback (most recent call last):
+  File "E:\PyFiles\DjangoBesettest\apps\case\libs\toRequests.py", line 83, in get
+    res=requests.get(url,headers=headers,params=data,verify=False,timeout=30)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\requests\api.py", line 75, in get
+    return request('get', url, params=params, **kwargs)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\requests\api.py", line 60, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\requests\sessions.py", line 519, in request
+    prep = self.prepare_request(req)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\requests\sessions.py", line 462, in prepare_request
+    hooks=merge_hooks(request.hooks, self.hooks),
+  File "E:\Envs\DjangoBesettest\lib\site-packages\requests\models.py", line 313, in prepare
+    self.prepare_url(url, params)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\requests\models.py", line 387, in prepare_url
+    raise MissingSchema(error)
+requests.exceptions.MissingSchema: Invalid URL '/login/test/': No schema supplied. Perhaps you meant http:///login/test/?
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "E:\PyFiles\DjangoBesettest\apps\case\views.py", line 39, in post
+    response=s.run(res_data["attr"],res_data["headers"],res_data["data"])
+  File "E:\PyFiles\DjangoBesettest\apps\case\libs\toRequests.py", line 39, in run
+    res=self.get(url,headers,data)
+  File "E:\PyFiles\DjangoBesettest\apps\case\libs\toRequests.py", line 86, in get
+    raise ValidationError(f)
+rest_framework.exceptions.ValidationError: [ErrorDetail(string="Invalid URL '/login/test/': No schema supplied. Perhaps you meant http:///login/test/?", code='invalid')]
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\exception.py", line 34, in inner
+    response = get_response(request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\views\generic\base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\views.py", line 462, in handle_exception
+    response = exception_handler(exc, context)
+  File "E:\PyFiles\DjangoBesettest\libs\exception.py", line 28, in custom_exception_handler
+    value = response.data[key]
+TypeError: list indices must be integers or slices, not ErrorDetail
+[2020-06-01 11:30:42,705](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+Traceback (most recent call last):
+  File "E:\PyFiles\DjangoBesettest\apps\case\libs\toRequests.py", line 83, in get
+    res=requests.get(url,headers=headers,params=data,verify=False,timeout=30)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\requests\api.py", line 75, in get
+    return request('get', url, params=params, **kwargs)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\requests\api.py", line 60, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\requests\sessions.py", line 519, in request
+    prep = self.prepare_request(req)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\requests\sessions.py", line 462, in prepare_request
+    hooks=merge_hooks(request.hooks, self.hooks),
+  File "E:\Envs\DjangoBesettest\lib\site-packages\requests\models.py", line 313, in prepare
+    self.prepare_url(url, params)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\requests\models.py", line 387, in prepare_url
+    raise MissingSchema(error)
+requests.exceptions.MissingSchema: Invalid URL '/login/test/': No schema supplied. Perhaps you meant http:///login/test/?
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "E:\PyFiles\DjangoBesettest\apps\case\views.py", line 39, in post
+    response=s.run(res_data["attr"],res_data["headers"],res_data["data"])
+  File "E:\PyFiles\DjangoBesettest\apps\case\libs\toRequests.py", line 39, in run
+    res=self.get(url,headers,data)
+  File "E:\PyFiles\DjangoBesettest\apps\case\libs\toRequests.py", line 86, in get
+    raise ValidationError(f)
+rest_framework.exceptions.ValidationError: [ErrorDetail(string="Invalid URL '/login/test/': No schema supplied. Perhaps you meant http:///login/test/?", code='invalid')]
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\exception.py", line 34, in inner
+    response = get_response(request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\views\generic\base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\views.py", line 462, in handle_exception
+    response = exception_handler(exc, context)
+  File "E:\PyFiles\DjangoBesettest\libs\exception.py", line 28, in custom_exception_handler
+    value = response.data[key]
+TypeError: list indices must be integers or slices, not ErrorDetail
+[2020-06-01 11:33:32,026](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+Traceback (most recent call last):
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\exception.py", line 34, in inner
+    response = get_response(request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 145, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 143, in _get_response
+    response = response.render()
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\template\response.py", line 105, in render
+    self.content = self.rendered_content
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\response.py", line 70, in rendered_content
+    ret = renderer.render(self.data, accepted_media_type, context)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\renderers.py", line 103, in render
+    allow_nan=not self.strict, separators=separators
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\utils\json.py", line 25, in dumps
+    return json.dumps(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\__init__.py", line 238, in dumps
+    **kw).encode(obj)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 199, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 257, in iterencode
+    return _iterencode(o, 0)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\utils\encoders.py", line 67, in default
+    return super().default(obj)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 180, in default
+    o.__class__.__name__)
+TypeError: Object of type 'MissingSchema' is not JSON serializable
+[2020-06-01 11:35:00,939](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+Traceback (most recent call last):
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\exception.py", line 34, in inner
+    response = get_response(request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 145, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 143, in _get_response
+    response = response.render()
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\template\response.py", line 105, in render
+    self.content = self.rendered_content
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\response.py", line 70, in rendered_content
+    ret = renderer.render(self.data, accepted_media_type, context)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\renderers.py", line 103, in render
+    allow_nan=not self.strict, separators=separators
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\utils\json.py", line 25, in dumps
+    return json.dumps(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\__init__.py", line 238, in dumps
+    **kw).encode(obj)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 199, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 257, in iterencode
+    return _iterencode(o, 0)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\utils\encoders.py", line 67, in default
+    return super().default(obj)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 180, in default
+    o.__class__.__name__)
+TypeError: Object of type 'MissingSchema' is not JSON serializable
+[2020-06-01 11:36:18,040](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+Traceback (most recent call last):
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\exception.py", line 34, in inner
+    response = get_response(request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 145, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 143, in _get_response
+    response = response.render()
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\template\response.py", line 105, in render
+    self.content = self.rendered_content
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\response.py", line 70, in rendered_content
+    ret = renderer.render(self.data, accepted_media_type, context)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\renderers.py", line 103, in render
+    allow_nan=not self.strict, separators=separators
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\utils\json.py", line 25, in dumps
+    return json.dumps(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\__init__.py", line 238, in dumps
+    **kw).encode(obj)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 199, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 257, in iterencode
+    return _iterencode(o, 0)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\utils\encoders.py", line 67, in default
+    return super().default(obj)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 180, in default
+    o.__class__.__name__)
+TypeError: Object of type 'MissingSchema' is not JSON serializable
+[2020-06-01 11:37:35,292](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+[2020-06-01 11:38:08,073](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+Traceback (most recent call last):
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\exception.py", line 34, in inner
+    response = get_response(request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 145, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 143, in _get_response
+    response = response.render()
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\template\response.py", line 105, in render
+    self.content = self.rendered_content
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\response.py", line 70, in rendered_content
+    ret = renderer.render(self.data, accepted_media_type, context)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\renderers.py", line 103, in render
+    allow_nan=not self.strict, separators=separators
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\utils\json.py", line 25, in dumps
+    return json.dumps(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\__init__.py", line 238, in dumps
+    **kw).encode(obj)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 199, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 257, in iterencode
+    return _iterencode(o, 0)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\utils\encoders.py", line 67, in default
+    return super().default(obj)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 180, in default
+    o.__class__.__name__)
+TypeError: Object of type 'MissingSchema' is not JSON serializable
+[2020-06-01 11:39:05,102](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+Traceback (most recent call last):
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\exception.py", line 34, in inner
+    response = get_response(request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 145, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 143, in _get_response
+    response = response.render()
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\template\response.py", line 105, in render
+    self.content = self.rendered_content
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\response.py", line 70, in rendered_content
+    ret = renderer.render(self.data, accepted_media_type, context)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\renderers.py", line 103, in render
+    allow_nan=not self.strict, separators=separators
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\utils\json.py", line 25, in dumps
+    return json.dumps(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\__init__.py", line 238, in dumps
+    **kw).encode(obj)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 199, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 257, in iterencode
+    return _iterencode(o, 0)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\utils\encoders.py", line 67, in default
+    return super().default(obj)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 180, in default
+    o.__class__.__name__)
+TypeError: Object of type 'MissingSchema' is not JSON serializable
+[2020-06-01 11:41:22,896](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+Traceback (most recent call last):
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\exception.py", line 34, in inner
+    response = get_response(request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 145, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 143, in _get_response
+    response = response.render()
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\template\response.py", line 105, in render
+    self.content = self.rendered_content
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\response.py", line 70, in rendered_content
+    ret = renderer.render(self.data, accepted_media_type, context)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\renderers.py", line 103, in render
+    allow_nan=not self.strict, separators=separators
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\utils\json.py", line 25, in dumps
+    return json.dumps(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\__init__.py", line 238, in dumps
+    **kw).encode(obj)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 199, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 257, in iterencode
+    return _iterencode(o, 0)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\utils\encoders.py", line 67, in default
+    return super().default(obj)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 180, in default
+    o.__class__.__name__)
+TypeError: Object of type 'MissingSchema' is not JSON serializable
+[2020-06-01 11:43:11,868](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+Traceback (most recent call last):
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\exception.py", line 34, in inner
+    response = get_response(request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 145, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 143, in _get_response
+    response = response.render()
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\template\response.py", line 105, in render
+    self.content = self.rendered_content
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\response.py", line 70, in rendered_content
+    ret = renderer.render(self.data, accepted_media_type, context)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\renderers.py", line 103, in render
+    allow_nan=not self.strict, separators=separators
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\utils\json.py", line 25, in dumps
+    return json.dumps(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\__init__.py", line 238, in dumps
+    **kw).encode(obj)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 199, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 257, in iterencode
+    return _iterencode(o, 0)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\utils\encoders.py", line 67, in default
+    return super().default(obj)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 180, in default
+    o.__class__.__name__)
+TypeError: Object of type 'MissingSchema' is not JSON serializable
+[2020-06-01 11:55:41,065](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+Traceback (most recent call last):
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\exception.py", line 34, in inner
+    response = get_response(request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 145, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 143, in _get_response
+    response = response.render()
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\template\response.py", line 105, in render
+    self.content = self.rendered_content
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\response.py", line 70, in rendered_content
+    ret = renderer.render(self.data, accepted_media_type, context)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\renderers.py", line 103, in render
+    allow_nan=not self.strict, separators=separators
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\utils\json.py", line 25, in dumps
+    return json.dumps(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\__init__.py", line 238, in dumps
+    **kw).encode(obj)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 199, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 257, in iterencode
+    return _iterencode(o, 0)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\utils\encoders.py", line 67, in default
+    return super().default(obj)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 180, in default
+    o.__class__.__name__)
+TypeError: Object of type 'MissingSchema' is not JSON serializable
+[2020-06-01 11:55:53,740](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+Traceback (most recent call last):
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\exception.py", line 34, in inner
+    response = get_response(request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 145, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 143, in _get_response
+    response = response.render()
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\template\response.py", line 105, in render
+    self.content = self.rendered_content
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\response.py", line 70, in rendered_content
+    ret = renderer.render(self.data, accepted_media_type, context)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\renderers.py", line 103, in render
+    allow_nan=not self.strict, separators=separators
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\utils\json.py", line 25, in dumps
+    return json.dumps(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\__init__.py", line 238, in dumps
+    **kw).encode(obj)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 199, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 257, in iterencode
+    return _iterencode(o, 0)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\utils\encoders.py", line 67, in default
+    return super().default(obj)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 180, in default
+    o.__class__.__name__)
+TypeError: Object of type 'MissingSchema' is not JSON serializable
+[2020-06-01 11:59:30,931](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+[2020-06-01 14:52:40,302](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+[2020-06-01 14:52:51,159](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+[2020-06-01 14:53:07,947](ERROR)(log)(log_response) : Internal Server Error: /users/case_debug/ 
+[2020-06-01 14:53:12,632](ERROR)(log)(log_response) : Internal Server Error: /users/case_debug/ 
+[2020-06-01 15:02:29,683](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+[2020-06-01 15:02:41,384](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+[2020-06-01 15:04:00,838](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+[2020-06-01 15:04:06,927](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+[2020-06-01 15:04:40,654](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+[2020-06-01 15:05:44,896](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+[2020-06-01 15:06:09,822](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+[2020-06-01 15:06:28,140](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+[2020-06-01 15:07:11,158](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+[2020-06-01 15:08:31,177](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+[2020-06-01 15:30:50,970](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+[2020-06-01 15:31:09,803](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+[2020-06-01 15:31:18,689](ERROR)(log)(log_response) : Internal Server Error: /users/case_debug/ 
+[2020-06-01 15:31:30,555](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+[2020-06-01 15:31:43,315](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+[2020-06-01 15:38:12,753](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+[2020-06-01 15:39:33,638](ERROR)(log)(log_response) : Internal Server Error: /users/case_debug/ 
+[2020-06-01 15:39:44,224](ERROR)(log)(log_response) : Internal Server Error: /users/case_debug/ 
+[2020-06-10 10:27:25,667](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+[2020-06-10 11:23:49,056](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_add/ 
+[2020-06-10 11:25:04,864](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_add/ 
+[2020-06-10 11:26:06,511](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_add/ 
+[2020-06-10 11:30:36,503](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_add/ 
+[2020-06-10 11:30:43,232](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_add/ 
+[2020-06-10 11:31:52,940](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_add/ 
+[2020-06-10 14:21:29,536](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_get/ 
+[2020-06-10 14:21:32,391](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_get/ 
+[2020-06-10 14:21:42,873](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_get/ 
+[2020-06-10 14:21:45,680](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_get/ 
+[2020-06-10 14:21:48,464](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_get/ 
+[2020-06-10 14:24:00,480](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_get/ 
+[2020-06-10 14:25:33,108](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_get/ 
+[2020-06-10 14:28:03,630](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_get/ 
+[2020-06-10 16:24:31,608](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_add/ 
+[2020-06-10 16:25:42,828](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_add/ 
+[2020-06-10 17:48:59,503](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_edit/ 
+[2020-06-10 18:03:59,336](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_edit/ 
+[2020-06-10 18:04:28,928](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_edit/ 
+[2020-06-10 18:39:04,128](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_delete/ 
+[2020-06-10 18:40:24,753](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_delete/ 
+[2020-06-11 10:02:02,263](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_get/ 
+[2020-06-11 10:03:54,566](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_delete/ 
+[2020-06-11 10:09:43,478](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_delete/ 
+[2020-06-11 10:10:12,191](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_delete/ 
+[2020-06-11 10:22:52,113](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_delete/ 
+[2020-06-11 10:32:44,956](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_add/ 
+[2020-06-11 10:33:23,008](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_add/ 
+[2020-06-11 10:34:55,894](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_add/ 
+[2020-06-11 11:22:40,640](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_edit/ 
+[2020-06-11 16:31:24,039](ERROR)(log)(log_response) : Internal Server Error: /users/case_add/ 
+[2020-06-11 16:41:03,827](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_edit/ 
+[2020-06-11 16:42:07,316](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_edit/ 
+[2020-06-11 16:42:57,836](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_add/ 
+[2020-06-11 17:00:15,958](ERROR)(log)(log_response) : Internal Server Error: /users/caseList_get/ 
+[2020-06-11 17:00:40,550](ERROR)(log)(log_response) : Internal Server Error: /users/caseList_get/ 
+[2020-06-11 17:10:49,051](ERROR)(log)(log_response) : Internal Server Error: /users/caseList_get/ 
+Traceback (most recent call last):
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\exception.py", line 34, in inner
+    response = get_response(request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 145, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 143, in _get_response
+    response = response.render()
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\template\response.py", line 105, in render
+    self.content = self.rendered_content
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\response.py", line 70, in rendered_content
+    ret = renderer.render(self.data, accepted_media_type, context)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\renderers.py", line 103, in render
+    allow_nan=not self.strict, separators=separators
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\utils\json.py", line 25, in dumps
+    return json.dumps(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\__init__.py", line 238, in dumps
+    **kw).encode(obj)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 199, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 257, in iterencode
+    return _iterencode(o, 0)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\utils\encoders.py", line 67, in default
+    return super().default(obj)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 180, in default
+    o.__class__.__name__)
+TypeError: Object of type 'CaseFile' is not JSON serializable
+[2020-06-11 17:12:16,992](ERROR)(log)(log_response) : Internal Server Error: /users/caseList_get/ 
+Traceback (most recent call last):
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\exception.py", line 34, in inner
+    response = get_response(request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 145, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 143, in _get_response
+    response = response.render()
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\template\response.py", line 105, in render
+    self.content = self.rendered_content
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\response.py", line 70, in rendered_content
+    ret = renderer.render(self.data, accepted_media_type, context)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\renderers.py", line 103, in render
+    allow_nan=not self.strict, separators=separators
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\utils\json.py", line 25, in dumps
+    return json.dumps(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\__init__.py", line 238, in dumps
+    **kw).encode(obj)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 199, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 257, in iterencode
+    return _iterencode(o, 0)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\utils\encoders.py", line 67, in default
+    return super().default(obj)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 180, in default
+    o.__class__.__name__)
+TypeError: Object of type 'CaseFile' is not JSON serializable
+[2020-06-11 17:12:46,532](ERROR)(log)(log_response) : Internal Server Error: /users/caseList_get/ 
+Traceback (most recent call last):
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\exception.py", line 34, in inner
+    response = get_response(request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 145, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 143, in _get_response
+    response = response.render()
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\template\response.py", line 105, in render
+    self.content = self.rendered_content
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\response.py", line 70, in rendered_content
+    ret = renderer.render(self.data, accepted_media_type, context)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\renderers.py", line 103, in render
+    allow_nan=not self.strict, separators=separators
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\utils\json.py", line 25, in dumps
+    return json.dumps(*args, **kwargs)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\__init__.py", line 238, in dumps
+    **kw).encode(obj)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 199, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 257, in iterencode
+    return _iterencode(o, 0)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\utils\encoders.py", line 67, in default
+    return super().default(obj)
+  File "C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Lib\json\encoder.py", line 180, in default
+    o.__class__.__name__)
+TypeError: Object of type 'CaseFile' is not JSON serializable
+[2020-06-11 17:13:13,513](ERROR)(log)(log_response) : Internal Server Error: /users/caseList_get/ 
+[2020-06-11 17:13:45,488](ERROR)(log)(log_response) : Internal Server Error: /users/caseList_get/ 
+[2020-06-11 17:14:10,523](ERROR)(log)(log_response) : Internal Server Error: /users/caseList_get/ 
+[2020-06-11 17:21:52,491](ERROR)(log)(log_response) : Internal Server Error: /users/caseList_get/ 
+[2020-06-11 17:22:11,662](ERROR)(log)(log_response) : Internal Server Error: /users/caseList_get/ 
+[2020-06-11 17:22:19,355](ERROR)(log)(log_response) : Internal Server Error: /users/caseList_get/ 
+[2020-06-11 17:24:55,272](ERROR)(log)(log_response) : Internal Server Error: /users/caseList_get/ 
+[2020-06-11 17:25:21,723](ERROR)(log)(log_response) : Internal Server Error: /users/caseList_get/ 
+[2020-06-11 17:26:54,473](ERROR)(log)(log_response) : Internal Server Error: /users/caseList_get/ 
+[2020-06-11 17:27:13,206](ERROR)(log)(log_response) : Internal Server Error: /users/caseList_get/ 
+[2020-06-11 17:45:30,673](ERROR)(log)(log_response) : Internal Server Error: /users/caseList_get/ 
+[2020-06-11 18:24:28,555](ERROR)(log)(log_response) : Internal Server Error: /users/caseList_get/ 
+[2020-06-11 18:24:32,384](ERROR)(log)(log_response) : Internal Server Error: /users/caseList_get/ 
+[2020-06-12 14:08:29,534](ERROR)(log)(log_response) : Internal Server Error: /users/caseList_get/ 
+[2020-06-12 14:09:13,587](ERROR)(log)(log_response) : Internal Server Error: /users/caseList_get/ 
+[2020-06-12 14:09:45,335](ERROR)(log)(log_response) : Internal Server Error: /users/caseList_get/ 
+[2020-06-12 14:19:10,713](ERROR)(log)(log_response) : Internal Server Error: /users/caseList_get/ 
+[2020-06-12 15:23:32,809](ERROR)(log)(log_response) : Internal Server Error: /users/caseList_get/ 
+[2020-06-12 16:10:44,947](ERROR)(log)(log_response) : Internal Server Error: /users/caseList_get/ 
+[2020-06-12 17:09:12,753](ERROR)(log)(log_response) : Internal Server Error: /users/caseList_get/ 
+[2020-06-12 17:12:04,982](ERROR)(log)(log_response) : Internal Server Error: /users/caseList_get/ 
+[2020-06-12 17:34:24,774](ERROR)(log)(log_response) : Internal Server Error: /users/caseList_get/ 
+[2020-06-12 17:34:34,456](ERROR)(log)(log_response) : Internal Server Error: /users/caseList_get/ 
+[2020-06-12 18:04:48,849](ERROR)(log)(log_response) : Internal Server Error: /users/case_run_all/ 
+[2020-06-12 18:07:59,963](ERROR)(log)(log_response) : Internal Server Error: /users/case_run_all/ 
+[2020-06-12 18:08:05,468](ERROR)(log)(log_response) : Internal Server Error: /users/case_run_all/ 
+[2020-06-15 15:42:31,007](ERROR)(log)(log_response) : Internal Server Error: /users/case_run_all/ 
+[2020-06-15 15:42:49,195](ERROR)(log)(log_response) : Internal Server Error: /users/case_run_all/ 
+[2020-06-15 15:45:20,268](ERROR)(log)(log_response) : Internal Server Error: /users/case_run_all/ 
+[2020-06-15 15:45:41,682](ERROR)(log)(log_response) : Internal Server Error: /users/case_run_all/ 
+[2020-06-15 15:46:22,694](ERROR)(log)(log_response) : Internal Server Error: /users/case_run_all/ 
+[2020-06-15 15:49:36,889](ERROR)(log)(log_response) : Internal Server Error: /users/case_run_all/ 
+[2020-06-15 15:51:31,477](ERROR)(log)(log_response) : Internal Server Error: /users/case_run_all/ 
+[2020-06-15 15:54:28,049](ERROR)(log)(log_response) : Internal Server Error: /users/case_run_all/ 
+[2020-06-15 15:54:39,836](ERROR)(log)(log_response) : Internal Server Error: /users/case_run_all/ 
+Traceback (most recent call last):
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\exception.py", line 34, in inner
+    response = get_response(request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\views\generic\base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\views.py", line 507, in dispatch
+    self.response = self.finalize_response(request, response, *args, **kwargs)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\views.py", line 422, in finalize_response
+    % type(response)
+AssertionError: Expected a `Response`, `HttpResponse` or `HttpStreamingResponse` to be returned from the view, but received a `<class 'bool'>`
+[2020-06-15 15:55:14,230](ERROR)(log)(log_response) : Internal Server Error: /users/case_run_all/ 
+Traceback (most recent call last):
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\exception.py", line 34, in inner
+    response = get_response(request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\views\generic\base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\views.py", line 507, in dispatch
+    self.response = self.finalize_response(request, response, *args, **kwargs)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\views.py", line 422, in finalize_response
+    % type(response)
+AssertionError: Expected a `Response`, `HttpResponse` or `HttpStreamingResponse` to be returned from the view, but received a `<class 'bool'>`
+[2020-06-15 15:56:29,715](ERROR)(log)(log_response) : Internal Server Error: /users/case_run_all/ 
+Traceback (most recent call last):
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\exception.py", line 34, in inner
+    response = get_response(request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\core\handlers\base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\django\views\generic\base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\views.py", line 507, in dispatch
+    self.response = self.finalize_response(request, response, *args, **kwargs)
+  File "E:\Envs\DjangoBesettest\lib\site-packages\rest_framework\views.py", line 422, in finalize_response
+    % type(response)
+AssertionError: Expected a `Response`, `HttpResponse` or `HttpStreamingResponse` to be returned from the view, but received a `<class 'bool'>`
+[2020-06-15 16:08:56,023](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_add/ 
+[2020-06-15 16:09:08,753](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_add/ 
+[2020-06-15 16:09:19,448](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_add/ 
+[2020-06-15 16:10:07,380](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_add/ 
+[2020-06-15 16:10:54,994](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_add/ 
+[2020-06-15 16:12:17,880](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_add/ 
+[2020-06-15 16:13:45,172](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_add/ 
+[2020-06-15 16:18:02,585](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_add/ 
+[2020-06-15 16:32:32,118](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_edit/ 
+[2020-06-15 16:33:59,600](ERROR)(log)(log_response) : Internal Server Error: /users/casePlan_edit/ 
+[2020-06-16 18:20:54,500](ERROR)(log)(log_response) : Internal Server Error: /users/case_run_all/ 
+[2020-06-16 18:23:03,437](ERROR)(log)(log_response) : Internal Server Error: /users/case_run_all/ 
+[2020-06-22 15:09:07,108](ERROR)(log)(log_response) : Internal Server Error: /users/mock_update_type/ 
+[2020-06-22 15:09:09,431](ERROR)(log)(log_response) : Internal Server Error: /users/mock_update_type/ 
+[2020-06-22 15:10:40,056](ERROR)(log)(log_response) : Internal Server Error: /api/product/canapplymock/ 
+[2020-06-22 15:11:45,816](ERROR)(log)(log_response) : Internal Server Error: /api/product/canapplymock/ 
+[2020-06-22 15:12:06,718](ERROR)(log)(log_response) : Internal Server Error: /api/product/canapply/mock/ 
+[2020-06-22 15:12:33,805](ERROR)(log)(log_response) : Internal Server Error: /api/product/canapply/mock/ 
+[2020-06-22 15:14:08,876](ERROR)(log)(log_response) : Internal Server Error: /api/product/canapply/mock/ 
+[2020-06-22 15:19:07,532](ERROR)(log)(log_response) : Internal Server Error: /api/product/canapply/mock/ 
+[2020-06-22 15:19:07,560](ERROR)(log)(log_response) : Internal Server Error: /api/product/canapply/mock/ 
+[2020-06-22 15:21:50,456](ERROR)(log)(log_response) : Internal Server Error: /users/mock_update_type/ 
+[2020-06-22 15:21:55,680](ERROR)(log)(log_response) : Internal Server Error: /users/mock_update_type/ 
+[2020-06-22 15:22:02,563](ERROR)(log)(log_response) : Internal Server Error: /users/mock_update_type/ 
+[2020-06-22 15:22:21,278](ERROR)(log)(log_response) : Internal Server Error: /users/mock_update_type/ 
+[2020-06-22 15:26:19,830](ERROR)(log)(log_response) : Internal Server Error: /cdsa/fdsf/mock/ 
+[2020-06-22 15:33:15,429](ERROR)(log)(log_response) : Internal Server Error: /cdsa/fdsf/mock/ 
+[2020-06-22 15:33:17,848](ERROR)(log)(log_response) : Internal Server Error: /cdsa/fdsf/mock/ 
+[2020-06-22 15:33:51,708](ERROR)(log)(log_response) : Internal Server Error: /cdsa/fdsf/mock/ 
+[2020-06-22 15:53:10,224](ERROR)(log)(log_response) : Internal Server Error: /cdsa/fdsf/mock/ 
+[2020-06-22 15:53:11,642](ERROR)(log)(log_response) : Internal Server Error: /cdsa/fdsf/mock/ 
+[2020-06-22 15:53:45,483](ERROR)(log)(log_response) : Internal Server Error: /cdsa/fdsf/mock/ 
+[2020-06-22 15:54:12,861](ERROR)(log)(log_response) : Internal Server Error: /cdsa/fdsf/mock/ 
+[2020-06-22 15:55:20,669](ERROR)(log)(log_response) : Internal Server Error: /cdsa/fdsf/mock/ 
+[2020-06-22 15:56:27,540](ERROR)(log)(log_response) : Internal Server Error: /cdsa/fdsf/mock/ 
+[2020-06-22 16:56:51,130](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+[2020-06-22 16:57:01,526](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+[2020-06-22 16:59:34,996](ERROR)(log)(log_response) : Internal Server Error: /users/case_run/ 
+[2020-06-22 17:03:00,856](ERROR)(log)(log_response) : Internal Server Error: /users/case_debug/ 
+[2020-06-22 17:03:07,796](ERROR)(log)(log_response) : Internal Server Error: /users/case_debug/ 
+[2020-06-22 17:07:19,156](ERROR)(log)(log_response) : Internal Server Error: /users/case_debug/ 
+[2020-06-22 17:07:51,488](ERROR)(log)(log_response) : Internal Server Error: /users/case_debug/ 
+[2020-06-22 17:10:05,385](ERROR)(log)(log_response) : Internal Server Error: /users/case_debug/ 
+[2020-06-22 17:10:51,626](ERROR)(log)(log_response) : Internal Server Error: /users/case_debug/ 
+[2020-06-22 17:14:16,285](ERROR)(log)(log_response) : Internal Server Error: /users/case_debug/ 
+[2020-06-22 17:15:04,552](ERROR)(log)(log_response) : Internal Server Error: /users/case_debug/ 
+[2020-06-22 17:17:55,346](ERROR)(log)(log_response) : Internal Server Error: /users/case_debug/ 
+[2020-06-22 17:19:12,594](ERROR)(log)(log_response) : Internal Server Error: /users/case_debug/ 
+[2020-06-22 17:19:18,032](ERROR)(log)(log_response) : Internal Server Error: /users/case_debug/ 
+[2020-06-23 10:28:18,395](ERROR)(log)(log_response) : Internal Server Error: /api/product/list/mock/ 
+[2020-06-23 10:29:13,195](ERROR)(log)(log_response) : Internal Server Error: /api/product/list/mock/ 
+[2020-06-23 10:29:58,665](ERROR)(log)(log_response) : Internal Server Error: /api/product/list/mock/ 
+[2020-06-23 10:30:08,926](ERROR)(log)(log_response) : Internal Server Error: /api/product/list/mock/ 
+[2020-06-23 10:30:47,733](ERROR)(log)(log_response) : Internal Server Error: /api/product/list/mock/ 
