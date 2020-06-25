@@ -141,7 +141,6 @@ class S_CaseRun(serializers.ModelSerializer):
 
     def get_headers(self, obj):
         if obj.headers:
-            print(obj.headers)
             return json.loads(obj.headers)
 
     def get_CaseGroupId(self, obj):

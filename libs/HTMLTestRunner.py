@@ -124,8 +124,8 @@ class OutputRedirector(object):
     def flush(self):
         self.fp.flush()
 
-stdout_redirector = OutputRedirector(sys.stdout)
-stderr_redirector = OutputRedirector(sys.stderr)
+stdout_redirector = OutputRedirector(sys.stdout)   #重定向前保存在实例中的stdout
+stderr_redirector = OutputRedirector(sys.stderr)  #重定向前保存在实例中的stderr
 
 
 
@@ -938,11 +938,10 @@ class _TestResult(TestResult):
 
     def __init__(self, verbosity=1):
         TestResult.__init__(self)
-        self.stdout0 = None
-        self.stderr0 = None
-        self.success_count = 0
+
+        self.success_count = 0  #成功的数量
         self.failure_count = 0
-        self.error_count = 0
+        self.error_count = 0  #错误用例的数量--其实就是把TestResult下面的 eerors列表len一下
         self.verbosity = verbosity
 
         # result is a list of result in 4 tuple
@@ -956,15 +955,17 @@ class _TestResult(TestResult):
 
 
     def startTest(self, test):
-        TestResult.startTest(self, test)
+        TestResult.startTest(self, test)  #这里调用TestResult的startTest
         # just one buffer for both stdout and stderr
-        self.outputBuffer= io.StringIO()
-        stdout_redirector.fp = self.outputBuffer
-        stderr_redirector.fp = self.outputBuffer
-        self.stdout0 = sys.stdout
-        self.stderr0 = sys.stderr
-        sys.stdout = stdout_redirector
-        sys.stderr = stderr_redirector
+        #OutputRedirector 在这个类中定义sys.stdout-指向stdout_redirector下的fp属性，定义sys.stdeer指向stderr_redirector下的fp属性
+
+        self.outputBuffer= io.StringIO()  #定义一个操作内存缓冲区中读写数据的实例对象
+        stdout_redirector.fp = self.outputBuffer  #将sys.stdout重定向到磁盘io的缓存中--也就是说这里会重内存中取打印信息以及日志
+        stderr_redirector.fp = self.outputBuffer  # 将sys.stderr重定向到磁盘io缓存中--也就是说这里会重内存中取错误信息
+        self.stdout0 = sys.stdout  #记录标准输出原始位置
+        self.stderr0 = sys.stderr  #将标准错误输出指向None
+        sys.stdout = stdout_redirector    #恢复重定向--因为OutputRedirector(sys.stdout)--所以就是相当于修改了从新重定向了之前的位置
+        sys.stderr = stderr_redirector    #恢复重定向 --同上
 
 
     def complete_output(self):
@@ -1047,7 +1048,6 @@ class HTMLTestRunner(Template_mixin):
     def run(self, test, caseinfo={}):
         "Run the given test case or test suite."
         result = _TestResult(self.verbosity)
-        print(test)
         test(result)
         self.stopTime = datetime.datetime.now()
         self.generateReport(test, result, caseinfo)

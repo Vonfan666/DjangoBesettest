@@ -84,35 +84,33 @@ class Public():
 
 class OutputRedirector(object):
     """ Wrapper to redirect stdout or stderr """
-    def __init__(self,fp,projectId,userId,runTime):
-        self.stdout0 = None
-        self.stderr0 = None
-        self.projectId = projectId
+    def __init__(self,fp,userId,interface,runTime):
         self.userId = userId
+        self.interface = interface
         self.runTime = runTime
         self.start=sys.stdout
         self.logRedis = conn("log")
         self.fp = fp
     def write(self, s):
         self.fp.write(s)
-        key="%s_%s_%s"%(self.projectId,self.userId,self.runTime)
-        self.logRedis.rpush("log:%s"%key, s)
+        # key="%s_%s_%s"%(self.projectId,self.userId,self.runTime)
+        self.logRedis.rpush("log:%s_%s"%(self.userId,self.interface), s)
         sys.stdout = self.start
     def writelines(self, lines):
         self.fp.writelines(lines)
     def flush(self):
         self.fp.flush()
 class StartMethod(object):
-    def __init__(self, projectId, userId, runTime):
-        self.projectId = projectId
+    def __init__(self, userId=None, interface=None, runTime=None):
         self.userId = userId
+        self.interface = interface
         self.runTime = runTime
-        self.stdout_redirector = OutputRedirector(sys.stdout, self.projectId, self.userId, self.runTime)
-        self.stderr_redirector = OutputRedirector(sys.stderr, self.projectId, self.userId, self.runTime)
+        self.stdout_redirector = OutputRedirector(sys.stdout, self.userId, self.interface, self.runTime)
+        self.stderr_redirector = OutputRedirector(sys.stderr, self.userId, self.interface, self.runTime)
         # self.startTest()
         # self.logger=logs(self.__class__.__module__)
     def __call__(self, *args, **kwargs):
-        return self.startTest()
+        return self.startTest(*args, **kwargs)
     def startTest(self,*args, **kwargs):
         self.outputBuffer = io.StringIO()
         self.stdout_redirector.fp = self.outputBuffer
@@ -121,17 +119,17 @@ class StartMethod(object):
         self.stderr0 = sys.stderr
         sys.stdout = self.stdout_redirector
         sys.stderr = self.stderr_redirector
-    def complete_output(self):
-        """
-        Disconnect output redirection and return buffer.
-        Safe to call multiple times.
-        """
-        if self.stdout0:
-            sys.stdout = self.stdout0
-            sys.stderr = self.stderr0
-            self.stdout0 = None
-            self.stderr0 = None
-        return self.outputBuffer.getvalue()
+    # def complete_output(self):
+    #     """
+    #     Disconnect output redirection and return buffer.
+    #     Safe to call multiple times.
+    #     """
+    #     if self.stdout0:
+    #         sys.stdout = self.stdout0
+    #         sys.stderr = self.stderr0
+    #         self.stdout0 = None
+    #         self.stderr0 = None
+    #     return self.outputBuffer.getvalue()
 
 
 if __name__=="__main__":

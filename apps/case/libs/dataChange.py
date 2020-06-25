@@ -23,7 +23,6 @@ class dataChange(object):
 
     def headerChange(self):
         """处理请求头格式"""
-        print(type(self.headers))
         if self.headers == None or self.headers == "":
             return {}
         if type(self.headers)==str:

@@ -15,6 +15,7 @@ from  rest_framework.views import APIView,status
 import time
 from libs.public import StartMethod
 from log.logFile import logger as logs
+from django_redis import get_redis_connection  as conn
 
 #
 # class EchoConsumer(WebsocketConsumer):
@@ -41,21 +42,24 @@ from log.logFile import logger as logs
 class RunCase(WebsocketConsumer):
     def connect(self):
         self.accept()
-        self.logger =  logging.getLogger("log")
+        # self.logger =  logging.getLogger("log")
+        self.logRedis = conn("log")
+
     def receive(self, text_data=None, bytes_data=None):
+        print(text_data,"上面的")
         user = self.scope['user']  # 获取当前用户，没有登录显示匿名用户
         path = self.scope['path']  # Request请求的路径，HTTP，WebSocket
-        print(user,path)
-        print(text_data)
-        print(type(text_data))
-        listId=json.loads(text_data)
+        textObj=json.loads(text_data)
+        listId=textObj["idList"]
+        self.userId=textObj["userId"]
+        self.interface=textObj["interface"]
+        self.count=len(listId)
         listIdSort=[]
-
+        n=1
         for id in listId:
 
             log=[]
             order=models.CaseFile.objects.get(id=id).order
-            print(order)
 
             listIdSort.append((order,id))
         listId=sorted(listIdSort,key=lambda x:x[0])
@@ -66,7 +70,7 @@ class RunCase(WebsocketConsumer):
             id=id[1]
             caseName=models.CaseFile.objects.get(id=id).name
 
-            start = StartMethod(caseName, "24", "3")
+            start = StartMethod(self.userId,self.interface)
             start()
             self.logger = logs(self.__class__.__module__)
             obj = models.CaseFile.objects.select_related("userId", "CaseGroupId", "postMethod", "dataType",
@@ -75,16 +79,54 @@ class RunCase(WebsocketConsumer):
             res_data = serializersObj.data
             res_data = json.loads(json.dumps(res_data))
             res_data = res_data[0]
-            self.logger.info("单位开始执行")
+            self.logger.info("%s》》》第{{%s}}个单位开始执行"%(caseName,n))
             s = InRequests(res_data["postMethod"], res_data["dataType"], res_data["environmentId"], res_data["name"],self.logger)
             res= s.run(res_data["attr"], res_data["headers"], res_data["data"])
-            self.logger.info("单位执行结束")
+            self.logger.info("%s》》》第{{%s}}个单位执行结束"%(caseName,n))
             self.send(json.dumps(res))
-            time.sleep(1)
-            start.complete_output()
+            n=n+1
             #执行完成之后把状态改成执行完成-
+        self.close()
     def disconnect(self, close_code):
-        pass
+        #断开时清除redis数据
+        print(self.logRedis.lrange("log:%s_%s"%(self.userId,self.interface),0,-1))  #存到数据库
+        self.logRedis.delete("log:%s_%s"%(self.userId,self.interface))  #删除key
+        print("断开")
 
+class selectLog(WebsocketConsumer):
+    def connect(self):
+        self.accept()
+        self.logRedis = conn("log")
+        self.len=0
+    def receive(self, text_data=None, bytes_data=None):
+        print("logList链接成功")
+        print(text_data,"下面的")
+        textObj = json.loads(text_data)
+        listId = textObj["idList"]
+        self.userId = textObj["userId"]
+        self.interface = textObj["interface"]
+        self.count = len(listId)
+        # self.send("32313")
+        # print("发送成功")
+        self.indexStart=0
+        while  1:
+            flag=0
+            redisListLog=self.logRedis.lrange("log:%s_%s"%(self.userId,self.interface), self.indexStart, -1)
+            indexEnd=len(redisListLog)
+            self.indexStart = self.indexStart+indexEnd
+            for log  in  redisListLog:
+                if "第{{%s}}个单位执行结束"%self.count  in  log.decode("utf8"):
+                    log = log.decode("utf8")
+                    self.send(json.dumps(log))
+                    flag=1
+                    break
+                else:
+                    log=log.decode("utf8")
+                    self.send(json.dumps(log))
+            if  flag==1:
+                self.close()
+                break
+    def disconnect(self, close_code):
+        print("断开连接")
 
 
