@@ -81,3 +81,14 @@ class CasePlan(models.Model):
     updateTime = models.DateTimeField(auto_now=True, verbose_name="更新时间")
     class Meta:
         db_table="case_plan"
+
+class CaseResult(models.Model):
+    userId = models.ForeignKey("users.UserProfile", to_field="id", on_delete=models.SET_NULL, null=True,related_name="c_name",verbose_name="创建人")
+    caseCount = models.IntegerField(null=True, verbose_name="用例数量")
+    assertSuccess=models.IntegerField(null=True, verbose_name="断言成功数量，扩展字段")
+    assertFailed = models.IntegerField(null=True, verbose_name="断言失败数量，扩展字段")
+    runFailed = models.IntegerField(null=True, verbose_name="执行失败数量，扩展字段")
+    createTime = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
+    updateTime = models.DateTimeField(auto_now=True, verbose_name="更新时间")
+    class Meta:
+        db_table="case_result"

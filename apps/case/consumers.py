@@ -79,10 +79,10 @@ class RunCase(WebsocketConsumer):
             res_data = serializersObj.data
             res_data = json.loads(json.dumps(res_data))
             res_data = res_data[0]
-            self.logger.info("%s》》》第{{%s}}个单位开始执行"%(caseName,n))
+            self.logger.info("%s>>>第{{%s}}个单位开始执行"%(caseName,n))
             s = InRequests(res_data["postMethod"], res_data["dataType"], res_data["environmentId"], res_data["name"],self.logger)
             res= s.run(res_data["attr"], res_data["headers"], res_data["data"])
-            self.logger.info("%s》》》第{{%s}}个单位执行结束"%(caseName,n))
+            self.logger.info("%s>>>第{{%s}}个单位执行结束"%(caseName,n))
             self.send(json.dumps(res))
             n=n+1
             #执行完成之后把状态改成执行完成-
