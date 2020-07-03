@@ -83,8 +83,11 @@ class CasePlan(models.Model):
         db_table="case_plan"
 
 class CaseResult(models.Model):
-    userId = models.ForeignKey("users.UserProfile", to_field="id", on_delete=models.SET_NULL, null=True,related_name="c_name",verbose_name="创建人")
-    caseCount = models.IntegerField(null=True, verbose_name="用例数量")
+    userId = models.ForeignKey("users.UserProfile", to_field="id", on_delete=models.SET_NULL, null=True,related_name="cc_name",verbose_name="创建人")
+    caseCount = models.IntegerField(null=True,default=1,verbose_name="用例数量")
+    type=models.IntegerField(null=True,verbose_name="结果类别")   #1debug接口  2批量结果 3allrun结果
+    result=models.TextField(null=True,verbose_name="测试结果")
+    c_id=models.IntegerField(verbose_name="所属id")#type==1 传caseId   type==2传interfaceId   type==3传casePlanId
     assertSuccess=models.IntegerField(null=True, verbose_name="断言成功数量，扩展字段")
     assertFailed = models.IntegerField(null=True, verbose_name="断言失败数量，扩展字段")
     runFailed = models.IntegerField(null=True, verbose_name="执行失败数量，扩展字段")

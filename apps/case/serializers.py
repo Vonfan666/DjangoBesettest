@@ -383,3 +383,15 @@ class S_EditCaseOrder(serializers.ModelSerializer):
         user=super().update(instance=instance,validated_data=validated_data)
         user.save()
         return user
+
+class S_CaseResults(serializers.ModelSerializer):
+    createTime = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
+    updateTime = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
+    user=serializers.SerializerMethodField()
+    def  get_user(self,obj):
+        return {"id":obj.userId.id,"name":obj.userId.name}
+
+
+    class Meta:
+        model=models.CaseResult
+        fields="__all__"

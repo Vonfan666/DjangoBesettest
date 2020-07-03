@@ -65,13 +65,10 @@ urlpatterns = [
     #环境变量操作
     url(r"^users/environment_add/", projectViews.EnvironmentsAdd.as_view(), name="EnvironmentsAdd"),#新增环境
     url(r"^users/environment_select/", projectViews.EnvironmentsSelect.as_view(), name="EnvironmentsSelect"),  # 查询环境
-
     url(r"^users/environment_delete/", projectViews.EnvironmentsDelete.as_view(), name="EnvironmentsDelete"),  # 删除环境变量
     url(r"^users/aa/", projectViews.MenuView.as_view(), name="View"),  # 查询环境
-
     #case操作
     url(r"^users/unity_project/", projectViews.ProjectUnityStatus.as_view(), name="ProjectUnityStatus"),  # 查询用例以及用例文件下的用例
-
     url(r"^users/select_caseGroup/", caseViews.CaseGroup.as_view(), name="CaseGroup"),  # 查询用例以及用例文件下的用例
     url(r"^users/caseGroup_add/", caseViews.AddGroup.as_view(), name="AddGroup"),  # 新增用例文件夹
     url(r"^users/caseGroup_edit/", caseViews.EditGroup.as_view(), name="EditGroup"),  # 修改用例文件夹
@@ -85,6 +82,10 @@ urlpatterns = [
     url(r"^users/case_edit/", caseViews.CaseEdit.as_view(), name="CaseEdit"),  # 点击编辑用例
     url(r"^users/case_run/", caseViews.RunCase.as_view(), name="RunCase"),  # 执行单个接口下所有用例
     url(r"^users/case_debug/", caseViews.DebugCase.as_view(), name="DebugCase"),  # 用例调试
+    url(r"^users/case_results/", caseViews.CaseResults.as_view(), name="CaseResults"),  # 查看用例调试结果
+    url(r"^users/case_results_detail/", caseViews.CaseResultsDetail.as_view(), name="CaseResultsDetail"),  # 查看debug日志详情
+
+    url(r"^users/case_results_del/", caseViews.CaseResults.as_view(), name="CaseResults"),  # 查看删除用例调试
     url(r"^users/case_run_all/", runCase.RunCaseAll.as_view(), name="RunCaseAll"),  # 执行测试计划
     url(r"^users/case_order/", caseViews.CaseOrder.as_view(), name="CaseOrder"),  # 修改该接口的执行顺序
     url(r"^users/casePlan_add/", caseViews.AddCasePlan.as_view(), name="AddCasePlan"),  # 新建测试计划

@@ -8,9 +8,11 @@ from project.models import Environments
 # Create your views here
 import  logging
 from libs.Pagination import Pagination
+from libs.public import StartMethod
 from django.db.models import Q
-logger =  logging.getLogger("log")
-
+from django_redis import get_redis_connection  as conn
+from log.logFile import logger as logs
+from  users.models import UserProfile
 
 
 class RunCase(APIView):
@@ -25,36 +27,61 @@ class RunCase(APIView):
 
 
     def post(self,req):
-        responses=[]
-        listId=json.loads(req.data.get("id"))
-        for id in listId:
 
-        #1封装环境变量取值---返回url  headers data
-        # idList=req.query_params.get("idList")
-        # if isinstance(idList,list):
-        # id = req.data.get("id")
-            obj=models.CaseFile.objects.select_related("userId","CaseGroupId","postMethod","dataType","environmentId").filter(id=id)
-            serializersObj=serializers.S_CaseRun(obj,many=True)
-            res_data=serializersObj.data
-            res_data=json.loads(json.dumps(res_data))
-            res_data=res_data[0]
-            logger.info("单位开始执行")
-            s = InRequests(res_data["postMethod"],res_data["dataType"],res_data["environmentId"],res_data["name"],logger)
-            response=s.run(res_data["attr"],res_data["headers"],res_data["data"])
-            responses.append(response)
-            logger.info("单位执行结束")
+        responses = []
+        data=req.data
+        listId=json.loads(req.data.get("id"))
+        id=listId[0]
+        l = []
+        self.logRedis = conn("log")
+        obj=models.CaseFile.objects.select_related("userId","CaseGroupId","postMethod","dataType","environmentId").filter(id=id)
+        serializersObj=serializers.S_CaseRun(obj,many=True)
+        res_data=serializersObj.data
+        res_data=json.loads(json.dumps(res_data))
+        res_data=res_data[0]
+        start = StartMethod(data["userId"])
+        start()
+        self.logger = logs(self.__class__.__module__)
+        self.logger.info("单位开始执行")
+        s = InRequests(res_data["postMethod"],res_data["dataType"],res_data["environmentId"],res_data["name"],self.logger)
+        response=s.run(res_data["attr"],res_data["headers"],res_data["data"])
+        responses.append(response)
+        self.logger.info("单位执行结束")
+        redisListLog = self.logRedis.lrange("log:%s_%s" % (data["userId"], None), 0, -1)
+        for log in redisListLog:
+            l.append(log.decode("utf8"))
+        response["logList"] = l
+        # 根据errors判断执行是否成功  断言另外处理
+        self.logRedis.delete("log:%s_%s" % (data["userId"], None))
+        # response--存入CaseResult  type=1
+        userId = UserProfile.objects.get(id=data["userId"])
+        models.CaseResult.objects.create(result=response, type=1, c_id=data["id"], userId=userId)
         return  APIResponse(200,"sucess",results=responses,status=status.HTTP_200_OK)
 
 class DebugCase(APIView):
     def post(self, req):
+        l=[]
+        self.logRedis = conn("log")
         data=req.data
         res_data=req.data.dict()
         validateObj=serializers.S_debugCase(data=data,many=False)
         environmentsObj=self.Environmented(validateObj,res_data)
-        logger.info("单位开始执行")
-        s = InRequests(res_data["postMethod"], res_data["dataType"], environmentsObj,res_data["name"],logger)
+        start = StartMethod(data["userId"])
+        start()
+        self.logger = logs(self.__class__.__module__)
+        self.logger.info("单位开始执行")
+        s = InRequests(res_data["postMethod"], res_data["dataType"], environmentsObj,res_data["name"],self.logger)
         response = s.run(res_data["attr"], res_data["headers"], res_data["data"])
-        logger.info("单位执行结束")
+        self.logger.info("单位执行结束")
+        redisListLog = self.logRedis.lrange("log:%s_%s" % (data["userId"], None), 0, -1)
+        for log  in redisListLog:
+            l.append(log.decode("utf8"))
+        response["logList"]=l
+        #根据errors判断执行是否成功  断言另外处理
+        self.logRedis.delete("log:%s_%s" % (data["userId"], None))
+        #response--存入CaseResult  type=1
+        userId=UserProfile.objects.get(id=data["userId"])
+        models.CaseResult.objects.create(result=response,type=1,c_id=data["id"],userId=userId)
         return APIResponse(200, "sucess", results=response, status=status.HTTP_200_OK)
 
     def Environmented(self,validateObj,res_data):
@@ -350,3 +377,57 @@ class EditCaseOrder(APIView):
             data=res_data.data
             return APIResponse(200,"编辑成功",results=data,status=status.HTTP_200_OK)
 
+class CaseResults(APIView):
+    """
+    测试结果列表
+    :param type==1  debug  type==2  allinterface  type==3 allrun
+    :param id
+    type==1 传caseId   type==2传interfaceId   type==3传casePlanId
+    """
+    def page_c(self,data):
+        type = data["type"]
+        page = data["page"]
+        pageSize = data["pageSize"]
+        obj = models.CaseResult.objects.filter(c_id=data["c_id"], type=type)
+        serializersObj = serializers.S_CaseResults(obj, many=True)
+        res_data = serializersObj.data
+        total = len(res_data)  # 数据总数
+        PaginationObj = Pagination(total, page, perPageNum=pageSize, allPageNum=11)
+        all_page = PaginationObj.all_page()
+        res_data = res_data[PaginationObj.start():PaginationObj.end()]
+        return res_data,all_page,total
+    def get(self,req):
+        data=req.query_params
+        res_data,all_page,total=self.page_c(data)
+        return APIResponse(200,"sucess",results=res_data,total=total,allPage=all_page,status=status.HTTP_200_OK)
+
+    def post(self,req):
+        """删除
+        参数同上
+        """
+        data=req.data
+        id=data["id"]
+        try:
+            models.CaseResult.objects.get(id=id).delete()
+        except:
+            return APIResponse(409, "删除异常",
+                               status=status.HTTP_200_OK)
+        res_data, all_page, total = self.page_c(data)
+        return APIResponse(200, "删除成功", results=res_data, total=total, allPage=all_page,
+                           status=status.HTTP_200_OK)
+
+
+
+class CaseResultsDetail(APIView):
+    """
+    测试结果详情
+    id
+    """
+    def get(self,req):
+        data=req.query_params
+        id=data["id"]
+        obj=models.CaseResult.objects.get(id=id)
+        serializersObj=serializers.S_CaseResults(obj)
+        res_data=serializersObj.data["result"]
+        return APIResponse(200, "sucess", results=eval(res_data),
+                           status=status.HTTP_200_OK)
