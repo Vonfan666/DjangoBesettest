@@ -30,7 +30,7 @@ class RunCase(APIView):
 
         responses = []
         data=req.data
-        listId=json.loads(req.data.get("id"))
+        listId=json.loads(data["id"])
         id=listId[0]
         l = []
         self.logRedis = conn("log")
@@ -55,7 +55,7 @@ class RunCase(APIView):
         self.logRedis.delete("log:%s_%s" % (data["userId"], None))
         # response--存入CaseResult  type=1
         userId = UserProfile.objects.get(id=data["userId"])
-        models.CaseResult.objects.create(result=response, type=1, c_id=data["id"], userId=userId)
+        models.CaseResult.objects.create(result=response, type=1, c_id=id, userId=userId)
         return  APIResponse(200,"sucess",results=responses,status=status.HTTP_200_OK)
 
 class DebugCase(APIView):
@@ -388,7 +388,7 @@ class CaseResults(APIView):
         type = data["type"]
         page = data["page"]
         pageSize = data["pageSize"]
-        obj = models.CaseResult.objects.filter(c_id=data["c_id"], type=type)
+        obj = models.CaseResult.objects.filter(c_id=data["c_id"], type=type).order_by("createTime").reverse()
         serializersObj = serializers.S_CaseResults(obj, many=True)
         res_data = serializersObj.data
         total = len(res_data)  # 数据总数
