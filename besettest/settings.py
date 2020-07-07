@@ -306,7 +306,7 @@ LOGGING = {
         },
         "django.db.backends":{   #记录所有日志
             'handlers': ["requests","console"],
-            'propagate': True,
+            'propagate': False,
             'level': 'DEBUG',
             # 'formatter': 'verbose'
         },

@@ -56,9 +56,12 @@ class RunCase(WebsocketConsumer):
         self.count=len(listId)
         listIdSort=[]
         n=1
+        self.l={
+            "results":[],
+            "logList":[],
+        }
         for id in listId:
 
-            log=[]
             order=models.CaseFile.objects.get(id=id).order
 
             listIdSort.append((order,id))
@@ -85,11 +88,15 @@ class RunCase(WebsocketConsumer):
             self.logger.info("%s>>>第{{%s}}个单位执行结束"%(caseName,n))
             self.send(json.dumps(res))
             n=n+1
-            #执行完成之后把状态改成执行完成-
+            self.l["results"].append(res)
         self.close()
     def disconnect(self, close_code):
         #断开时清除redis数据
-        print(self.logRedis.lrange("log:%s_%s"%(self.userId,self.interface),0,-1))  #存到数据库
+        redisListLog=self.logRedis.lrange("log:%s_%s" % (self.userId, self.interface), 0, -1)  # 存到数据库
+        for log in redisListLog:
+            self.l["logList"].append(log.decode("utf8"))
+        userId = UserProfile.objects.get(id=self.userId)
+        models.CaseResult.objects.create(result=self.l, type=2, c_id=self.interface, userId=userId)  #批量执行type传2--
         self.logRedis.delete("log:%s_%s"%(self.userId,self.interface))  #删除key
         print("断开")
 

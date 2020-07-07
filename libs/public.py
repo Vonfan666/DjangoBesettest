@@ -119,18 +119,6 @@ class StartMethod(object):
         self.stderr0 = sys.stderr
         sys.stdout = self.stdout_redirector
         sys.stderr = self.stderr_redirector
-    # def complete_output(self):
-    #     """
-    #     Disconnect output redirection and return buffer.
-    #     Safe to call multiple times.
-    #     """
-    #     if self.stdout0:
-    #         sys.stdout = self.stdout0
-    #         sys.stderr = self.stderr0
-    #         self.stdout0 = None
-    #         self.stderr0 = None
-    #     return self.outputBuffer.getvalue()
-
 
 if __name__=="__main__":
     Publics=Public()

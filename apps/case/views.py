@@ -32,7 +32,10 @@ class RunCase(APIView):
         data=req.data
         listId=json.loads(data["id"])
         id=listId[0]
-        l = []
+        l = {
+            "results":[],
+            "logList":[],
+        }
         self.logRedis = conn("log")
         obj=models.CaseFile.objects.select_related("userId","CaseGroupId","postMethod","dataType","environmentId").filter(id=id)
         serializersObj=serializers.S_CaseRun(obj,many=True)
@@ -45,22 +48,25 @@ class RunCase(APIView):
         self.logger.info("单位开始执行")
         s = InRequests(res_data["postMethod"],res_data["dataType"],res_data["environmentId"],res_data["name"],self.logger)
         response=s.run(res_data["attr"],res_data["headers"],res_data["data"])
-        responses.append(response)
+        l["results"].append(response)
         self.logger.info("单位执行结束")
         redisListLog = self.logRedis.lrange("log:%s_%s" % (data["userId"], None), 0, -1)
         for log in redisListLog:
-            l.append(log.decode("utf8"))
-        response["logList"] = l
+            l["logList"].append(log.decode("utf8"))
+
         # 根据errors判断执行是否成功  断言另外处理
         self.logRedis.delete("log:%s_%s" % (data["userId"], None))
         # response--存入CaseResult  type=1
         userId = UserProfile.objects.get(id=data["userId"])
-        models.CaseResult.objects.create(result=response, type=1, c_id=id, userId=userId)
-        return  APIResponse(200,"sucess",results=responses,status=status.HTTP_200_OK)
+        models.CaseResult.objects.create(result=l, type=1, c_id=id, userId=userId)
+        return  APIResponse(200,"sucess",results=l,status=status.HTTP_200_OK)
 
 class DebugCase(APIView):
     def post(self, req):
-        l=[]
+        l = {
+            "results": [],
+            "logList": [],
+        }
         self.logRedis = conn("log")
         data=req.data
         res_data=req.data.dict()
@@ -72,17 +78,17 @@ class DebugCase(APIView):
         self.logger.info("单位开始执行")
         s = InRequests(res_data["postMethod"], res_data["dataType"], environmentsObj,res_data["name"],self.logger)
         response = s.run(res_data["attr"], res_data["headers"], res_data["data"])
+        l["results"].append(response)
         self.logger.info("单位执行结束")
         redisListLog = self.logRedis.lrange("log:%s_%s" % (data["userId"], None), 0, -1)
-        for log  in redisListLog:
-            l.append(log.decode("utf8"))
-        response["logList"]=l
+        for log in redisListLog:
+            l["logList"].append(log.decode("utf8"))
         #根据errors判断执行是否成功  断言另外处理
         self.logRedis.delete("log:%s_%s" % (data["userId"], None))
         #response--存入CaseResult  type=1
         userId=UserProfile.objects.get(id=data["userId"])
-        models.CaseResult.objects.create(result=response,type=1,c_id=data["id"],userId=userId)
-        return APIResponse(200, "sucess", results=response, status=status.HTTP_200_OK)
+        models.CaseResult.objects.create(result=l,type=1,c_id=data["id"],userId=userId)
+        return APIResponse(200, "sucess", results=l, status=status.HTTP_200_OK)
 
     def Environmented(self,validateObj,res_data):
 
@@ -123,7 +129,6 @@ class CaseGroup(APIView):
         serializersObj=serializers.S_CaseGroupFiles(obj,many=True)
         print(serializersObj.data)
         return APIResponse(200,"sucess",results=serializersObj.data,status=status.HTTP_200_OK)
-
 class AddGroup(APIView):
     """新增接口分组
         :param projectId
@@ -138,7 +143,6 @@ class AddGroup(APIView):
             res_data=serializers.S_AddGroup(validate_data)
             res_data=res_data.data
             return APIResponse(200,"添加成功",results=res_data,status=status.HTTP_200_OK)
-
 class EditGroup(APIView):
     """修改用例文件夹
         :param  id   用例文件夹id
@@ -153,15 +157,12 @@ class EditGroup(APIView):
             res_data=serializers.S_AddGroup(validate_data)
             res_data=res_data.data
             return APIResponse(200,"修改成功",results=res_data,status=status.HTTP_200_OK)
-
 class RemoveGroup(APIView):
     """删除用例文件夹"""
     def post(self,req):
         id = req.data["id"]
         models.CaseGroupFiles.objects.get(id=id).delete()
         return APIResponse(200, "删除成功",status=status.HTTP_200_OK)
-
-
 class AddInterface(APIView):
     """新增用例接口"""
     def post(self,req):
@@ -171,8 +172,6 @@ class AddInterface(APIView):
             res_data=serializers.S_AddCase(validate_data)
             res_data=res_data.data
             return APIResponse(200,"添加成功",results=res_data,status=status.HTTP_200_OK)
-
-
 class EditCase(APIView):
     """编辑接口文件名称"""
     def post(self,req):
@@ -184,7 +183,6 @@ class EditCase(APIView):
             res_data = serializers.S_AddCase(validate_data)
             res_data = res_data.data
             return APIResponse(200, "修改成功", results=res_data, status=status.HTTP_200_OK)
-
 class RemoveInterface(APIView):
     """删除接口"""
     def post(self,req):
@@ -358,7 +356,6 @@ class GetCaseList(APIView):
         res_data = res_data[PaginationObj.start():PaginationObj.end()]
         return APIResponse(200, "success", results=res_data, total=total, allPage=all_page,
                            status=status.HTTP_200_OK)
-
 class EditCaseOrder(APIView):
     """用例列表编辑用例
        :param id  用例id
@@ -376,7 +373,6 @@ class EditCaseOrder(APIView):
             res_data=serializers.S_EditCaseOrder(res_obj)
             data=res_data.data
             return APIResponse(200,"编辑成功",results=data,status=status.HTTP_200_OK)
-
 class CaseResults(APIView):
     """
     测试结果列表
@@ -415,9 +411,6 @@ class CaseResults(APIView):
         res_data, all_page, total = self.page_c(data)
         return APIResponse(200, "删除成功", results=res_data, total=total, allPage=all_page,
                            status=status.HTTP_200_OK)
-
-
-
 class CaseResultsDetail(APIView):
     """
     测试结果详情
