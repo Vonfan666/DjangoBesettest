@@ -75,30 +75,30 @@ class CaseAction():
             pass
 
 
-class OutputRedirector(object):
-    """ Wrapper to redirect stdout or stderr """
-
-    def __init__(self, fp):
-        self.fp = fp
-
-    def write(self, s):
-        self.fp.write(s)
-
-    def writelines(self, lines):
-        self.fp.writelines(lines)
-
-    def flush(self):
-        self.fp.flush()
-
-
-
-class cc(object):
-    def __init__(self,fp):
-        self.fp=fp
-
-    def c(self,s):
-        print(self.fp)
-        print(s)
-import sys
-stdout_redirector = cc(sys.stdout)
-stderr_redirector = cc(sys.stderr)
+# class OutputRedirector(object):
+#     """ Wrapper to redirect stdout or stderr """
+#
+#     def __init__(self, fp):
+#         self.fp = fp
+#
+#     def write(self, s):
+#         self.fp.write(s)
+#
+#     def writelines(self, lines):
+#         self.fp.writelines(lines)
+#
+#     def flush(self):
+#         self.fp.flush()
+#
+#
+#
+# class cc(object):
+#     def __init__(self,fp):
+#         self.fp=fp
+#
+#     def c(self,s):
+#         print(self.fp)
+#         print(s)
+# import sys
+# stdout_redirector = cc(sys.stdout)
+# stderr_redirector = cc(sys.stderr)
