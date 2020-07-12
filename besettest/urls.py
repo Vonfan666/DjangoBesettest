@@ -24,7 +24,7 @@ from project import views as projectViews
 from users import  views as userViews
 from case import  views as caseViews
 from case  import  runCase
-
+# from case import tasks
 
 urlpatterns = [
     url('admin/', admin.site.urls),  #admin后台url
@@ -86,7 +86,9 @@ urlpatterns = [
     url(r"^users/case_results_detail/", caseViews.CaseResultsDetail.as_view(), name="CaseResultsDetail"),  # 查看debug日志详情
 
     url(r"^users/case_results_del/", caseViews.CaseResults.as_view(), name="CaseResults"),  # 查看删除用例调试
-    url(r"^users/case_run_all/", runCase.RunCaseAll.as_view(), name="RunCaseAll"),  # 执行测试计划
+    # url(r"^users/case_run_all/", runCase.RunCaseAll.as_view(), name="RunCaseAll"),  # 执行测试计划
+    # url(r"^users/case_run_all/", tasks.UsersTask.as_view(), name="RunCaseAll"),  # 执行测试计划
+    url(r"^users/case_run_all/", caseViews.RunAll.as_view(), name="RunCaseAll"),  # 执行测试计划
     url(r"^users/case_order/", caseViews.CaseOrder.as_view(), name="CaseOrder"),  # 修改该接口的执行顺序
     url(r"^users/casePlan_add/", caseViews.AddCasePlan.as_view(), name="AddCasePlan"),  # 新建测试计划
     url(r"^users/casePlan_get/", caseViews.GetCasePlan.as_view(), name="GetCasePlan"),  # 查看测试计划

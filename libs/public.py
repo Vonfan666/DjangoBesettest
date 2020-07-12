@@ -95,6 +95,7 @@ class OutputRedirector(object):
         self.fp.write(s)
         # key="%s_%s_%s"%(self.projectId,self.userId,self.runTime)
         self.logRedis.rpush("log:%s_%s"%(self.userId,self.interface), s)
+
         sys.stdout = self.start
     def writelines(self, lines):
         self.fp.writelines(lines)

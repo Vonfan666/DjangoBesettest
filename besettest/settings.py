@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/3.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
+from __future__ import absolute_import
 
 import os, sys
 import logging
@@ -20,6 +21,20 @@ sys.path.insert(0, BASE_DIR)  # 将根目录临时添加到环境变量
 sys.path.insert(0, os.path.join(BASE_DIR, "apps"))  # 将Mx_Shop/apps临时添加到环境变量
 sys.path.insert(0, os.path.join(BASE_DIR, "extra_apps"))  # 将Mx_Shop/apps临时添加到环境变量
 
+#celery配置信息
+#celery中间人 redis://:redis密码@redis服务所在的ip地址:端口/数据库号
+#channels配置redis也是这样配置，如果没有密码，就可以把':redis密码@'省略
+BROKER_BACKEND = 'redis'
+BROKER_URL = 'redis://localhost:6379/2'
+#celery结果返回，可用于跟踪结果
+CELERY_RESULT_BACKEND ='redis://localhost:6379/3'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
+
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
@@ -27,7 +42,7 @@ sys.path.insert(0, os.path.join(BASE_DIR, "extra_apps"))  # 将Mx_Shop/apps临�
 SECRET_KEY = 'hnr7eed9rkpd7iqa7l#8a(^pt0w4$^7jd-7k#!9=zzrel)c-pv'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["*", ]
 
@@ -48,6 +63,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',  # token验证
     # 'django.contrib.staticfiles',
     'channels',
+    "djcelery",
 
 ]
 
@@ -326,3 +342,5 @@ LOGGING = {
 
     }
 }
+
+

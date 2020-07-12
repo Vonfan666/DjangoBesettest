@@ -13,8 +13,13 @@ from django.db.models import Q
 from django_redis import get_redis_connection  as conn
 from log.logFile import logger as logs
 from  users.models import UserProfile
-
-
+from case.tasks import UsersTask
+class  RunAll(APIView):
+    def post(self,req):
+        cc = req.data
+        cc = cc.dict()
+        UsersTask.delay(json.dumps(cc))
+        return APIResponse(200,"c",status=status.HTTP_200_OK)
 class RunCase(APIView):
     """单条用例执行
         全部id传o 部分传id列表
@@ -60,7 +65,6 @@ class RunCase(APIView):
         userId = UserProfile.objects.get(id=data["userId"])
         models.CaseResult.objects.create(result=l, type=1, c_id=id, userId=userId)
         return  APIResponse(200,"sucess",results=l,status=status.HTTP_200_OK)
-
 class DebugCase(APIView):
     def post(self, req):
         l = {

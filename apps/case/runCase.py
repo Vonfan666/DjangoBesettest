@@ -10,7 +10,7 @@ import  json,os,time
 from libs import HTMLTestRunner
 from case.libs.findeSqlCase import FindCase
 from libs.writeScript import MakeScript
-
+# from case.tasks import UsersTask
 import unittest
 PATH = lambda  p:os.path.abspath(
        os.path.join(os.path.dirname(__file__),p)
@@ -57,8 +57,11 @@ class RunCaseAll(APIView):
         else:
             res_list = res_list["msg"]
         return  res_list
+
     def post(self,req):
         """需要传一个项目id 然后通过项目id找到name"""
+        print("啥情况")
+
         casePlanObj=models.CasePlan.objects.select_related("projectId").get(id=req.data["id"])
         projectId=casePlanObj.projectId
         fileName=casePlanObj.cname #脚本名称
