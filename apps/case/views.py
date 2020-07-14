@@ -13,12 +13,16 @@ from django.db.models import Q
 from django_redis import get_redis_connection  as conn
 from log.logFile import logger as logs
 from  users.models import UserProfile
-from case.tasks import UsersTask
+from case import tasks
+from case.runCase import RunCaseAll
 class  RunAll(APIView):
     def post(self,req):
         cc = req.data
         cc = cc.dict()
-        UsersTask.delay(json.dumps(cc))
+        cc=json.dumps(cc)
+        RunCaseAll().post(cc)
+        # res=tasks.allRun.delay(cc)
+        # print(res.task_id)
         return APIResponse(200,"c",status=status.HTTP_200_OK)
 class RunCase(APIView):
     """单条用例执行

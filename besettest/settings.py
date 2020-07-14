@@ -21,16 +21,9 @@ sys.path.insert(0, BASE_DIR)  # 将根目录临时添加到环境变量
 sys.path.insert(0, os.path.join(BASE_DIR, "apps"))  # 将Mx_Shop/apps临时添加到环境变量
 sys.path.insert(0, os.path.join(BASE_DIR, "extra_apps"))  # 将Mx_Shop/apps临时添加到环境变量
 
-#celery配置信息
-#celery中间人 redis://:redis密码@redis服务所在的ip地址:端口/数据库号
-#channels配置redis也是这样配置，如果没有密码，就可以把':redis密码@'省略
-BROKER_BACKEND = 'redis'
-BROKER_URL = 'redis://localhost:6379/2'
-#celery结果返回，可用于跟踪结果
-CELERY_RESULT_BACKEND ='redis://localhost:6379/3'
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
+
+
+
 
 
 
@@ -63,7 +56,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',  # token验证
     # 'django.contrib.staticfiles',
     'channels',
-    "djcelery",
+    'djcelery',
+    'django_celery_beat',
 
 ]
 
@@ -99,11 +93,11 @@ WSGI_APPLICATION = 'besettest.wsgi.application'
 # 指定ASGI的路由地址
 ASGI_APPLICATION = 'besettest.routing.application'
 
-
+redisHost="127.0.0.1:6379"
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379/0',
+        'LOCATION': 'redis://%s/0'%redisHost,
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
             'CONNECTION_POOL_KWARGS': {  #最大连接数
@@ -114,7 +108,7 @@ CACHES = {
     },
     'log': {
             'BACKEND': 'django_redis.cache.RedisCache',
-            'LOCATION': 'redis://127.0.0.1:6379/1/log',
+            'LOCATION': 'redis://%s/1/log'%redisHost,
             'OPTIONS': {
                 'CLIENT_CLASS': 'django_redis.client.DefaultClient',
                 'CONNECTION_POOL_KWARGS': {  #最大连接数
@@ -122,7 +116,18 @@ CACHES = {
                 },
                 # 'PASSWORD': 'xxx', # 如果有设置了redis-server密码在这里设置
             }
-        }
+        },
+    'celery': {
+                'BACKEND': 'django_redis.cache.RedisCache',
+                'LOCATION': 'redis://127.0.0.1:6379/2/log',
+                'OPTIONS': {
+                    'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+                    'CONNECTION_POOL_KWARGS': {  #最大连接数
+                        'max_connections': 1000
+                    },
+                    # 'PASSWORD': 'xxx', # 如果有设置了redis-server密码在这里设置
+                }
+            }
 
 }
 
@@ -344,3 +349,15 @@ LOGGING = {
 }
 
 
+# # from .celeryCon import *
+# #celery配置信息
+# #celery中间人 redis://:redis密码@redis服务所在的ip地址:端口/数据库号
+# #channels配置redis也是这样配置，如果没有密码，就可以把':redis密码@'省略
+# # BROKER_BACKEND = 'redis'
+# BROKER_URL = 'redis://localhost:6379/2'
+# #celery结果返回，可用于跟踪结果
+# CELERY_RESULT_BACKEND ='redis://localhost:6379/3'
+# CELERY_ACCEPT_CONTENT = ['json']
+# CELERY_TASK_SERIALIZER = 'json'
+# CELERY_RESULT_SERIALIZER = 'json'
+# CELERY_TIMEZONE =TIME_ZONE
