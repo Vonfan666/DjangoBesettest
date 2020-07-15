@@ -14,15 +14,17 @@ from django_redis import get_redis_connection  as conn
 from log.logFile import logger as logs
 from  users.models import UserProfile
 from case import tasks
-from case.runCase import RunCaseAll
+# from case.runCase import RunCaseAll
 class  RunAll(APIView):
     def post(self,req):
         cc = req.data
         cc = cc.dict()
         cc=json.dumps(cc)
-        RunCaseAll().post(cc)
-        # res=tasks.allRun.delay(cc)
-        # print(res.task_id)
+        # RunCaseAll().post(cc)
+        res=tasks.allRun.delay(cc)
+        # rep=tasks.forEach.delay(res.task_id)
+        #res存储的就是任务结果--当任务完成时 result.ready()为true，然后res.get()取结果即可
+        print(res.task_id)
         return APIResponse(200,"c",status=status.HTTP_200_OK)
 class RunCase(APIView):
     """单条用例执行
@@ -33,10 +35,7 @@ class RunCase(APIView):
         :param userId  执行人
         :id
     """
-
-
     def post(self,req):
-
         responses = []
         data=req.data
         listId=json.loads(data["id"])

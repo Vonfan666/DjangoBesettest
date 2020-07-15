@@ -11,11 +11,18 @@ import time
 from  case.runCase import RunCaseAll
 
 # 这里不再使用@app.task,而是用@shared_task，是指定可以在其他APP中也可以调用这个任务
-@shared_task
-def allRun(req):
+@shared_task(bind=True)
+def allRun(self,req):
+    #数据库创建case_results新增数据 status为初始化。。。
     s=RunCaseAll()
-    print(req)
-    return s.post(req)
+    # res=
+    # print(res)
+    # print(res.tasks_id)
+    s.post(req)
+    # for  i  in range(1,11):
+    #     time.sleep(0.1)
+    self.update_state(state="Progress",meta={})
+    return "执行完毕"
 
 # @shared_task
 # def minus(x,y):

@@ -29,11 +29,7 @@ class RunCaseAll(APIView):
     def removeFile(self,file):
         dirPath = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
         DIR = os.path.join(dirPath, "interface\\testFiles","")
-        print(os.listdir(DIR))
-        print("".join([file,".py"]))
-        print(332312321)
         if "".join([file,".py"]) in  os.listdir(DIR):
-            print(444444)
             os.remove(os.path.join(DIR,"".join([file,".py"])))
     def report_path(self,name):
         case_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), r"interface/results")
@@ -58,12 +54,9 @@ class RunCaseAll(APIView):
 
     def post(self,req):
         """需要传一个项目id 然后通过项目id找到name"""
-        print("啥情况")
-        print(req)
         req=json.loads(req)
-        print()
+        time.sleep(10)
         casePlanObj=models.CasePlan.objects.select_related("projectId").get(id=int(req["id"]))
-        print(casePlanObj)
         projectId=casePlanObj.projectId
         fileName=casePlanObj.cname #脚本名称
         name=casePlanObj.name   #计划名称
@@ -78,17 +71,16 @@ class RunCaseAll(APIView):
             res_list = res_list["msg"]
 
         if int(againScript)==1:  #如果设置每次执行重新生成
+            #### 数据库创建case_results新增数据 status为生成脚本。。。
             self.removeFile(fileName)  #检测存在脚本则删除--删除之后下面重新生成--如果没有下面新生成
-            print("5555555")
             MakeScript().make_file(res_list, fileName)
-            print(66666)
         if  int(againScript)==0:
+            #### 数据库创建case_results新增数据 status为执行脚本。。。
             if not self.distinctFileName(fileName):
                 MakeScript().make_file(res_list, fileName)
-        print("dsadsadas")
         report_set = open(self.report_path(name), 'wb')
         runner=HTMLTestRunner.HTMLTestRunner(stream=report_set,description = description,title=name)
         runner.run(self.allCase(fileName))
         report_set.close()
+        #### 数据库创建case_results新增数据 status为执行完毕。。。
 
-        return APIResponse(200, "sucess", status=status.HTTP_200_OK)
