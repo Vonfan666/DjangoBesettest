@@ -98,7 +98,6 @@ import time
 import unittest
 from xml.sax import saxutils
 
-
 # ------------------------------------------------------------------------
 # The redirectors below are used to capture output during testing. Output
 # sent to sys.stdout and sys.stderr are automatically captured. However
@@ -109,15 +108,15 @@ from xml.sax import saxutils
 # e.g.
 #   >>> logging.basicConfig(stream=HTMLTestRunner.stdout_redirector)
 #   >>>
-
-class OutputRedirector(object):
+class OutputRedirector():
     """ Wrapper to redirect stdout or stderr """
     def __init__(self, fp):
         self.fp = fp
 
     def write(self, s):
         self.fp.write(s)
-
+        # from django_redis import get_redis_connection  as conn
+        # self.logRedis.rpush("log:%s_%s" % (self.userId), s)
     def writelines(self, lines):
         self.fp.writelines(lines)
 
@@ -932,6 +931,7 @@ a.popup_link:hover {
 
 TestResult = unittest.TestResult
 
+
 class _TestResult(TestResult):
     # note: _TestResult is a pure representation of results.
     # It lacks the output and reporting ability compares to unittest._TextTestResult.
@@ -978,6 +978,7 @@ class _TestResult(TestResult):
             sys.stderr = self.stderr0
             self.stdout0 = None
             self.stderr0 = None
+
         return self.outputBuffer.getvalue()
 
 

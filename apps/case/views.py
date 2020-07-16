@@ -2,7 +2,7 @@ from django.shortcuts import render
 from  rest_framework.views import APIView,status
 from libs.api_response import APIResponse
 from . import models,serializers
-import  json,os
+import  json,os,time
 from case.libs.toRequests import InRequests
 from project.models import Environments
 # Create your views here
@@ -17,15 +17,20 @@ from case import tasks
 # from case.runCase import RunCaseAll
 class  RunAll(APIView):
     def post(self,req):
-        cc = req.data
-        cc = cc.dict()
-        cc=json.dumps(cc)
-        # RunCaseAll().post(cc)
-        res=tasks.allRun.delay(cc)
+        tasks_data = req.data
+        tasks_data = tasks_data.dict()
+        # timeStr=time.strftime("%Y%m%d%H%M%S",time.localtime())
+        # tasks_data["timeStr"]=timeStr
+        # print(tasks_data)
+        tasks_data=json.dumps(tasks_data)
+        res=tasks.allRun.delay(tasks_data)
+        print(res)
+        a=json.dumps({"tasksId":res.task_id})
+        tasks.celeryTasks.delay(a)
         # rep=tasks.forEach.delay(res.task_id)
         #res存储的就是任务结果--当任务完成时 result.ready()为true，然后res.get()取结果即可
         print(res.task_id)
-        return APIResponse(200,"c",status=status.HTTP_200_OK)
+        return APIResponse(200,"任务开始执行",task_id=res.task_id,status=status.HTTP_200_OK)
 class RunCase(APIView):
     """单条用例执行
         全部id传o 部分传id列表

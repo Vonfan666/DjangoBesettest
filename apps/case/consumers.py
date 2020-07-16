@@ -133,6 +133,7 @@ class selectLog(WebsocketConsumer):
             if  flag==1:
                 self.close()
                 break
+            time.sleep(0.1)
     def disconnect(self, close_code):
         print("断开连接")
 

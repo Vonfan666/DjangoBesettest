@@ -12,10 +12,15 @@ from case.libs.findeSqlCase import FindCase
 from libs.writeScript import MakeScript
 # from case.tasks import UsersTask
 import unittest
+from django_redis import get_redis_connection  as conn
+from log.logFile import logger as logs
+from libs.public import StartMethod
+
 PATH = lambda  p:os.path.abspath(
        os.path.join(os.path.dirname(__file__),p)
 )
-class RunCaseAll(APIView):
+class RunCaseAll():
+
     def distinctFileName(self,file):
         # 这里需要判断该目录下是否存在同名的fileName.py文件
         files=[]
@@ -53,8 +58,12 @@ class RunCaseAll(APIView):
         return  res_list
 
     def post(self,req):
+
         """需要传一个项目id 然后通过项目id找到name"""
+
+        # self.logRedis = conn("log")
         req=json.loads(req)
+        # self.userId="%s_%s"%(req["id"],req["timeStr"])  #把计划id+时间戳当做用户id传过去
         time.sleep(10)
         casePlanObj=models.CasePlan.objects.select_related("projectId").get(id=int(req["id"]))
         projectId=casePlanObj.projectId
