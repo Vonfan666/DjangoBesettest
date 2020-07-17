@@ -54,23 +54,17 @@ class RunCaseAll():
         orderDictObj = serializersObj.data
         dictObj = json.loads(json.dumps(orderDictObj))
         res_list = FindCase(dictObj).run()
-
         return  res_list
-
     def post(self,req):
 
         """需要传一个项目id 然后通过项目id找到name"""
-
-        # self.logRedis = conn("log")
         req=json.loads(req)
-        # self.userId="%s_%s"%(req["id"],req["timeStr"])  #把计划id+时间戳当做用户id传过去
         time.sleep(10)
         casePlanObj=models.CasePlan.objects.select_related("projectId").get(id=int(req["id"]))
         projectId=casePlanObj.projectId
         fileName=casePlanObj.cname #脚本名称
         name=casePlanObj.name   #计划名称
         description=casePlanObj.detail
-
         againScript=casePlanObj.againScript  #是否新建脚本(删除之前的在新建)   不删除直接使用之前的
         res_list=self.serializers_data(projectId)  #各种骚操作找到排序后的用例参数集
 
@@ -88,8 +82,10 @@ class RunCaseAll():
             if not self.distinctFileName(fileName):
                 MakeScript().make_file(res_list, fileName)
         report_set = open(self.report_path(name), 'wb')
-        runner=HTMLTestRunner.HTMLTestRunner(stream=report_set,description = description,title=name)
-        runner.run(self.allCase(fileName))
+        key = "%s_%s" % (req["id"], req["timeStr"])  # 把计划id+时间戳当做用户id传过去
+        runner=HTMLTestRunner.HTMLTestRunner(stream=report_set,description = description,title=name,key=key)
+
+        runner.run(self.allCase(fileName))   #这里传一个任务id到HTMLTestRunner--然后根据这个加上时间戳生成id
         report_set.close()
         #### 数据库创建case_results新增数据 status为执行完毕。。。
 

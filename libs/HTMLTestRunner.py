@@ -97,7 +97,8 @@ import sys
 import time
 import unittest
 from xml.sax import saxutils
-
+# from case.runCase import RunCaseAll
+from django_redis import get_redis_connection  as conn
 # ------------------------------------------------------------------------
 # The redirectors below are used to capture output during testing. Output
 # sent to sys.stdout and sys.stderr are automatically captured. However
@@ -108,15 +109,16 @@ from xml.sax import saxutils
 # e.g.
 #   >>> logging.basicConfig(stream=HTMLTestRunner.stdout_redirector)
 #   >>>
+tasks_key={"id":None}
 class OutputRedirector():
     """ Wrapper to redirect stdout or stderr """
     def __init__(self, fp):
         self.fp = fp
-
+        self.logRedis = conn("log")
     def write(self, s):
         self.fp.write(s)
-        # from django_redis import get_redis_connection  as conn
-        # self.logRedis.rpush("log:%s_%s" % (self.userId), s)
+        #
+        self.logRedis.rpush("log:%s" % (tasks_key["id"]), s)
     def writelines(self, lines):
         self.fp.writelines(lines)
 
@@ -1031,9 +1033,10 @@ class _TestResult(TestResult):
 class HTMLTestRunner(Template_mixin):
     """
     """
-    def __init__(self, stream=sys.stdout, verbosity=1, title=None, description=None):
+    def __init__(self, stream=sys.stdout, verbosity=1, title=None, description=None,key=None):
         self.stream = stream
         self.verbosity = verbosity
+        tasks_key["id"] = key
         if title is None:
             self.title = self.DEFAULT_TITLE
         else:
@@ -1047,7 +1050,9 @@ class HTMLTestRunner(Template_mixin):
 
 
     def run(self, test, caseinfo={}):
+
         "Run the given test case or test suite."
+
         result = _TestResult(self.verbosity)
         test(result)
         self.stopTime = datetime.datetime.now()

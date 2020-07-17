@@ -19,14 +19,13 @@ class  RunAll(APIView):
     def post(self,req):
         tasks_data = req.data
         tasks_data = tasks_data.dict()
-        # timeStr=time.strftime("%Y%m%d%H%M%S",time.localtime())
-        # tasks_data["timeStr"]=timeStr
-        # print(tasks_data)
-        tasks_data=json.dumps(tasks_data)
-        res=tasks.allRun.delay(tasks_data)
-        print(res)
-        a=json.dumps({"tasksId":res.task_id})
-        tasks.celeryTasks.delay(a)
+        timeStr=time.strftime("%Y%m%d%H%M%S",time.localtime())
+        tasks_data["timeStr"]=timeStr
+        tasks_data_json=json.dumps(tasks_data)
+        res=tasks.allRun.delay(tasks_data_json)
+        tasks_data["tasksId"]=res.task_id
+        tasks_data_celeryTasks_json=json.dumps(tasks_data)
+        tasks.celeryTasks.delay(tasks_data_celeryTasks_json)
         # rep=tasks.forEach.delay(res.task_id)
         #res存储的就是任务结果--当任务完成时 result.ready()为true，然后res.get()取结果即可
         print(res.task_id)

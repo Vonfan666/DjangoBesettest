@@ -18,14 +18,25 @@ from  case.runCase import RunCaseAll
 def allRun(self,tasks_data):
 
     #数据库创建case_results新增数据 status为初始化。。。
-    s=RunCaseAll()
-    print(tasks_data)
-    s.post(tasks_data)
-    self.update_state(state="Progress",meta={})
-    return "success"
+    try:
+        s=RunCaseAll()
+        s.post(tasks_data)
+        self.update_state(state="Progress",meta={})
+        print(self.task_id)
+        return "success"
+    except:
+        return "fail"
 
 @shared_task(bind=True)
-def celeryTasks(self,tasksId):
+def celeryTasks(self,tasks_data):
+    """
+    '{"id": "67", "timeStr": "20200717180838", "tasksId": "f76c488c-fa29-42f1-9b4a-4c80ade939bf"}'
+    :param self:
+    :param tasks_data:
+    :return:
+    """
+    tasks_data=json.loads(tasks_data)
+    tasksId=tasks_data["tasksId"]
     #检查上一个异步是否执行完毕--如果执行完毕则将redis日志存入数据库，
     #然后前端起一个websockt查询redis日志
     #检测任务状态修改并插入数据库
