@@ -285,8 +285,9 @@ class S_AddCasePlan(serializers.ModelSerializer):
         return user
 
     def update(self, instance, validated_data):
-        validated_data["CaseCount"] = models.CaseFile.objects.filter(
-            Q(CaseGroupId__CaseGroupFilesId__projectId=int(self.initial_data["projectId"])) & Q(status=1)).count()
+        if validated_data["againScript"]:  #如果重新创建脚本则更新用例数量
+            validated_data["CaseCount"] = models.CaseFile.objects.filter(
+                Q(CaseGroupId__CaseGroupFilesId__projectId=int(self.initial_data["projectId"])) & Q(status=1)).count()
         user=super().update(instance=instance,validated_data=validated_data)
         user.save()
         return user

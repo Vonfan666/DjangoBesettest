@@ -28,8 +28,7 @@ class  RunAll(APIView):
         tasks.celeryTasks.delay(tasks_data_celeryTasks_json)
         # rep=tasks.forEach.delay(res.task_id)
         #res存储的就是任务结果--当任务完成时 result.ready()为true，然后res.get()取结果即可
-        print(res.task_id)
-        return APIResponse(200,"任务开始执行",task_id=res.task_id,status=status.HTTP_200_OK)
+        return APIResponse(200,"success",task_id=res.task_id,log_id="%s_%s"%(tasks_data["id"],timeStr),status=status.HTTP_200_OK)
 class RunCase(APIView):
     """单条用例执行
         全部id传o 部分传id列表

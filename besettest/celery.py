@@ -12,10 +12,10 @@ app = Celery('besettest')
 class Config:
     BROKER_URL = 'redis://localhost:6379/2'
     CELERY_RESULT_BACKEND = 'redis://localhost:6379/3'
-    # CELERY_ACCEPT_CONTENT = ['json']
-    # CELERY_TASK_SERIALIZER = 'json'
-    # CELERY_RESULT_SERIALIZER = 'json'
-    # CELERY_TIMEZONE = TIME_ZONE
+    CELERY_ACCEPT_CONTENT = ['json']
+    CELERY_TASK_SERIALIZER = 'json'
+    CELERY_RESULT_SERIALIZER = 'json'
+    CELERY_TIMEZONE = TIME_ZONE
 
 app.config_from_object(Config)
 # 到各个APP里自动发现tasks.py文件
