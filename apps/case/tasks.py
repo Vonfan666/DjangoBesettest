@@ -12,7 +12,11 @@ from  celery import Task
 import time
 from  case.runCase import RunCaseAll
 from celery.result import AsyncResult
+from  case import models
 from django_redis import get_redis_connection  as conn
+from users.models import UserProfile
+from django.db.models import Q
+
 # from log.logFile import logger as logs
 # from libs.public import StartMethod
 # 这里不再使用@app.task,而是用@shared_task，是指定可以在其他APP中也可以调用这个任务
@@ -27,7 +31,7 @@ def allRun(self,tasks_data):
     try:
         s=RunCaseAll()
 
-        s.post(tasks_data)
+        res=s.post(tasks_data)
         self.update_state(state="Progress",meta={})
         return "success"
     except:
@@ -41,23 +45,60 @@ def celeryTasks(self,tasks_data):
     :param tasks_data:
     :return:
     """
+
     tasks_data=json.loads(tasks_data)
-    tasksId="%s-%s"%("celery-task-meta",tasks_data["tasksId"])
+    print(tasks_data)
     tasks_id=tasks_data["tasksId"]
-    #检查上一个异步是否执行完毕--如果执行完毕则将redis日志存入数据库，
-    #然后前端起一个websockt查询redis日志
-    #检测任务状态修改并插入数据库
-    #并实时读取产生的日志
+    timeStr=tasks_data["timeStr"]
+    userId=tasks_data["userId"]
+    c_id =tasks_data["id"]
+    CaseCount=tasks_data["CaseCount"]
+    startTime=time.time()
+    self.l = {
+        "results": [],
+        "logList": [],
+    }
     while True:
+        endTime=time.time()
         try:
             res=AsyncResult(tasks_id).status
+        except:
+            if endTime-startTime>60*30:
+                break
+            else:
+                continue
+        else:
             if res=="SUCCESS":
                 #存入库中之后推出循环
-                print(res)
+                Redis=conn()
+                RedisCount=conn()
+                redisListLog=Redis.lrange("log:%s_%s"%(tasks_data["id"],timeStr),0,-1)
+                RedisCountLog=RedisCount.get("status:%s_%s"%(c_id,timeStr))
+                for log in redisListLog:
+                    self.l["logList"].append(log.decode("utf8"))
+                print(c_id)
+                print(userId)
+                RedisCountLog=json.loads(RedisCountLog)
+                print(RedisCountLog)
+                userId = UserProfile.objects.get(id=userId)
+                if int(tasks_data["againScript"])==1:
+                    CaseCount=models.CaseFile.objects.filter(
+                        Q(CaseGroupId__CaseGroupFilesId__projectId=int(tasks_data["projectId"])) & Q(status=1)).count()
+                models.CasePlan.objects.filter(id=c_id).update(CaseCount=int(CaseCount))
+                models.CaseResult.objects.create(
+                    result=self.l,
+                    type=3,
+                    c_id=c_id,
+                    userId=userId,
+                    caseCount=int(CaseCount),
+                    assertSuccess=RedisCountLog["count"]["assertSuccess"],
+                    assertFailed=RedisCountLog["count"]["assertFailed"],
+                    runFailed=RedisCountLog["count"]["runFailed"],
+                )
+
                 break
-        except:
-            continue
-        time.sleep(1)
+    time.sleep(1)
+    print("退出")
 
 # @shared_task
 # def minus(x,y):

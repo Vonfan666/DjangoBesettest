@@ -15,6 +15,7 @@ from log.logFile import logger as logs
 from  users.models import UserProfile
 from case import tasks
 # from case.runCase import RunCaseAll
+
 class  RunAll(APIView):
     def post(self,req):
         tasks_data = req.data

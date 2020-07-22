@@ -1081,6 +1081,7 @@ class HTMLTestRunner(Template_mixin):
         Return report attributes as a list of (name, value).
         Override this to add custom attributes.
         """
+        self.runCase=result   #新增一个实例变量--通过在执行用例时通过它去找用例执行成功失败断言数量
         startTime = str(self.startTime)[:19]
         duration = str(self.stopTime - self.startTime)
         status = []

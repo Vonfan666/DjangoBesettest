@@ -137,4 +137,18 @@ class selectLog(WebsocketConsumer):
     def disconnect(self, close_code):
         print("断开连接")
 
+class runCaseSelectLog(WebsocketConsumer):
+    def connect(self):
+        self.accept()
 
+    def receive(self, text_data=None, bytes_data=None):
+        print("logList链接成功")
+        print(text_data, "下面的")
+        data=json.loads(text_data)
+        tasks_id=data["task_id"]
+        for  a   in  range(20):
+            self.send("%s_%s"%(tasks_id,a))
+            time.sleep(1)
+        self.close()
+    def disconnect(self, code):
+        print("断开连接")

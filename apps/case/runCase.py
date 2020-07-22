@@ -95,11 +95,21 @@ class RunCaseAll():
         self.logRedis.set("status:%s" % key, self.resStatus(2))
         time.sleep(0.2)
         runner.run(self.allCase(fileName))   #这里传一个任务id到HTMLTestRunner--然后根据这个加上时间戳生成id
+        print(runner.description)
+
+        print(runner.runCase.error_count)
+        print(runner.runCase.success_count)
+        print(runner.runCase.failure_count)
+        l={}
+        l["assertSuccess"]=runner.runCase.success_count
+        l["assertFailed"]=runner.runCase.failure_count
+        l["runFailed"]=runner.runCase.error_count
         report_set.close()
-        self.logRedis.set("status:%s" % key, self.resStatus(3))
+
+        self.logRedis.set("status:%s" % key, self.resStatus(3,count=l))
         #### 数据库创建case_results新增数据 status为执行完毕。。。
 
-    def resStatus(self,status):
+    def resStatus(self,status,count=None):
         """
         0  初始化
         1  创建脚本
@@ -107,5 +117,5 @@ class RunCaseAll():
         3  执行完毕
         """
         list=["初始化","创建脚本","执行脚本","执行完毕"]
-        data={"status":status,"msg":list[status]}
+        data={"status":status,"msg":list[status],"count":count}
         return json.dumps(data)

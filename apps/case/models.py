@@ -95,3 +95,6 @@ class CaseResult(models.Model):
     updateTime = models.DateTimeField(auto_now=True, verbose_name="更新时间")
     class Meta:
         db_table="case_result"
+
+class   test(models.Model):
+    pass
