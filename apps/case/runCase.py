@@ -64,11 +64,11 @@ class RunCaseAll():
     def post(self,req):
 
         """需要传一个项目id 然后通过项目id找到name"""
+
         req = json.loads(req)
         key = "%s_%s" % (req["id"], req["timeStr"])  # 把计划id+时间戳当做用户id传过去
         self.logRedis = conn()
         self.logRedis.set("status:%s"%key,self.resStatus(1))
-        time.sleep(1)
         casePlanObj=models.CasePlan.objects.select_related("projectId").get(id=int(req["id"]))
         projectId=casePlanObj.projectId
         fileName=casePlanObj.cname #脚本名称
@@ -84,7 +84,6 @@ class RunCaseAll():
         if int(againScript)==1:  #如果设置每次执行重新生成
             #### 数据库创建case_results新增数据 status为生成脚本。。。
             self.logRedis.set("status:%s" % key, self.resStatus(2))
-            time.sleep(1)
             self.removeFile(fileName)  #检测存在脚本则删除--删除之后下面重新生成--如果没有下面新生成
             MakeScript().make_file(res_list, fileName)
         if  int(againScript)==0:
@@ -92,26 +91,31 @@ class RunCaseAll():
                 MakeScript().make_file(res_list, fileName)
         report_set = open(self.report_path(name), 'wb')
         runner=HTMLTestRunner.HTMLTestRunner(stream=report_set,description = description,title=name,key=key)
-        self.logRedis.set("status:%s" % key, self.resStatus(3))
-        time.sleep(0.2)
+        self.logRedis.set("status:%s" % key, self.resStatus(3,createStatus=int(againScript)))
         runner.run(self.allCase(fileName))   #这里传一个任务id到HTMLTestRunner--然后根据这个加上时间戳生成id
         l={}
         l["assertSuccess"]=runner.runCase.success_count
         l["assertFailed"]=runner.runCase.failure_count
         l["runFailed"]=runner.runCase.error_count
         report_set.close()
-        self.logRedis.set("status:%s" % key, self.resStatus(4, count=l))
+        self.logRedis.set("status:%s" % key, self.resStatus(4,createStatus=int(againScript), count=l))
         self.logRedis.rpush("log:%s"%key,"结束")
 
         #### 数据库创建case_results新增数据 status为执行完毕。。。
 
-    def resStatus(self,status,count=None):
+    def resStatus(self,status,createStatus=None,count=None):
         """
         1  初始化
         2  创建脚本
         3  执行脚本
         4  执行完毕
+        createStatus  #是否创新创建脚本
+
         """
-        list=["初始化","创建脚本","执行脚本","执行完毕"]
-        data={"status":status,"msg":list[status],"count":count}
+        list = ["准备", "初始化", "创建脚本", "执行脚本", "执行完毕"]
+        data = {"status": status, "msg": list[status], "count": count}
+        if  createStatus==0:  #不需要重新创建脚本
+            list.pop(2)
+            data = {"status": status-1, "msg": list[status-1], "count": count}
+
         return json.dumps(data)

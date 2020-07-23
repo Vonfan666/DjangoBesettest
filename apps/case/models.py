@@ -96,5 +96,3 @@ class CaseResult(models.Model):
     class Meta:
         db_table="case_result"
 
-class   test(models.Model):
-    pass

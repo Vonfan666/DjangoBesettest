@@ -31,7 +31,7 @@ def allRun(self,tasks_data):
     try:
         s=RunCaseAll()
 
-        res=s.post(tasks_data)
+        s.post(tasks_data)
         self.update_state(state="Progress",meta={})
         return "success"
     except:
@@ -95,7 +95,6 @@ def celeryTasks(self,tasks_data):
                 )
 
                 break
-    time.sleep(1)
     print("退出")
 
 # @shared_task
