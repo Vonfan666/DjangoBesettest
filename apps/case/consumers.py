@@ -106,15 +106,11 @@ class selectLog(WebsocketConsumer):
         self.logRedis = conn("log")
         self.len=0
     def receive(self, text_data=None, bytes_data=None):
-        print("logList链接成功")
-        print(text_data,"下面的")
         textObj = json.loads(text_data)
         listId = textObj["idList"]
         self.userId = textObj["userId"]
         self.interface = textObj["interface"]
         self.count = len(listId)
-        # self.send("32313")
-        # print("发送成功")
         self.indexStart=0
         while  1:
             flag=0
@@ -140,15 +136,42 @@ class selectLog(WebsocketConsumer):
 class runCaseSelectLog(WebsocketConsumer):
     def connect(self):
         self.accept()
+        self.redisLog=conn()
 
     def receive(self, text_data=None, bytes_data=None):
-        print("logList链接成功")
-        print(text_data, "下面的")
+
         data=json.loads(text_data)
-        tasks_id=data["task_id"]
-        for  a   in  range(20):
-            self.send("%s_%s"%(tasks_id,a))
-            time.sleep(1)
+        startTime=time.time()
+        Start=0
+        msg={
+            "log":"",
+            "status":None
+        }
+        while True:
+            try:
+                res=self.redisLog.lrange("log:%s"%data["log_id"],Start,-1)
+                resStatus=self.redisLog.get("status:%s"%data["log_id"])
+                msg["status"]=json.loads(resStatus)
+                if res:
+                    listLog=list(map(lambda x:x.decode("utf8"),res))
+                    print(json.dumps(listLog))
+                    for  log  in listLog:
+                        msg["log"]=log
+                        self.send(json.dumps(msg))
+                        if log=="结束":
+                            break
+
+                    Start = len(res) + Start
+                    continue
+                else:
+                    endTime=time.time()
+                    if endTime-startTime<20:
+                        time.sleep(0.5)
+                        continue
+                    else:
+                        break
+            except:
+                continue
         self.close()
     def disconnect(self, code):
         print("断开连接")

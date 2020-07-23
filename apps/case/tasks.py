@@ -76,8 +76,6 @@ def celeryTasks(self,tasks_data):
                 RedisCountLog=RedisCount.get("status:%s_%s"%(c_id,timeStr))
                 for log in redisListLog:
                     self.l["logList"].append(log.decode("utf8"))
-                print(c_id)
-                print(userId)
                 RedisCountLog=json.loads(RedisCountLog)
                 print(RedisCountLog)
                 userId = UserProfile.objects.get(id=userId)
