@@ -15,7 +15,18 @@ from log.logFile import logger as logs
 from  users.models import UserProfile
 from case import tasks
 # from case.runCase import RunCaseAll
+"""最新的"""
 
+#非异步
+# class  RunAll(APIView):
+#     def post(self,req):
+#         cc = req.data
+#         cc = cc.dict()
+#         cc=json.dumps(cc)
+#         RunCaseAll().post(cc)
+#         # res=tasks.allRun.delay(cc)
+#         # print(res.task_id)
+#         return APIResponse(200,"c",status=status.HTTP_200_OK)
 class  RunAll(APIView):
     def post(self,req):
         tasks_data = req.data

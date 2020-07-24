@@ -227,7 +227,7 @@ class  S_CaseFilesDetail(serializers.ModelSerializer):
                 dict_obj = {
                     "name": rows.name,
                     "order": rows.order,
-                    "status": rows.get_status_display(),
+                    "status": {"id": rows.status, "name": rows.get_status_display()},
                     "postMethod": rows.postMethod.id,
                     "dataType": rows.dataType.id,
                     "attr": rows.attr,

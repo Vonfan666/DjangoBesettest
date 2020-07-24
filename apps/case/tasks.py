@@ -47,7 +47,6 @@ def celeryTasks(self,tasks_data):
     """
 
     tasks_data=json.loads(tasks_data)
-    print(tasks_data)
     tasks_id=tasks_data["tasksId"]
     timeStr=tasks_data["timeStr"]
     userId=tasks_data["userId"]
@@ -77,7 +76,6 @@ def celeryTasks(self,tasks_data):
                 for log in redisListLog:
                     self.l["logList"].append(log.decode("utf8"))
                 RedisCountLog=json.loads(RedisCountLog)
-                print(RedisCountLog)
                 userId = UserProfile.objects.get(id=userId)
                 if int(tasks_data["againScript"])==1:
                     CaseCount=models.CaseFile.objects.filter(
