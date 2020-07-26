@@ -13,8 +13,8 @@ from libs.writeScript import MakeScript
 # from case.tasks import UsersTask
 import unittest
 from django_redis import get_redis_connection  as conn
-from log.logFile import logger as logs
-from libs.public import StartMethod
+# from log.logFile import logger as logs
+# from libs.public import StartMethod
 
 """最新的"""
 PATH = lambda  p:os.path.abspath(
@@ -67,17 +67,24 @@ class RunCaseAll():
         """需要传一个项目id 然后通过项目id找到name"""
 
         req = json.loads(req)
+        print(req)
         key = "%s_%s" % (req["id"], req["timeStr"])  # 把计划id+时间戳当做用户id传过去
+        print(key)
         self.logRedis = conn()
+        print("实例redis")
         self.logRedis.set("status:%s"%key,self.resStatus(1))
         casePlanObj=models.CasePlan.objects.select_related("projectId").get(id=int(req["id"]))
+        print(casePlanObj)
         projectId=casePlanObj.projectId
+        print("22222")
         fileName=casePlanObj.cname #脚本名称
+        print(3)
         name=casePlanObj.name   #计划名称
+        print(4)
         description=casePlanObj.detail
         againScript=casePlanObj.againScript  #是否新建脚本(删除之前的在新建)   不删除直接使用之前的
         res_list=self.serializers_data(projectId)  #各种骚操作找到排序后的用例参数集
-
+        print(res_list)
         if not res_list["code"]:  # 如果有接口或者用例执行顺序重复则直接返回
             return APIResponse(409, res_list["msg"], results=res_list["msg"], status=status.HTTP_200_OK)
         else:
@@ -91,6 +98,7 @@ class RunCaseAll():
             if not self.distinctFileName(fileName):
                 MakeScript().make_file(res_list, fileName)
         report_set = open(self.report_path(name), 'wb')
+        print(key)
         runner=HTMLTestRunner.HTMLTestRunner(stream=report_set,description = description,title=name,key=key)
         self.logRedis.set("status:%s" % key, self.resStatus(3,createStatus=int(againScript)))
         runner.run(self.allCase(fileName))   #这里传一个任务id到HTMLTestRunner--然后根据这个加上时间戳生成id
@@ -101,6 +109,7 @@ class RunCaseAll():
         report_set.close()
         self.logRedis.set("status:%s" % key, self.resStatus(4,createStatus=int(againScript), count=l))
         self.logRedis.rpush("log:%s"%key,"结束")
+        print("runCaseJISHHU")
 
         #### 数据库创建case_results新增数据 status为执行完毕。。。
 

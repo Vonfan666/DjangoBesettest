@@ -1,5 +1,4 @@
 from django.db import models
-
 # Create your models here.
 
 class CaseGroupFiles(models.Model):
@@ -73,6 +72,7 @@ class CasePlan(models.Model):
     userId = models.ForeignKey("users.UserProfile", to_field="id", on_delete=models.SET_NULL, null=True,related_name="c_name",verbose_name="创建人")
     status=models.IntegerField(choices=status_Choices,default=0,null=True,verbose_name="执行状态")
     runType=models.IntegerField(choices=run_Choices,default=0,verbose_name="执行方式")
+    cron = models.CharField(max_length=255, verbose_name="cron定时表达式")
     CaseCount=models.IntegerField(null=True,verbose_name="用例数量")
     caseStartTime=models.DateTimeField(verbose_name="计划开始时间",null=True)
     caseEndTime = models.DateTimeField(verbose_name="计划结束时间", null=True)
@@ -96,3 +96,21 @@ class CaseResult(models.Model):
     class Meta:
         db_table="case_result"
 
+class timedTask(models.Model):
+    """该表关联计划表和 django_celery_beat_periodictask django_celery_beat_crontabschedule表
+        定时任务停止则删除 django_celery_beat_crontabschedule定时和django_celery_beat_periodictask任务--以及修改CasePlan执行方式为手动
+        重新启动 则新增--
+        删除则 修改CasePlan执行方式---删除该表相关内容  以及 beat表两张表的呃逆荣
+    """
+    status_Choices = (
+        (0, "有效"),
+        (1, "暂停"),
+    )
+    planId=models.ForeignKey("CasePlan",to_field="id",on_delete=models.SET_NULL, null=True,related_name="planId_tt",verbose_name="计划id")
+    cronId=models.IntegerField(null=True,verbose_name="cron表达式id")
+    PeriodicTaskId=models.IntegerField(null=True,verbose_name="任务id")
+    userId = models.ForeignKey("users.UserProfile", to_field="id", on_delete=models.SET_NULL, null=True,related_name="userId_tt",verbose_name="创建人")
+    status=models.IntegerField(choices=status_Choices,default=0,null=True,verbose_name="定时任务状态")
+    cron = models.CharField(max_length=255, verbose_name="cron定时表达式",null=True)
+    class Meta:
+        db_table="django_celery_beat_task"

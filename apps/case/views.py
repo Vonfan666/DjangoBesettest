@@ -1,19 +1,78 @@
-from django.shortcuts import render
-from  rest_framework.views import APIView,status
-from libs.api_response import APIResponse
-from . import models,serializers
-import  json,os,time
-from case.libs.toRequests import InRequests
-from project.models import Environments
-# Create your views here
-import  logging
-from libs.Pagination import Pagination
-from libs.public import StartMethod
-from django.db.models import Q
+import json
+import time
+from  datetime import datetime
+
+from django_celery_beat.models import PeriodicTask, IntervalSchedule
 from django_redis import get_redis_connection  as conn
+from  rest_framework.views import APIView,status
+
+from case.libs.toRequests import InRequests
+from case.tasks import allRun,celeryTasks
+from libs.Pagination import Pagination
+from libs.api_response import APIResponse
+from libs.public import StartMethod
 from log.logFile import logger as logs
+from project.models import Environments
 from  users.models import UserProfile
-from case import tasks
+from . import models,serializers
+
+from django_celery_beat.models import PeriodicTask,CrontabSchedule
+class TimedTask(APIView):
+    """定时任务
+        新建/编辑计划时如果设置了定时-这里就会管理任务表和 beat系列表
+        1. Seconds （秒）
+2. Minutes （分）
+3. Hours （时）
+4. Day-of-Month （天）
+5. Month （月）
+6. Day-of-Week （周）
+7. Year (年 可选字段)
+    """
+    def cronChange(self,data):
+        timeList=data.split(" ")
+        return timeList
+    def task(self, data):
+        cronTime=self.cronChange(data["cron"])
+        if not models.timedTask.objects.filter(planId_id=data["id"]):
+            task, created =CrontabSchedule.objects.get_or_create(
+
+                second=cronTime[0],
+                minute=cronTime[1],
+                hour=cronTime[2],
+                day_of_month=cronTime[3],  #可出现", - * / ? L C #"四个字符，有效范围为1-7的整数或SUN-SAT两个范围。1表示星期天，2表示星期一， 依次类推
+                month=cronTime[4],
+                day_of_week=cronTime[5],  #可出现", - * / ? L W C"八个字符，有效范围为0-31的整数
+                year=cronTime[6],
+                task="case.tasks.timedTask")
+
+    def post(name, task, task_args, crontab_time, desc):
+        '''
+        新增定时任务
+        :param name: 定时任务名称
+        :param task: 对应tasks里已有的task
+        :param task_args: list 参数
+        :param crontab_time: 时间配置
+        :param desc: 定时任务描述
+        :return: ok
+        '''
+        # task任务， created是否定时创建
+        # task, created = celery_models.PeriodicTask.objects.get_or_create(
+        #     name=name, task=task)
+        # # 获取 crontab
+        # crontab = celery_models.CrontabSchedule.objects.filter(
+        #     **crontab_time).first()
+        # if crontab is None:
+        #     # 如果没有就创建，有的话就继续复用之前的crontab
+        #     crontab = celery_models.CrontabSchedule.objects.create(**crontab_time)
+        # task.crontab = crontab  # 设置crontab
+        # task.enabled = True  # 开启task
+        # task.kwargs = json.dumps(task_args, ensure_ascii=False)  # 传入task参数
+        # task.description = desc
+        # task.save()
+
+        return APIResponse(200, "success", status=status.HTTP_200_OK)
+
+
 # from case.runCase import RunCaseAll
 """最新的"""
 
@@ -34,10 +93,10 @@ class  RunAll(APIView):
         timeStr=time.strftime("%Y%m%d%H%M%S",time.localtime())
         tasks_data["timeStr"]=timeStr
         tasks_data_json=json.dumps(tasks_data)
-        res=tasks.allRun.delay(tasks_data_json)
+        res= allRun.delay(tasks_data_json)
         tasks_data["tasksId"]=res.task_id
         tasks_data_celeryTasks_json=json.dumps(tasks_data)
-        tasks.celeryTasks.delay(tasks_data_celeryTasks_json)
+        celeryTasks.delay(tasks_data_celeryTasks_json)
         # rep=tasks.forEach.delay(res.task_id)
         #res存储的就是任务结果--当任务完成时 result.ready()为true，然后res.get()取结果即可
         return APIResponse(200,"success",task_id=res.task_id,log_id="%s_%s"%(tasks_data["id"],timeStr),status=status.HTTP_200_OK)
@@ -287,6 +346,19 @@ class AddCasePlan(APIView):
             # res_data=res_data_obj.data
             S = DeleteCasePlan()
             res = S.listPlan(req)
+            data=json.loads(json.dumps(res["res_data"]))[0]
+            if int(data["runType"])==1:
+                arg={
+                    "id":data["id"],
+                    "runType":data["runType"]["id"],
+                    "userId":data["userId"]["id"],
+                    "CaseCount":data["CaseCount"],
+                    "projectId":data["projectId"]["id"],
+                    "againScript":data["againScript"],
+                    "cron":data["cron"]}
+                print(arg)
+                TimedTask().task(arg)
+            #新建如果是定时任务--那么就在任务列表插入一条数据---同时创建定时任务到beat表
             return APIResponse(200, "计划创建成功", results=res["res_data"], total=res["total"], allPage=res["all_page"],
                                status=status.HTTP_200_OK)
 class UpdateCasePlan(APIView):
@@ -299,6 +371,17 @@ class UpdateCasePlan(APIView):
             res_obj=serializersObj.save()
             res_data_obj=serializers.S_AddCasePlan(res_obj)
             res_data=res_data_obj.data
+            data = res_data   #编辑需要操作任务表----如果执行方式是手动执行--则改为将任务状态改为失效
+            arg={
+                "id":data["id"],
+                "runType":data["runType"]["id"],
+                "userId":data["userId"]["id"],
+                "CaseCount":data["CaseCount"],
+                "projectId":data["projectId"]["id"],
+                "againScript":data["againScript"],
+                "cron":data["cron"]}
+            print(arg)
+            TimedTask().task(arg)
             return APIResponse(200,"计划更新成功",results=res_data,status=status.HTTP_200_OK)
 class GetCasePlan(APIView):
     """查看执行计划
@@ -446,3 +529,6 @@ class CaseResultsDetail(APIView):
         res_data=serializersObj.data["result"]
         return APIResponse(200, "sucess", results=eval(res_data),
                            status=status.HTTP_200_OK)
+
+
+

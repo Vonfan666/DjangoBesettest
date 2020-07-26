@@ -88,7 +88,9 @@ urlpatterns = [
     url(r"^users/case_results_del/", caseViews.CaseResults.as_view(), name="CaseResults"),  # 查看删除用例调试
     # url(r"^users/case_run_all/", runCase.RunCaseAll.as_view(), name="RunCaseAll"),  # 执行测试计划
     # url(r"^users/case_run_all/", tasks.UsersTask.as_view(), name="RunCaseAll"),  # 执行测试计划
-    url(r"^users/case_run_all/", caseViews.RunAll.as_view(), name="RunCaseAll"),  # 执行测试计划
+    url(r"^users/case_run_all/", caseViews.RunAll.as_view(), name="RunCaseAll"),  # 异步执行测试计划
+    url(r"^users/timed_task/", caseViews.TimedTask.as_view(), name="TimedTask"),  # 新增定时任务
+
     url(r"^users/case_order/", caseViews.CaseOrder.as_view(), name="CaseOrder"),  # 修改该接口的执行顺序
     url(r"^users/casePlan_add/", caseViews.AddCasePlan.as_view(), name="AddCasePlan"),  # 新建测试计划
     url(r"^users/casePlan_get/", caseViews.GetCasePlan.as_view(), name="GetCasePlan"),  # 查看测试计划

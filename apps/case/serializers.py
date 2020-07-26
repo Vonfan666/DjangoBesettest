@@ -267,9 +267,13 @@ class S_AddCasePlan(serializers.ModelSerializer):
 
     def validate(self, attrs):
         cname=attrs.get("cname")
-        idCode=self.initial_data["id"]
-        if  models.CasePlan.objects.filter(Q(cname=cname) & ~Q(id=idCode)):
-           raise  ValidationError("脚本名称不能重复")
+        if "id"  in  self.initial_data.dict().keys():  #编辑传id验证脚本是否重复
+            idCode=self.initial_data["id"]
+            if  models.CasePlan.objects.filter(Q(cname=cname) & ~Q(id=idCode)):
+               raise  ValidationError("脚本名称不能重复")
+        else:  #不传id就是新增--直接查脚本名称是否重复
+            if models.CasePlan.objects.filter(Q(cname=cname)):
+                raise ValidationError("脚本名称不能重复")
         return attrs
     class Meta:
         model=models.CasePlan
@@ -279,6 +283,7 @@ class S_AddCasePlan(serializers.ModelSerializer):
     def  create(self, validated_data):
         s.validated_data_add(validated_data, self.initial_data, projectModels.ProjectList, "projectId", "projectId")
         s.validated_data_add(validated_data, self.initial_data, usersModels.UserProfile, "userId", "userId")
+        validated_data["runType"]=self.initial_data["runType"]
         validated_data["CaseCount"]=models.CaseFile.objects.select_related("CaseGroupId__CaseGroupFilesId__projectId","CaseGroupId__CaseGroupFilesId","CaseGroupId").filter(Q(CaseGroupId__CaseGroupFilesId__projectId=int(self.initial_data["projectId"])) & Q(status=1)).count()
         user= super().create(validated_data=validated_data)
         user.save()
