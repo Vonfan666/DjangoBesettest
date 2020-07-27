@@ -249,10 +249,12 @@ class S_AddCasePlan(serializers.ModelSerializer):
     caseEndTime=serializers.DateTimeField(read_only=True,format="%Y-%m-%d %H:%M:%S")
     createTime = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
     updateTime = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
+    # cron = serializers.CharField()
     projectId=serializers.SerializerMethodField()
     userId=serializers.SerializerMethodField()
     status=serializers.SerializerMethodField()
     runType=serializers.SerializerMethodField()
+    cron=serializers.SerializerMethodField()
     def get_projectId(self,obj):
         return {"id":obj.projectId.id,"name":obj. projectId.name}
 
@@ -264,9 +266,19 @@ class S_AddCasePlan(serializers.ModelSerializer):
 
     def get_runType(self,obj):
         return {"id":obj.runType,"name":obj.get_runType_display()}
-
+    def get_cron(self,obj):
+        if int(obj.runType)==1:
+            return obj.cron
+        if int(obj.runType)==0:
+            return "-"
     def validate(self, attrs):
         cname=attrs.get("cname")
+        data = self.initial_data.dict()
+        print(data)
+        if "cron"  in  data.keys():
+            if data["cron"]=="-":
+                raise ValidationError("定时策略不合法")
+
         if "id"  in  self.initial_data.dict().keys():  #编辑传id验证脚本是否重复
             idCode=self.initial_data["id"]
             if  models.CasePlan.objects.filter(Q(cname=cname) & ~Q(id=idCode)):
@@ -274,6 +286,7 @@ class S_AddCasePlan(serializers.ModelSerializer):
         else:  #不传id就是新增--直接查脚本名称是否重复
             if models.CasePlan.objects.filter(Q(cname=cname)):
                 raise ValidationError("脚本名称不能重复")
+
         return attrs
     class Meta:
         model=models.CasePlan
@@ -283,7 +296,7 @@ class S_AddCasePlan(serializers.ModelSerializer):
     def  create(self, validated_data):
         s.validated_data_add(validated_data, self.initial_data, projectModels.ProjectList, "projectId", "projectId")
         s.validated_data_add(validated_data, self.initial_data, usersModels.UserProfile, "userId", "userId")
-        validated_data["runType"]=self.initial_data["runType"]
+        validated_data["runType"]=int(self.initial_data["runType"])
         validated_data["CaseCount"]=models.CaseFile.objects.select_related("CaseGroupId__CaseGroupFilesId__projectId","CaseGroupId__CaseGroupFilesId","CaseGroupId").filter(Q(CaseGroupId__CaseGroupFilesId__projectId=int(self.initial_data["projectId"])) & Q(status=1)).count()
         user= super().create(validated_data=validated_data)
         user.save()
@@ -293,6 +306,10 @@ class S_AddCasePlan(serializers.ModelSerializer):
         # if validated_data["againScript"]:  #如果重新创建脚本则更新用例数量
         #     validated_data["CaseCount"] = models.CaseFile.objects.filter(
         #         Q(CaseGroupId__CaseGroupFilesId__projectId=int(self.initial_data["projectId"])) & Q(status=1)).count()
+
+        validated_data["runType"]=int(self.initial_data["runType"])
+        if int(validated_data["runType"])==1:
+            validated_data["cron"]=self.initial_data["cron"]
         user=super().update(instance=instance,validated_data=validated_data)
         user.save()
         return user

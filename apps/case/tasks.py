@@ -96,8 +96,8 @@ def celeryTasks(self,tasks_data):
 
 
 
-@shared_task
-def timedTask():
+@shared_task(bind=True)
+def timedTask(data):
     """
     定时执行脚本---cron
     id  计划id
@@ -106,8 +106,12 @@ def timedTask():
     againScript 是否重新创建项目
     :return:
     """
+    print("开始")
+    print(data)
     timeStr = time.strftime("%Y%m%d%H%M%S", time.localtime())
-    data={"id": "6", "timeStr": timeStr,"userId":"5","CaseCount":"16","projectId":"98","againScript":"1"}
+    data=json.loads(data)
+    data["timeStr"]=timeStr
+    # data={"id": "6", "timeStr": timeStr,"userId":"5","CaseCount":"16","projectId":"98","againScript":"1"}
     print(data)
     userId = data["userId"]
     c_id =data["id"]
@@ -151,3 +155,9 @@ def timedTask():
 
     return "success"
 
+
+
+@shared_task(bind=True)
+def  test(a):
+    print("执行了test:%s"%a)
+    return "success"

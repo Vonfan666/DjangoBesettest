@@ -33,17 +33,25 @@ class TimedTask(APIView):
         return timeList
     def task(self, data):
         cronTime=self.cronChange(data["cron"])
+        timeStr = time.strftime("%Y%m%d%H%M%S", time.localtime())
+        print(cronTime)
         if not models.timedTask.objects.filter(planId_id=data["id"]):
-            task, created =CrontabSchedule.objects.get_or_create(
+            schedule, _  =CrontabSchedule.objects.get_or_create(
+                minute=cronTime[0],
+                hour=cronTime[1],
+                day_of_week=cronTime[2],  #可出现", - * / ? L C #"四个字符，有效范围为1-7的整数或SUN-SAT两个范围。1表示星期天，2表示星期一， 依次类推
+                day_of_month=cronTime[3],
+                month_of_year=cronTime[4],  #可出现", - * / ? L W C"八个字符，有效范围为0-31的整数
+                timezone='Asia/Shanghai'
+            )
+            print(schedule)
+            PeriodicTask.objects.create(
+                crontab=schedule,
+                name='timedTask_%s_%s_%s'%(data["id"],data["userId"],timeStr ),
+                task="case.tasks.timedTask",
+                kwargs=json.dumps(data),
+            )
 
-                second=cronTime[0],
-                minute=cronTime[1],
-                hour=cronTime[2],
-                day_of_month=cronTime[3],  #可出现", - * / ? L C #"四个字符，有效范围为1-7的整数或SUN-SAT两个范围。1表示星期天，2表示星期一， 依次类推
-                month=cronTime[4],
-                day_of_week=cronTime[5],  #可出现", - * / ? L W C"八个字符，有效范围为0-31的整数
-                year=cronTime[6],
-                task="case.tasks.timedTask")
 
     def post(name, task, task_args, crontab_time, desc):
         '''
@@ -347,7 +355,8 @@ class AddCasePlan(APIView):
             S = DeleteCasePlan()
             res = S.listPlan(req)
             data=json.loads(json.dumps(res["res_data"]))[0]
-            if int(data["runType"])==1:
+            print(data)
+            if int(data["runType"]["id"])==1:
                 arg={
                     "id":data["id"],
                     "runType":data["runType"]["id"],
@@ -355,7 +364,9 @@ class AddCasePlan(APIView):
                     "CaseCount":data["CaseCount"],
                     "projectId":data["projectId"]["id"],
                     "againScript":data["againScript"],
-                    "cron":data["cron"]}
+                    "cron":data["cron"],
+                    "name": data["cname"],
+                }
                 print(arg)
                 TimedTask().task(arg)
             #新建如果是定时任务--那么就在任务列表插入一条数据---同时创建定时任务到beat表
@@ -372,16 +383,20 @@ class UpdateCasePlan(APIView):
             res_data_obj=serializers.S_AddCasePlan(res_obj)
             res_data=res_data_obj.data
             data = res_data   #编辑需要操作任务表----如果执行方式是手动执行--则改为将任务状态改为失效
-            arg={
-                "id":data["id"],
-                "runType":data["runType"]["id"],
-                "userId":data["userId"]["id"],
-                "CaseCount":data["CaseCount"],
-                "projectId":data["projectId"]["id"],
-                "againScript":data["againScript"],
-                "cron":data["cron"]}
-            print(arg)
-            TimedTask().task(arg)
+            if int(data["runType"]["id"])==1:
+                arg={
+                    "id":data["id"],
+                    "runType":data["runType"]["id"],
+                    "userId":data["userId"]["id"],
+                    "CaseCount":data["CaseCount"],
+                    "projectId":data["projectId"]["id"],
+                    "againScript":data["againScript"],
+                    "cron":data["cron"],
+                    "name": data["cname"],
+                }
+
+                print(arg)
+                TimedTask().task(arg)
             return APIResponse(200,"计划更新成功",results=res_data,status=status.HTTP_200_OK)
 class GetCasePlan(APIView):
     """查看执行计划

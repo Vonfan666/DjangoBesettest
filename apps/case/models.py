@@ -72,7 +72,7 @@ class CasePlan(models.Model):
     userId = models.ForeignKey("users.UserProfile", to_field="id", on_delete=models.SET_NULL, null=True,related_name="c_name",verbose_name="创建人")
     status=models.IntegerField(choices=status_Choices,default=0,null=True,verbose_name="执行状态")
     runType=models.IntegerField(choices=run_Choices,default=0,verbose_name="执行方式")
-    cron = models.CharField(max_length=255, verbose_name="cron定时表达式")
+    cron = models.CharField(max_length=255, verbose_name="cron定时表达式",null=True)
     CaseCount=models.IntegerField(null=True,verbose_name="用例数量")
     caseStartTime=models.DateTimeField(verbose_name="计划开始时间",null=True)
     caseEndTime = models.DateTimeField(verbose_name="计划结束时间", null=True)
