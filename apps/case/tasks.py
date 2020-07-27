@@ -31,8 +31,7 @@ def allRun(self,tasks_data):
         print(f)
         return "fail"
 
-def  cc(a,b):
-    return a+b
+
 
 @shared_task(bind=True)
 def celeryTasks(self,tasks_data):
@@ -96,7 +95,7 @@ def celeryTasks(self,tasks_data):
 
 
 
-@shared_task(bind=True)
+@shared_task
 def timedTask(data):
     """
     定时执行脚本---cron
@@ -106,18 +105,16 @@ def timedTask(data):
     againScript 是否重新创建项目
     :return:
     """
-    print("开始")
-    print(data)
     timeStr = time.strftime("%Y%m%d%H%M%S", time.localtime())
-    data=json.loads(data)
     data["timeStr"]=timeStr
     # data={"id": "6", "timeStr": timeStr,"userId":"5","CaseCount":"16","projectId":"98","againScript":"1"}
-    print(data)
     userId = data["userId"]
+    againScript = int(data["againScript"])
     c_id =data["id"]
     CaseCount = data["CaseCount"]
-    key = "%s_%s" % (data["id"], data["timeStr"])  # 把计划id+时间戳当做用户id传过去
-    data=json.dumps(data)
+    key = "%s_%s" % (c_id ,timeStr)  # 把计划id+时间戳当做用户id传过去
+    data_post=json.dumps(data)
+
     l = {
         "results": [],
         "logList": [],
@@ -125,20 +122,19 @@ def timedTask(data):
     s = RunCaseAll()
 
     try:
-        s.post(data)
-        print("执行完毕")
+        s.post(data_post)
     except Exception as  f:
         return f
     else:
         Redis = conn()
         RedisCount = conn()
         redisListLog = Redis.lrange("log:%s" %key, 0, -1)
-        RedisCountLog = RedisCount.get("log:%s" %key)
+        RedisCountLog = RedisCount.get("status:%s"%key)
         for log in redisListLog:
             l["logList"].append(log.decode("utf8"))
         RedisCountLog = json.loads(RedisCountLog)
-        userId = UserProfile.objects.get(id=userId)
-        if int(data["againScript"]) == 1:
+        user= UserProfile.objects.get(id=userId)
+        if againScript == 1:
             CaseCount = models.CaseFile.objects.filter(
                 Q(CaseGroupId__CaseGroupFilesId__projectId=int(data["projectId"])) & Q(status=1)).count()
         models.CasePlan.objects.filter(id=c_id).update(CaseCount=int(CaseCount))
@@ -146,18 +142,13 @@ def timedTask(data):
             result=l,
             type=3,
             c_id=c_id,
-            userId=userId,
+            userId=user,
             caseCount=int(CaseCount),
             assertSuccess=RedisCountLog["count"]["assertSuccess"],
             assertFailed=RedisCountLog["count"]["assertFailed"],
             runFailed=RedisCountLog["count"]["runFailed"],
         )
-
     return "success"
 
 
 
-@shared_task(bind=True)
-def  test(a):
-    print("执行了test:%s"%a)
-    return "success"

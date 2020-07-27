@@ -15,7 +15,7 @@ from log.logFile import logger as logs
 from project.models import Environments
 from  users.models import UserProfile
 from . import models,serializers
-
+import pytz
 from django_celery_beat.models import PeriodicTask,CrontabSchedule
 class TimedTask(APIView):
     """定时任务
@@ -42,14 +42,14 @@ class TimedTask(APIView):
                 day_of_week=cronTime[2],  #可出现", - * / ? L C #"四个字符，有效范围为1-7的整数或SUN-SAT两个范围。1表示星期天，2表示星期一， 依次类推
                 day_of_month=cronTime[3],
                 month_of_year=cronTime[4],  #可出现", - * / ? L W C"八个字符，有效范围为0-31的整数
-                timezone='Asia/Shanghai'
+                timezone=pytz.timezone('Asia/Shanghai')
             )
             print(schedule)
             PeriodicTask.objects.create(
                 crontab=schedule,
                 name='timedTask_%s_%s_%s'%(data["id"],data["userId"],timeStr ),
                 task="case.tasks.timedTask",
-                kwargs=json.dumps(data),
+                args=json.dumps(data),
             )
 
 

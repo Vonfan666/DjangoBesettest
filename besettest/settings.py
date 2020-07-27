@@ -182,7 +182,8 @@ USE_I18N = True  # 国际化支持 I18N
 USE_L10N = True
 
 USE_TZ = True  # USE_TZ设置为True,Django会使用系统默认设置的时区即America/Chicago,此时的TIME_ZONE不管有没有设置都不起作用。
-
+# CELERY_ENABLE_UTC = False
+# DJANGO_CELERY_BEAT_TZ_AWARE = False
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
