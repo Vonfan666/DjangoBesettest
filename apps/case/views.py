@@ -28,29 +28,53 @@ class TimedTask(APIView):
 6. Day-of-Week （周）
 7. Year (年 可选字段)
     """
-    def cronChange(self,data):
-        timeList=data.split(" ")
+    def cronChange(self):
+        timeList=self.data["cron"].split(" ")
+        if timeList[4]=="?":
+            timeList[4]="*"
         return timeList
+    def create(self,cronTime):
+        """创建定时策略以及任务"""
+        schedule, status = CrontabSchedule.objects.get_or_create(
+            minute=cronTime[0],
+            hour=cronTime[1],
+            day_of_week=cronTime[2],  # 可出现", - * / ? L C #"四个字符，有效范围为1-7的整数或SUN-SAT两个范围。1表示星期天，2表示星期一， 依次类推
+            day_of_month=cronTime[3],
+            month_of_year=cronTime[4],  # 可出现", - * / ? L W C"八个字符，有效范围为0-31的整数
+            timezone=pytz.timezone('Asia/Shanghai'),
+        )
+        self.addTask(schedule)  #创建任务
+
+        task_obj=PeriodicTask.objects.get(name=self.name)
+        task_id=task_obj.id
+        if not self.data["timedId"]:   #如果timedId是0  则暂停任务
+            self.stopTask(task_id)
+
+    def addTask(self,schedule):
+        PeriodicTask.objects.create(
+            crontab=schedule,
+            name=self.name,
+            task="case.tasks.timedTask",
+            args=json.dumps([self.data]),
+        )
+    def stopTask(self,task_id):
+        PeriodicTask.objects.get(id=task_id).enabled = False
+        PeriodicTask.objects.get(id=task_id).save()
+    def startTask(self,task_id):
+        PeriodicTask.objects.get(id=task_id).enabled = True
+        PeriodicTask.objects.get(id=task_id).save()
+    def deleteTask(self,task_id):
+        PeriodicTask.objects.get(id=task_id).enabled =False
+        PeriodicTask.objects.get(id=task_id).delete()
+
     def task(self, data):
-        cronTime=self.cronChange(data["cron"])
         timeStr = time.strftime("%Y%m%d%H%M%S", time.localtime())
-        print(cronTime)
-        if not models.timedTask.objects.filter(planId_id=data["id"]):
-            schedule, _  =CrontabSchedule.objects.get_or_create(
-                minute=cronTime[0],
-                hour=cronTime[1],
-                day_of_week=cronTime[2],  #可出现", - * / ? L C #"四个字符，有效范围为1-7的整数或SUN-SAT两个范围。1表示星期天，2表示星期一， 依次类推
-                day_of_month=cronTime[3],
-                month_of_year=cronTime[4],  #可出现", - * / ? L W C"八个字符，有效范围为0-31的整数
-                timezone=pytz.timezone('Asia/Shanghai')
-            )
-            print(schedule)
-            PeriodicTask.objects.create(
-                crontab=schedule,
-                name='timedTask_%s_%s_%s'%(data["id"],data["userId"],timeStr ),
-                task="case.tasks.timedTask",
-                args=json.dumps(data),
-            )
+        self.data=data
+        self.name = 'timedTask_%s_%s_%s' % (self.data["id"], self.data["userId"], timeStr)
+        cronTime = self.cronChange()
+        if not models.timedTask.objects.filter(planId_id=self.data["id"]):
+            self.create(cronTime)  #传整个data 和定时策略时间
+
 
 
     def post(name, task, task_args, crontab_time, desc):
@@ -63,20 +87,6 @@ class TimedTask(APIView):
         :param desc: 定时任务描述
         :return: ok
         '''
-        # task任务， created是否定时创建
-        # task, created = celery_models.PeriodicTask.objects.get_or_create(
-        #     name=name, task=task)
-        # # 获取 crontab
-        # crontab = celery_models.CrontabSchedule.objects.filter(
-        #     **crontab_time).first()
-        # if crontab is None:
-        #     # 如果没有就创建，有的话就继续复用之前的crontab
-        #     crontab = celery_models.CrontabSchedule.objects.create(**crontab_time)
-        # task.crontab = crontab  # 设置crontab
-        # task.enabled = True  # 开启task
-        # task.kwargs = json.dumps(task_args, ensure_ascii=False)  # 传入task参数
-        # task.description = desc
-        # task.save()
 
         return APIResponse(200, "success", status=status.HTTP_200_OK)
 
@@ -356,7 +366,7 @@ class AddCasePlan(APIView):
             res = S.listPlan(req)
             data=json.loads(json.dumps(res["res_data"]))[0]
             print(data)
-            if int(data["runType"]["id"])==1:
+            if int(data["runType"]["id"])==1:  #只要是选择定时都会去新建一个---只是该定时任务目前是暂停的
                 arg={
                     "id":data["id"],
                     "runType":data["runType"]["id"],
@@ -366,6 +376,7 @@ class AddCasePlan(APIView):
                     "againScript":data["againScript"],
                     "cron":data["cron"],
                     "name": data["cname"],
+                    "timedId":data["timedId"]
                 }
                 print(arg)
                 TimedTask().task(arg)
@@ -383,16 +394,17 @@ class UpdateCasePlan(APIView):
             res_data_obj=serializers.S_AddCasePlan(res_obj)
             res_data=res_data_obj.data
             data = res_data   #编辑需要操作任务表----如果执行方式是手动执行--则改为将任务状态改为失效
-            if int(data["runType"]["id"])==1:
-                arg={
-                    "id":data["id"],
-                    "runType":data["runType"]["id"],
-                    "userId":data["userId"]["id"],
-                    "CaseCount":data["CaseCount"],
-                    "projectId":data["projectId"]["id"],
-                    "againScript":data["againScript"],
-                    "cron":data["cron"],
+            if int(data["runType"]["id"])==1:   #只要是选择定时都会去新建一个---只是该定时任务目前是暂停的
+                arg = {
+                    "id": data["id"],
+                    "runType": data["runType"]["id"],
+                    "userId": data["userId"]["id"],
+                    "CaseCount": data["CaseCount"],
+                    "projectId": data["projectId"]["id"],
+                    "againScript": data["againScript"],
+                    "cron": data["cron"],
                     "name": data["cname"],
+                    "timedId": data["timedId"]
                 }
 
                 print(arg)

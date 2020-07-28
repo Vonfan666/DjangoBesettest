@@ -31,6 +31,7 @@ class Config:
 
     # CELERY_DISABLE_RATE_LIMITS = True # 禁用所有速度限制，如果网络资源有限，不建议开足马力。
 app.config_from_object(Config)
+
 # app.now = timezone.now
 # 到各个APP里自动发现tasks.py文件
 app.autodiscover_tasks(

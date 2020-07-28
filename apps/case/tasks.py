@@ -105,6 +105,7 @@ def timedTask(data):
     againScript 是否重新创建项目
     :return:
     """
+    print(data)
     timeStr = time.strftime("%Y%m%d%H%M%S", time.localtime())
     data["timeStr"]=timeStr
     # data={"id": "6", "timeStr": timeStr,"userId":"5","CaseCount":"16","projectId":"98","againScript":"1"}

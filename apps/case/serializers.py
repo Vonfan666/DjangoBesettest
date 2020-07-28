@@ -276,7 +276,7 @@ class S_AddCasePlan(serializers.ModelSerializer):
         data = self.initial_data.dict()
         print(data)
         if "cron"  in  data.keys():
-            if data["cron"]=="-":
+            if data["cron"]=="-" or  data["cron"]=="" or data["cron"]==None:
                 raise ValidationError("定时策略不合法")
 
         if "id"  in  self.initial_data.dict().keys():  #编辑传id验证脚本是否重复
@@ -286,7 +286,6 @@ class S_AddCasePlan(serializers.ModelSerializer):
         else:  #不传id就是新增--直接查脚本名称是否重复
             if models.CasePlan.objects.filter(Q(cname=cname)):
                 raise ValidationError("脚本名称不能重复")
-
         return attrs
     class Meta:
         model=models.CasePlan
@@ -297,6 +296,8 @@ class S_AddCasePlan(serializers.ModelSerializer):
         s.validated_data_add(validated_data, self.initial_data, projectModels.ProjectList, "projectId", "projectId")
         s.validated_data_add(validated_data, self.initial_data, usersModels.UserProfile, "userId", "userId")
         validated_data["runType"]=int(self.initial_data["runType"])
+        if int(self.initial_data["runType"])==1:
+            validated_data["cron"]=self.initial_data["cron"]
         validated_data["CaseCount"]=models.CaseFile.objects.select_related("CaseGroupId__CaseGroupFilesId__projectId","CaseGroupId__CaseGroupFilesId","CaseGroupId").filter(Q(CaseGroupId__CaseGroupFilesId__projectId=int(self.initial_data["projectId"])) & Q(status=1)).count()
         user= super().create(validated_data=validated_data)
         user.save()

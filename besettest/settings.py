@@ -24,7 +24,7 @@ sys.path.insert(0, os.path.join(BASE_DIR, "extra_apps"))  # 将Mx_Shop/apps临�
 
 
 
-
+redisHost="127.0.0.1:6379"
 
 
 
@@ -92,7 +92,7 @@ WSGI_APPLICATION = 'besettest.wsgi.application'
 # 指定ASGI的路由地址
 ASGI_APPLICATION = 'besettest.routing.application'
 
-redisHost="127.0.0.1:6379"
+
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',

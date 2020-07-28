@@ -76,6 +76,7 @@ class CasePlan(models.Model):
     CaseCount=models.IntegerField(null=True,verbose_name="用例数量")
     caseStartTime=models.DateTimeField(verbose_name="计划开始时间",null=True)
     caseEndTime = models.DateTimeField(verbose_name="计划结束时间", null=True)
+    timedId=models.IntegerField(choices=status_Choices,default=0,null=True,verbose_name="定时任务状态")
     detail=models.TextField(verbose_name="计划描述",null=True)
     createTime = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
     updateTime = models.DateTimeField(auto_now=True, verbose_name="更新时间")
@@ -110,7 +111,6 @@ class timedTask(models.Model):
     cronId=models.IntegerField(null=True,verbose_name="cron表达式id")
     PeriodicTaskId=models.IntegerField(null=True,verbose_name="任务id")
     userId = models.ForeignKey("users.UserProfile", to_field="id", on_delete=models.SET_NULL, null=True,related_name="userId_tt",verbose_name="创建人")
-    status=models.IntegerField(choices=status_Choices,default=0,null=True,verbose_name="定时任务状态")
     cron = models.CharField(max_length=255, verbose_name="cron定时表达式",null=True)
     class Meta:
         db_table="django_celery_beat_task"
