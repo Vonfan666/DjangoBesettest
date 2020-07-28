@@ -267,10 +267,10 @@ class S_AddCasePlan(serializers.ModelSerializer):
     def get_runType(self,obj):
         return {"id":obj.runType,"name":obj.get_runType_display()}
     def get_cron(self,obj):
-        if int(obj.runType)==1:
-            return obj.cron
-        if int(obj.runType)==0:
-            return "-"
+        # if int(obj.runType)==1:
+        return obj.cron
+        # if int(obj.runType)==0:
+        #     return "-"
     def validate(self, attrs):
         cname=attrs.get("cname")
         data = self.initial_data.dict()

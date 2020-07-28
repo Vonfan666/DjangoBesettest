@@ -77,6 +77,7 @@ class CasePlan(models.Model):
     caseStartTime=models.DateTimeField(verbose_name="计划开始时间",null=True)
     caseEndTime = models.DateTimeField(verbose_name="计划结束时间", null=True)
     timedId=models.IntegerField(choices=status_Choices,default=0,null=True,verbose_name="定时任务状态")
+    taskId=models.IntegerField(null=True,verbose_name="定时任务Id")
     detail=models.TextField(verbose_name="计划描述",null=True)
     createTime = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
     updateTime = models.DateTimeField(auto_now=True, verbose_name="更新时间")
@@ -107,7 +108,7 @@ class timedTask(models.Model):
         (0, "有效"),
         (1, "暂停"),
     )
-    planId=models.ForeignKey("CasePlan",to_field="id",on_delete=models.SET_NULL, null=True,related_name="planId_tt",verbose_name="计划id")
+    planId=models.OneToOneField("CasePlan",to_field="id",on_delete=models.SET_NULL, null=True,related_name="planId_tt",verbose_name="计划id")
     cronId=models.IntegerField(null=True,verbose_name="cron表达式id")
     PeriodicTaskId=models.IntegerField(null=True,verbose_name="任务id")
     userId = models.ForeignKey("users.UserProfile", to_field="id", on_delete=models.SET_NULL, null=True,related_name="userId_tt",verbose_name="创建人")

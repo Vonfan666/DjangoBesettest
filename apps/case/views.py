@@ -35,7 +35,7 @@ class TimedTask(APIView):
         return timeList
     def create(self,cronTime):
         """创建定时策略以及任务"""
-        schedule, status = CrontabSchedule.objects.get_or_create(
+        schedule, _ = CrontabSchedule.objects.get_or_create(
             minute=cronTime[0],
             hour=cronTime[1],
             day_of_week=cronTime[2],  # 可出现", - * / ? L C #"四个字符，有效范围为1-7的整数或SUN-SAT两个范围。1表示星期天，2表示星期一， 依次类推
@@ -43,30 +43,49 @@ class TimedTask(APIView):
             month_of_year=cronTime[4],  # 可出现", - * / ? L W C"八个字符，有效范围为0-31的整数
             timezone=pytz.timezone('Asia/Shanghai'),
         )
-        self.addTask(schedule)  #创建任务
+        if self.data["taskId"]:  #如果存在这个id则说明存在任务--
+            self.isTask(self.data["taskId"],schedule)   #判断任务里面是否存在存在这个id，有则更新，无则创建
+        else:  #如果没有则需要创建任务
+            self.addTask(schedule)  #创建任务
 
-        task_obj=PeriodicTask.objects.get(name=self.name)
-        task_id=task_obj.id
-        if not self.data["timedId"]:   #如果timedId是0  则暂停任务
+            #判断是否执行
+    def  isTask(self,task_id,schedule):
+        try:
+            self.update(task_id)
+        except:
+            self.addTask(schedule)
+
+    def update(self,task_id):
+        """判断是否修改任务状态"""
+        if self.data["timedId"] == 1:
+            self.startTask(task_id)
+        if self.data["timedId"] == 0:
             self.stopTask(task_id)
 
-    def addTask(self,schedule):
+    def addTask(self,schedule):  #添加任务并同步id到计划表
         PeriodicTask.objects.create(
             crontab=schedule,
             name=self.name,
             task="case.tasks.timedTask",
             args=json.dumps([self.data]),
         )
-    def stopTask(self,task_id):
-        PeriodicTask.objects.get(id=task_id).enabled = False
-        PeriodicTask.objects.get(id=task_id).save()
-    def startTask(self,task_id):
-        PeriodicTask.objects.get(id=task_id).enabled = True
-        PeriodicTask.objects.get(id=task_id).save()
-    def deleteTask(self,task_id):
-        PeriodicTask.objects.get(id=task_id).enabled =False
-        PeriodicTask.objects.get(id=task_id).delete()
-
+        task_obj = PeriodicTask.objects.get(name=self.name)  # 根据唯一的任务名获取创建的对象
+        task_id = task_obj.taskId  # 获取taskId
+        models.CasePlan.objects.filter(id=self.data["id"]).update(taskId=task_id)  # 将创建的任务Id插入计划表
+        self.update(task_id)    #判断任务暂停还是执行
+        # self.createTask(task_id)  #将数据同步到自己的任务表中
+    def stopTask(self,task_id):  #暂停任务
+        obj=PeriodicTask.objects.get(id=task_id)
+        obj.enabled = False
+        obj.save()
+    def startTask(self,task_id): #开始任务
+        obj = PeriodicTask.objects.get(id=task_id)
+        obj.enabled = True
+        obj.save()
+    def deleteTask(self,task_id):  #删除任务
+        obj = PeriodicTask.objects.get(id=task_id)
+        obj.enabled = False
+        obj.delete()
     def task(self, data):
         timeStr = time.strftime("%Y%m%d%H%M%S", time.localtime())
         self.data=data
@@ -74,9 +93,18 @@ class TimedTask(APIView):
         cronTime = self.cronChange()
         if not models.timedTask.objects.filter(planId_id=self.data["id"]):
             self.create(cronTime)  #传整个data 和定时策略时间
-
-
-
+    def createTask(self,task_id):
+        """操作任务时关联三张表计划表/自己的任务表/celery的任务表"""
+        #先判断该表是否存在
+        user=UserProfile.objects.get(id=self.data["userId"])
+        plan=models.CasePlan.objects.get(id=self.data["id"])
+        data={
+           "PeriodicTaskId": task_id,
+            "cron":self.data["cron"],
+            "userId":user,
+            "planId":plan,
+        }
+        models.timedTask.objects.create(**data)
     def post(name, task, task_args, crontab_time, desc):
         '''
         新增定时任务
@@ -376,7 +404,8 @@ class AddCasePlan(APIView):
                     "againScript":data["againScript"],
                     "cron":data["cron"],
                     "name": data["cname"],
-                    "timedId":data["timedId"]
+                    "timedId":data["timedId"],
+                    "taskId": data["taskId"]
                 }
                 print(arg)
                 TimedTask().task(arg)
@@ -404,7 +433,8 @@ class UpdateCasePlan(APIView):
                     "againScript": data["againScript"],
                     "cron": data["cron"],
                     "name": data["cname"],
-                    "timedId": data["timedId"]
+                    "timedId": data["timedId"],
+                    "taskId":data["taskId"]
                 }
 
                 print(arg)
