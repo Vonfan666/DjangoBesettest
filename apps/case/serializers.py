@@ -269,6 +269,7 @@ class S_AddCasePlan(serializers.ModelSerializer):
     def get_cron(self,obj):
         # if int(obj.runType)==1:
         return obj.cron
+
         # if int(obj.runType)==0:
         #     return "-"
     def validate(self, attrs):

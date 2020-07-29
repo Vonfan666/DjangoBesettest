@@ -93,6 +93,7 @@ class TimedTask(APIView):
         cronTime = self.cronChange()
         if not models.timedTask.objects.filter(planId_id=self.data["id"]):
             self.create(cronTime)  #传整个data 和定时策略时间
+            
     def createTask(self,task_id):
         """操作任务时关联三张表计划表/自己的任务表/celery的任务表"""
         #先判断该表是否存在
