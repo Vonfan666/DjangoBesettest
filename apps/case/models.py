@@ -60,6 +60,10 @@ class CasePlan(models.Model):
         (1,"执行中"),
         (2,"已完成")
     )
+    timed_timedId=(
+        (0, "暂停"),
+        (1, "有效"),
+    )
     run_Choices=(
         (0, "手动执行"),
         (1, "定时执行"),
@@ -76,7 +80,7 @@ class CasePlan(models.Model):
     CaseCount=models.IntegerField(null=True,verbose_name="用例数量")
     caseStartTime=models.DateTimeField(verbose_name="计划开始时间",null=True)
     caseEndTime = models.DateTimeField(verbose_name="计划结束时间", null=True)
-    timedId=models.IntegerField(choices=status_Choices,default=0,null=True,verbose_name="定时任务状态")
+    timedId=models.IntegerField(choices=timed_timedId,default=0,null=True,verbose_name="定时任务状态")
     taskId=models.IntegerField(null=True,verbose_name="定时任务Id")
     detail=models.TextField(verbose_name="计划描述",null=True)
     createTime = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")

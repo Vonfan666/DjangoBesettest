@@ -93,8 +93,6 @@ def celeryTasks(self,tasks_data):
 
 
 
-
-
 @shared_task
 def timedTask(data):
     """

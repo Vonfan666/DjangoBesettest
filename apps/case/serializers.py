@@ -1,11 +1,12 @@
-import  json,os
+import  json,os,datetime,time
 from rest_framework import serializers
 from rest_framework.validators import ValidationError
 from libs.validated_update import Validated_data
+from libs.public import  Public
 from project import models as projectModels
 from users import  models as usersModels
 from django.db.models import Q
-
+from django_celery_beat.models import PeriodicTask
 from  . import  models
 s=Validated_data()
 class S_caseGtoupInterface(serializers.ModelSerializer):
@@ -249,12 +250,15 @@ class S_AddCasePlan(serializers.ModelSerializer):
     caseEndTime=serializers.DateTimeField(read_only=True,format="%Y-%m-%d %H:%M:%S")
     createTime = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
     updateTime = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
+
     # cron = serializers.CharField()
     projectId=serializers.SerializerMethodField()
     userId=serializers.SerializerMethodField()
     status=serializers.SerializerMethodField()
     runType=serializers.SerializerMethodField()
     cron=serializers.SerializerMethodField()
+    timedId = serializers.SerializerMethodField()
+    lastRunTime=serializers.SerializerMethodField()
     def get_projectId(self,obj):
         return {"id":obj.projectId.id,"name":obj. projectId.name}
 
@@ -269,9 +273,21 @@ class S_AddCasePlan(serializers.ModelSerializer):
     def get_cron(self,obj):
         # if int(obj.runType)==1:
         return obj.cron
+    def get_timedId(self,obj):
+        return {"id":obj.timedId,"name":obj.get_timedId_display()}
 
-        # if int(obj.runType)==0:
-        #     return "-"
+
+    def get_lastRunTime(self,obj):
+        taskId=obj.taskId
+        if taskId:
+
+            lastTime = PeriodicTask.objects.get(id=taskId).last_run_at
+            print(lastTime, type(lastTime))
+            lastTime = Public().utcTime(lastTime)
+            return lastTime
+
+        else:
+            return ""
     def validate(self, attrs):
         cname=attrs.get("cname")
         data = self.initial_data.dict()
@@ -310,6 +326,7 @@ class S_AddCasePlan(serializers.ModelSerializer):
         #         Q(CaseGroupId__CaseGroupFilesId__projectId=int(self.initial_data["projectId"])) & Q(status=1)).count()
 
         validated_data["runType"]=int(self.initial_data["runType"])
+        validated_data["timedId"]=int(self.initial_data["timedId"])
         if int(validated_data["runType"])==1:
             validated_data["cron"]=self.initial_data["cron"]
         user=super().update(instance=instance,validated_data=validated_data)

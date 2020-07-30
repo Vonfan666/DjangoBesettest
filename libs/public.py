@@ -5,7 +5,7 @@
 # @Time:2020年05月04日22时03分18秒
 
 # -*- coding: utf-8 -*-
-import socket,sys,io
+import socket,sys,io,time
 from django_redis import get_redis_connection  as conn
 from log.logFile import logger as logs
 
@@ -80,6 +80,10 @@ class Public():
                     self.forData(item["children"], res_data_c[index][item["cname"]])
         return res_data_c
 
+    def utcTime(self,code):
+        a = time.mktime(code.timetuple())
+        b=time.strftime('%Y-%m-%d %X', time.localtime(a))
+        return b
 
 
 class OutputRedirector(object):
