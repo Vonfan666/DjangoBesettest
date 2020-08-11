@@ -1,4 +1,4 @@
-import  json,os,datetime,time
+import  json,os,datetime,time,requests
 from rest_framework import serializers
 from rest_framework.validators import ValidationError
 from libs.validated_update import Validated_data
@@ -86,7 +86,7 @@ class S_AddInterface(serializers.ModelSerializer):
                 return json.loads(obj.data)
         def get_headers(self,obj):
             if obj.headers:
-                print(obj.headers)
+                # print(obj.headers)
                 return json.loads(obj.headers)
         class Meta:
             model=models.CaseFile
@@ -181,7 +181,7 @@ class S_debugCase(serializers.Serializer):
     # headers = serializers.CharField()
     # data = serializers.CharField()
     def validate(self, attrs):
-        print(self.initial_data)
+        # print(self.initial_data)
         postMethod=self.initial_data.get("postMethod")
         dataType=self.initial_data.get("dataType")
         attr=self.initial_data.get("attr")
@@ -276,23 +276,25 @@ class S_AddCasePlan(serializers.ModelSerializer):
     def get_timedId(self,obj):
         return {"id":obj.timedId,"name":obj.get_timedId_display()}
 
-
     def get_lastRunTime(self,obj):
         taskId=obj.taskId
+        lastTime=None
         if taskId:
-
-            lastTime = PeriodicTask.objects.get(id=taskId).last_run_at
-            print(lastTime, type(lastTime))
-            lastTime = Public().utcTime(lastTime)
+            try:  #调试的时候--可能会删掉定时。。导致报错。。正式使用不需要try
+                lastTime = PeriodicTask.objects.get(id=taskId).last_run_at
+                # print(lastTime, type(lastTime))
+                if lastTime:
+                    lastTime = Public().utcTime(lastTime)
+            except:
+                pass
             return lastTime
-
         else:
             return ""
     def validate(self, attrs):
         cname=attrs.get("cname")
         data = self.initial_data.dict()
-        print(data)
-        if "cron"  in  data.keys():
+        # print(data)
+        if "cron"  in  data.keys() and attrs.get("runType")==1:
             if data["cron"]=="-" or  data["cron"]=="" or data["cron"]==None:
                 raise ValidationError("定时策略不合法")
 
@@ -326,8 +328,9 @@ class S_AddCasePlan(serializers.ModelSerializer):
         #         Q(CaseGroupId__CaseGroupFilesId__projectId=int(self.initial_data["projectId"])) & Q(status=1)).count()
 
         validated_data["runType"]=int(self.initial_data["runType"])
-        validated_data["timedId"]=int(self.initial_data["timedId"])
+
         if int(validated_data["runType"])==1:
+            validated_data["timedId"] = int(self.initial_data["timedId"])
             validated_data["cron"]=self.initial_data["cron"]
         user=super().update(instance=instance,validated_data=validated_data)
         user.save()
@@ -417,10 +420,10 @@ class S_EditCaseOrder(serializers.ModelSerializer):
         s.validated_data_add(validated_data, self.initial_data, models.CaseGroup, "isInterface", "CaseGroupId")
         s.validated_data_add(validated_data, self.initial_data, usersModels.UserProfile, "updateUser", "update_userId")
         #跨表修改接口表的执行顺序
-        print(validated_data["CaseGroupId"].order)
+        # print(validated_data["CaseGroupId"].order)
         validated_data["CaseGroupId"].order=self.initial_data["iorder"]
         validated_data["CaseGroupId"].save()
-        print(validated_data["CaseGroupId"].order)
+        # print(validated_data["CaseGroupId"].order)
         validated_data["order"]=self.initial_data["corder"]
         user=super().update(instance=instance,validated_data=validated_data)
         user.save()
@@ -437,3 +440,59 @@ class S_CaseResults(serializers.ModelSerializer):
     class Meta:
         model=models.CaseResult
         fields="__all__"
+
+
+class S_addTimedTask(serializers.ModelSerializer):
+    createTime = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
+    updateTime = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
+    projectId = serializers.SerializerMethodField()
+    userId = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+    plan=serializers.SerializerMethodField()
+
+    def get_plan(self,obj):
+        if  obj.casePlanId:
+            return {"id":obj.casePlanId.id,"name":obj.casePlanId.name}
+    def get_projectId(self,obj):
+        return {"id":obj.projectId.id,"name":obj. projectId.name}
+    def get_userId(self,obj):
+        return {"id":obj.userId.id,"name":obj.userId.name}
+    def get_status(self,obj):
+        return {"id":obj.status,"name":obj.get_status_display()}
+    class Meta:
+        model=models.timedTask
+        fields="__all__"
+    def CronValid(self,cron):
+        url = "https://www.iamwawa.cn/home/crontab/ajax"
+        data = {'expression': cron}
+        header = {
+            "user-agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.113 Safari/537.36",
+        }
+        res = requests.post(url, headers=header, data=data)
+        return res.json()
+    def  validate(self, attrs):
+        cron=attrs.get("cron")
+        name=attrs.get("taskName")
+        rep=self.CronValid(cron)
+        if  int(rep["status"])!=1:
+            raise ValidationError("Cron表达式错误")
+        if len(PeriodicTask.objects.filter(name=name))>1:
+            raise ValidationError("任务名称重复")
+        return attrs
+    def  create(self, validated_data):
+        s.validated_data_add(validated_data, self.initial_data, projectModels.ProjectList, "projectId", "projectId")
+        s.validated_data_add(validated_data, self.initial_data, usersModels.UserProfile, "userId", "userId")
+        s.validated_data_add(validated_data, self.initial_data, models.CasePlan, "Plan", "casePlanId")
+        validated_data["status"]=self.initial_data["status"]
+        user=super().create(validated_data=validated_data)
+        user.save()
+        return user
+
+    def  update(self, instance, validated_data):
+        # s.validated_data_add(validated_data, self.initial_data, usersModels.UserProfile, "userId", "userId")
+        s.validated_data_add(validated_data, self.initial_data, models.CasePlan, "Plan", "casePlanId")
+        validated_data["status"] = int(self.initial_data["status"])
+        user=super().update(validated_data=validated_data,instance=instance)
+
+        user.save()
+        return user

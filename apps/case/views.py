@@ -1,5 +1,5 @@
 import json
-import time
+import time,requests
 from  datetime import datetime
 
 from django_celery_beat.models import PeriodicTask, IntervalSchedule
@@ -15,7 +15,7 @@ from log.logFile import logger as logs
 from project.models import Environments
 from  users.models import UserProfile
 from . import models,serializers
-from .libs.timedTask import TimedTask
+from .libs.timedTask import TimedTask,myTimedTask
 
 
 
@@ -32,7 +32,7 @@ from .libs.timedTask import TimedTask
 #         # res=tasks.allRun.delay(cc)
 #         # print(res.task_id)
 #         return APIResponse(200,"c",status=status.HTTP_200_OK)
-class  RunAll(APIView):
+class RunAll(APIView):
     def post(self,req):
         tasks_data = req.data
         tasks_data = tasks_data.dict()
@@ -154,7 +154,7 @@ class CaseGroup(APIView):
         id=params.get("id")
         obj=models.CaseGroupFiles.objects.select_related("projectId","userId").filter(projectId_id=id)
         serializersObj=serializers.S_CaseGroupFiles(obj,many=True)
-        print(serializersObj.data)
+        # print(serializersObj.data)
         return APIResponse(200,"sucess",results=serializersObj.data,status=status.HTTP_200_OK)
 class AddGroup(APIView):
     """新增接口分组
@@ -293,7 +293,7 @@ class AddCasePlan(APIView):
             S = DeleteCasePlan()
             res = S.listPlan(req)
             data=json.loads(json.dumps(res["res_data"]))[0]
-            print(data)
+            # print(data)
             if int(data["runType"]["id"])==1:  #只要是选择定时都会去新建一个---只是该定时任务目前是暂停的
                 arg={
                     "id":data["id"],
@@ -307,7 +307,7 @@ class AddCasePlan(APIView):
                     "timedId":data["timedId"],
                     "taskId": data["taskId"]
                 }
-                print(arg)
+                # print(arg)
                 TimedTask().task(arg)
             #新建如果是定时任务--那么就在任务列表插入一条数据---同时创建定时任务到beat表
             return APIResponse(200, "计划创建成功", results=res["res_data"], total=res["total"], allPage=res["all_page"],
@@ -323,22 +323,26 @@ class UpdateCasePlan(APIView):
             res_data_obj=serializers.S_AddCasePlan(res_obj)
             res_data=res_data_obj.data
             data = res_data   #编辑需要操作任务表----如果执行方式是手动执行--则改为将任务状态改为失效
-            if int(data["runType"]["id"])==1:   #只要是选择定时都会去新建一个---只是该定时任务目前是暂停的
-                arg = {
-                    "id": data["id"],
-                    "runType": data["runType"]["id"],
-                    "userId": data["userId"]["id"],
-                    "CaseCount": data["CaseCount"],
-                    "projectId": data["projectId"]["id"],
-                    "againScript": data["againScript"],
-                    "cron": data["cron"],
-                    "name": data["cname"],
-                    "timedId": data["timedId"],
-                    "taskId":data["taskId"]
-                }
+             #只要是选择定时都会去新建一个---只是该定时任务目前是暂停的
+            arg = {
+                "id": data["id"],
+                "runType": data["runType"]["id"],
+                "userId": data["userId"]["id"],
+                "CaseCount": data["CaseCount"],
+                "projectId": data["projectId"]["id"],
+                "againScript": data["againScript"],
+                "cron": data["cron"],
+                "name": data["cname"],
+                "timedId": data["timedId"]["id"],  #是否开启定时
+                "taskId":data["taskId"]   #celery任务id
+            }
+            # print(arg)
+            TimedTask().task(arg)
+            obj = models.CasePlan.objects.get(id=id)
+            serializersObj = serializers.S_AddCasePlan(obj)
+            # print(serializersObj)
+            res_data=serializersObj.data
 
-                print(arg)
-                TimedTask().task(arg)
             return APIResponse(200,"计划更新成功",results=res_data,status=status.HTTP_200_OK)
 class GetCasePlan(APIView):
     """查看执行计划
@@ -349,18 +353,26 @@ class GetCasePlan(APIView):
 
     def get(self,req):
         id=req.query_params["projectId"]
-        page=req.query_params["page"]
-        pageSize=req.query_params["pageSize"]
+        total = None
+        all_page = None
+        page=None
+        pageSize=None
+        if "page" in req.query_params:
+            page = req.query_params["page"]
+            pageSize = req.query_params["pageSize"]
+
         obj=models.CasePlan.objects.select_related("projectId","userId").filter(projectId=id).order_by("createTime").reverse()
         serializersObj=serializers.S_AddCasePlan(obj,many=True)
         res_data=serializersObj.data
-        total=len(res_data)  #数据总数
-        PaginationObj = Pagination(total, page, perPageNum=pageSize, allPageNum=11)
-        all_page = PaginationObj.all_page()
-        res_data = res_data[PaginationObj.start():PaginationObj.end()]
+        if page:  #如果传了分页 则返回分页数据--否则返回所有数据
+            total=len(res_data)  #数据总数
+            PaginationObj = Pagination(total, page, perPageNum=pageSize, allPageNum=11)
+            all_page = PaginationObj.all_page()
+            res_data = res_data[PaginationObj.start():PaginationObj.end()]
 
         return APIResponse(200, "success", results=res_data, total=total,allPage=all_page,
                            status=status.HTTP_200_OK)
+
 class DeleteCasePlan(APIView):
     """删除"""
 
@@ -377,9 +389,18 @@ class DeleteCasePlan(APIView):
         all_page = PaginationObj.all_page()
         res_data = res_data[PaginationObj.start():PaginationObj.end()]
         return {"res_data":res_data,"total":total,"all_page":all_page}
+    def delete_task(self,task_id):
+        TimedTask().deleteTask(task_id)
     def post(self,req):
-        models.CasePlan.objects.get(id=req.data["id"]).delete()
+        obj=models.CasePlan.objects.get(id=req.data["id"])
+        #这里需要删除测试报告里面的内容。。。或者在测试结果里面加一个已经删除的标识
+        task_id = obj.taskId
+        if task_id:
+            self.delete_task(task_id)
+        obj.delete()
+
         res=self.listPlan(req)
+
         return APIResponse(200, "删除成功", results=res["res_data"], total=res["total"], allPage=res["all_page"],
                            status=status.HTTP_200_OK)
 class SearchCasePlan(APIView):
@@ -487,5 +508,115 @@ class CaseResultsDetail(APIView):
         return APIResponse(200, "sucess", results=eval(res_data),
                            status=status.HTTP_200_OK)
 
+class  addTimedTask(APIView):
+
+    """新建定时任务
+
+    """
+    def taskList(self,data,kwarg={}):
+        id = data["projectId"]
+        page = data["page"]
+        pageSize = data["pageSize"]
+
+        kwarg["projectId"]=id
+        obj = models.timedTask.objects.select_related("projectId", "userId").filter(**kwarg).order_by(
+            "createTime").reverse()
+        serializersObj = serializers.S_addTimedTask(obj, many=True)
+        res_data = serializersObj.data
+        total = len(res_data)  # 数据总数
+        PaginationObj = Pagination(total, page, perPageNum=pageSize, allPageNum=11)
+        all_page = PaginationObj.all_page()
+        if  int(all_page)>=int(page):
+            print(PaginationObj.start(),PaginationObj.end())
+            res_data = res_data[PaginationObj.start():PaginationObj.end()]
+        else:
+            PaginationObj = Pagination(total, int(page)-1, perPageNum=pageSize, allPageNum=11)
+            res_data = res_data[PaginationObj.start():PaginationObj.end()]
+        print(res_data)
+        return {"res_data": res_data, "total": total, "all_page": all_page}
+    def post(self,req):
+        serializersObj = serializers.S_addTimedTask(data=req.data,many=False)
+        if serializersObj.is_valid(raise_exception=True):
+            res_data=serializersObj.save()
+            res_data=serializers.S_addTimedTask(res_data)
+            data_obj=res_data.data
+            res=self.taskList(req.data)
+            s=myTimedTask()
+            data=models.CasePlan.objects.get(id=data_obj["casePlanId"])
+            arg = {
+                "id": data.id,  #计划的id
+                "t_id":data_obj["id"],
+                "runType": 1,  #新增的定时任务始终执行类型始终都是为1
+                "userId": data.userId.id,
+                "CaseCount": data.CaseCount,
+                "projectId": data.projectId.id,
+                "againScript": data.againScript,
+                "cron": data.cron,
+                "taskName": data_obj["taskName"],
+                "timedId":data_obj["status"]["id"]
+                # "timedId": data["timedId"],
+                # "taskId": data["taskId"]
+            }
+            s.run(arg)
+            return APIResponse(200, "计划创建成功", results=res["res_data"], total=res["total"], allPage=res["all_page"],
+                               status=status.HTTP_200_OK)
+
+class  ValidCron(APIView):
+    def CronValid(self,cron):
+        url = "https://www.iamwawa.cn/home/crontab/ajax"
+        data = {'expression': cron}
+        header = {
+            "user-agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.113 Safari/537.36",
+        }
+        res = requests.post(url, headers=header, data=data)
+        return res.json()
+    def  post(self,req):
+        cron=req.data["cron"]
+        res=self.CronValid(cron)
+        if  int(res["status"])==1:
+            return  APIResponse(200,"",results=res,status=status.HTTP_200_OK)
+        else:
+            res["info"]="Cron表达式格式错误"
+            return APIResponse(200,"",results=res,status=status.HTTP_200_OK)
+
+class GetTimedTask(APIView):
+    """操作自定义的任务列表"""
+    def  get(self,req):
+        data=req.query_params
+        kwargs={}
+
+        if "taskName"  in data.keys():
+            kwargs["taskName__icontains"]=data["taskName"]
+        if "casePlanId"  in data.keys():
+            kwargs["casePlanId__name__icontains"]=data["casePlanId"]
+        if "userId"  in data.keys():
+            kwargs["userId__name__icontains"]=data["userId"]
+        res =addTimedTask().taskList(data,kwarg=kwargs)
+        return APIResponse(200, "", results=res["res_data"], total=res["total"], allPage=res["all_page"],
+                           status=status.HTTP_200_OK)
+class RemoveTimedTask(APIView):
+    def post(self,req):
+        data=req.data
+        id=data["id"]
+        obj=models.timedTask.objects.get(id=id)
+        task_id=obj.taskId
+        myTimedTask().deleteMyTask(task_id)  #同步删除celery任务
+        obj.delete()   #删除的时候需要级联删除celery 任务表中数据
+
+        res = addTimedTask().taskList(data)
+        return APIResponse(200, "删除成功", results=res["res_data"], total=res["total"], allPage=res["all_page"],
+                           status=status.HTTP_200_OK)
 
 
+class UpdateTimedTask(APIView):
+    def  post(self,req):
+        data=req.data
+        id=data["id"]
+        obj=models.timedTask.objects.get(id=id)
+        serializersObj = serializers.S_addTimedTask(data=req.data,instance=obj,partial=True)
+        if serializersObj.is_valid(raise_exception=True):
+            res_obj=serializersObj.save()
+            res_data=serializers.S_addTimedTask(res_obj)
+            data=res_data.data
+            myTimedTask().updateMyTask(data)  #处理celery任务
+            return APIResponse(200,"编辑成功",results=data,status=status.HTTP_200_OK)

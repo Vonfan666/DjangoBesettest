@@ -81,9 +81,10 @@ class Public():
         return res_data_c
 
     def utcTime(self,code):
-        a = time.mktime(code.timetuple())
-        b=time.strftime('%Y-%m-%d %X', time.localtime(a))
-        return b
+        if code:
+            a = time.mktime(code.timetuple())
+            code=time.strftime('%Y-%m-%d %X', time.localtime(a))
+        return code
 
 
 class OutputRedirector(object):

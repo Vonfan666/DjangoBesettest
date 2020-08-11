@@ -11,7 +11,7 @@ class Validated_data():
     #     # self.models=models
     def validated_data_add(self, validated_data,initial_data,models, postKey, updateKey):
 
-        print(postKey  in validated_data.keys())
+        # print(postKey  in validated_data.keys())
 
         if postKey not in validated_data.keys() and  postKey in initial_data.keys()  :
             if initial_data[postKey]!= "":

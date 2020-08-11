@@ -25,6 +25,9 @@ class Pagination():
             return a
         return a + 1
 
+    def run(self,data):
+        pass
+
 
 
 

@@ -109,13 +109,24 @@ class timedTask(models.Model):
         删除则 修改CasePlan执行方式---删除该表相关内容  以及 beat表两张表的呃逆荣
     """
     status_Choices = (
-        (0, "有效"),
-        (1, "暂停"),
+        (0, "暂停"),
+        (1, "有效"),
     )
-    planId=models.OneToOneField("CasePlan",to_field="id",on_delete=models.SET_NULL, null=True,related_name="planId_tt",verbose_name="计划id")
-    cronId=models.IntegerField(null=True,verbose_name="cron表达式id")
+    taskName=models.TextField(null=True,verbose_name="任务名称")
+    status = models.IntegerField(choices=status_Choices, default=0, null=True, verbose_name="执行状态")
     PeriodicTaskId=models.IntegerField(null=True,verbose_name="任务id")
+    results=models.TextField(null=True,verbose_name="最近执行结果")
+    #如果删除任务则需要联动删除这个
+    casePlanId =models.ForeignKey("CasePlan",to_field="id",on_delete=models.SET_NULL,null=True,verbose_name="项目id",related_name="casePlanId_tt")
     userId = models.ForeignKey("users.UserProfile", to_field="id", on_delete=models.SET_NULL, null=True,related_name="userId_tt",verbose_name="创建人")
+    projectId=models.ForeignKey("project.ProjectList",to_field="id",on_delete=models.SET_NULL,null=True,verbose_name="项目id")
+
     cron = models.CharField(max_length=255, verbose_name="cron定时表达式",null=True)
+    detail=models.TextField(verbose_name="定时描述",null=True)
+    taskId = models.IntegerField(null=True, verbose_name="定时任务Id")
+
+    createTime = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
+    updateTime = models.DateTimeField(auto_now=True, verbose_name="更新时间")
+
     class Meta:
         db_table="django_celery_beat_task"

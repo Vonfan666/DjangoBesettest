@@ -98,6 +98,12 @@ urlpatterns = [
     url(r"^users/casePlan_delete/", caseViews.DeleteCasePlan.as_view(), name="DeleteCasePlan"),  # 删除测试计划
     url(r"^users/caseList_get/", caseViews.GetCaseList.as_view(), name="GetCaseList"),  # 查看项目下的用例列表
     url(r"^users/caseOrder_edit/", caseViews.EditCaseOrder.as_view(), name="EditCaseOrder"),  # 编辑接口和用例的执行顺序
+    #自己的定时任务列表
+    url(r"^users/add_timedTask/", caseViews.addTimedTask.as_view(), name="addTimedTask"),  # 新增自己的定时任务列表
+    url(r"^users/get_timedTask/", caseViews.GetTimedTask.as_view(), name="GetTimedTask"),  # 查看自己的定时任务
+    url(r"^users/remove_timedTask/", caseViews.RemoveTimedTask.as_view(), name="RemoveTimedTask"),  # 删除自己的定时任务
+    url(r"^users/update_timedTask/", caseViews.UpdateTimedTask.as_view(), name="UpdateTimedTask"),  # 编辑自己的定时任务
 
+    url(r"^users/valid_cron/", caseViews.ValidCron.as_view(), name="ValidCron"),  # 校验cron
 
 ]
