@@ -16,5 +16,5 @@ class Validated_data():
         if postKey not in validated_data.keys() and  postKey in initial_data.keys()  :
             if initial_data[postKey]!= "":
                 value = initial_data[postKey]
-                obj = models.objects.get(id=value)
+                obj = models.objects.get(id=int(value))
                 validated_data[updateKey] = obj

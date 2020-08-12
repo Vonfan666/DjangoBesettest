@@ -130,3 +130,50 @@ class timedTask(models.Model):
 
     class Meta:
         db_table="django_celery_beat_task"
+
+
+
+class SqlBox(models.Model):
+    type_Choices = (
+        (1, "MySql"),
+        (2, "SqlSever"),
+        (3,"Redis"),
+        (4, "Oracle")
+    )
+    userId = models.ForeignKey("users.UserProfile", to_field="id", on_delete=models.SET_NULL, null=True,related_name="userId_SqlBox",verbose_name="创建人")
+    projectId=models.ForeignKey("project.ProjectList",to_field="id",on_delete=models.SET_NULL,null=True,verbose_name="项目id",related_name="projectId_SqlBox")
+    name = models.CharField(verbose_name="变量名",max_length=255)
+    type = models.IntegerField(choices=type_Choices,default=1,verbose_name="数据库类型")
+    host = models.CharField(verbose_name="主机地址",max_length=255)
+    port = models.CharField(verbose_name="端口",max_length=255)
+    database=models.CharField(verbose_name="数据库名称",max_length=255)
+    userName = models.CharField(verbose_name="用户名",max_length=255)
+    passWord = models.CharField(verbose_name="密码",max_length=255)
+    createTime = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
+    updateTime = models.DateTimeField(auto_now=True, verbose_name="更新时间")
+    detail=models.TextField(verbose_name="描述",null=True)
+
+    class Meta:
+        db_table="sql_box"
+class SqlStatement(models.Model):
+    type_Choices = (
+        (1, "查"),
+        (2, "改"),
+        (3, "增"),
+        (3, "删")
+    )
+    BoxId=models.ForeignKey("SqlBox",to_field="id",on_delete=models.SET_NULL,null=True,related_name="boxId_ss")
+    userId = models.ForeignKey("users.UserProfile", to_field="id", on_delete=models.SET_NULL, null=True,
+                               related_name="userId_ss", verbose_name="创建人")
+    projectId = models.ForeignKey("project.ProjectList", to_field="id", on_delete=models.SET_NULL, null=True,
+                                  verbose_name="项目id")
+    SqlActionResults=models.TextField(verbose_name="sql结果处理",null=True)
+    type = models.IntegerField(choices=type_Choices,default=1,verbose_name="执行语句类型")
+    name = models.CharField(verbose_name="数据库连接名", max_length=255)
+    sql = models.TextField(verbose_name="sql语句",null=True)
+    createTime = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
+    updateTime = models.DateTimeField(auto_now=True, verbose_name="更新时间")
+    detail=models.TextField(verbose_name="描述",null=True)
+
+    class Meta:
+        db_table="sql_statement"

@@ -16,7 +16,7 @@ from project.models import Environments
 from  users.models import UserProfile
 from . import models,serializers
 from .libs.timedTask import TimedTask,myTimedTask
-
+from db_tools.connectSql  import Con_sql
 
 
 # from case.runCase import RunCaseAll
@@ -372,7 +372,6 @@ class GetCasePlan(APIView):
 
         return APIResponse(200, "success", results=res_data, total=total,allPage=all_page,
                            status=status.HTTP_200_OK)
-
 class DeleteCasePlan(APIView):
     """删除"""
 
@@ -507,8 +506,7 @@ class CaseResultsDetail(APIView):
         res_data=serializersObj.data["result"]
         return APIResponse(200, "sucess", results=eval(res_data),
                            status=status.HTTP_200_OK)
-
-class  addTimedTask(APIView):
+class addTimedTask(APIView):
 
     """新建定时任务
 
@@ -560,7 +558,6 @@ class  addTimedTask(APIView):
             s.run(arg)
             return APIResponse(200, "计划创建成功", results=res["res_data"], total=res["total"], allPage=res["all_page"],
                                status=status.HTTP_200_OK)
-
 class  ValidCron(APIView):
     def CronValid(self,cron):
         url = "https://www.iamwawa.cn/home/crontab/ajax"
@@ -578,20 +575,22 @@ class  ValidCron(APIView):
         else:
             res["info"]="Cron表达式格式错误"
             return APIResponse(200,"",results=res,status=status.HTTP_200_OK)
-
 class GetTimedTask(APIView):
     """操作自定义的任务列表"""
+    def isValid(self,data):
+        kwargs = {}
+
+        if "taskName" in data.keys():
+            kwargs["taskName__icontains"] = data["taskName"]
+        if "casePlanId" in data.keys():
+            kwargs["casePlanId__name__icontains"] = data["casePlanId"]
+        if "userId" in data.keys():
+            kwargs["userId__name__icontains"] = data["userId"]
+        return kwargs
     def  get(self,req):
         data=req.query_params
-        kwargs={}
 
-        if "taskName"  in data.keys():
-            kwargs["taskName__icontains"]=data["taskName"]
-        if "casePlanId"  in data.keys():
-            kwargs["casePlanId__name__icontains"]=data["casePlanId"]
-        if "userId"  in data.keys():
-            kwargs["userId__name__icontains"]=data["userId"]
-        res =addTimedTask().taskList(data,kwarg=kwargs)
+        res =addTimedTask().taskList(data,kwarg=self.isValid(data))
         return APIResponse(200, "", results=res["res_data"], total=res["total"], allPage=res["all_page"],
                            status=status.HTTP_200_OK)
 class RemoveTimedTask(APIView):
@@ -603,11 +602,9 @@ class RemoveTimedTask(APIView):
         myTimedTask().deleteMyTask(task_id)  #同步删除celery任务
         obj.delete()   #删除的时候需要级联删除celery 任务表中数据
 
-        res = addTimedTask().taskList(data)
+        res = addTimedTask().taskList(data,GetTimedTask().isValid(data))
         return APIResponse(200, "删除成功", results=res["res_data"], total=res["total"], allPage=res["all_page"],
                            status=status.HTTP_200_OK)
-
-
 class UpdateTimedTask(APIView):
     def  post(self,req):
         data=req.data
@@ -620,3 +617,189 @@ class UpdateTimedTask(APIView):
             data=res_data.data
             myTimedTask().updateMyTask(data)  #处理celery任务
             return APIResponse(200,"编辑成功",results=data,status=status.HTTP_200_OK)
+
+class addSqlBox(APIView):
+    """新增数据库连接"""
+
+    def post(self,req):
+        data=req.data
+        serializersObj=serializers.S_addSqlBox(data=data)
+        print(serializersObj)
+        if  serializersObj.is_valid(raise_exception=True):
+            serializersObj.save()
+            kwargs = {}
+            if "s_name" in data.keys():
+                kwargs["name__icontains"] = data["s_name"]
+            if "s_type" in data.keys():
+                kwargs["type__name__icontains"] = data["s_type"]
+            if "s_userId" in data.keys():
+                kwargs["userId__name__icontains"] = data["s_userId"]
+            s = SqlBoxMethods()
+            res = s.taskList(data, kwarg=kwargs)
+            return APIResponse(200, "添加成功", results=res["res_data"], total=res["total"], allPage=res["all_page"],
+                               status=status.HTTP_200_OK)
+
+class SqlBoxMethods():
+    def taskList(self,data,kwarg={}):
+        id = data["projectId"]
+        page = data["page"]
+        pageSize = data["pageSize"]
+        kwarg["projectId"]=id
+        obj = models.SqlBox.objects.select_related("projectId", "userId").filter(**kwarg).order_by(
+            "createTime").reverse()
+        serializersObj = serializers.S_addSqlBox(obj, many=True)
+        res_data = serializersObj.data
+        total = len(res_data)  # 数据总数
+        PaginationObj = Pagination(total, page, perPageNum=pageSize, allPageNum=11)
+        all_page = PaginationObj.all_page()
+        if  int(all_page)>=int(page):
+            print(PaginationObj.start(),PaginationObj.end())
+            res_data = res_data[PaginationObj.start():PaginationObj.end()]
+        else:
+            PaginationObj = Pagination(total, int(page)-1, perPageNum=pageSize, allPageNum=11)
+            res_data = res_data[PaginationObj.start():PaginationObj.end()]
+        print(res_data)
+        return {"res_data": res_data, "total": total, "all_page": all_page}
+    def isValid(self,data):
+        kwargs = {}
+        if "name" in data.keys():
+            kwargs["name__icontains"] = data["name"]
+        if "type" in data.keys():
+            kwargs["type__name__icontains"] = data["type"]
+        if "userId" in data.keys():
+            kwargs["userId__name__icontains"] = data["userId"]
+        return kwargs
+class  GetSqlBox(APIView):
+    def get(self,req):
+        data=req.query_params
+        s=SqlBoxMethods()
+        res=s.taskList(data,kwarg=s.isValid(data))
+        return APIResponse(200, "", results=res["res_data"], total=res["total"], allPage=res["all_page"],
+                           status=status.HTTP_200_OK)
+
+class removeSqlBox(APIView):
+    def post(self,req):
+        data = req.data
+        id=data["id"]
+        models.SqlBox.objects.filter(id=id).delete()
+        s = SqlBoxMethods()
+        res = s.taskList(data, kwarg=s.isValid(data))
+        return APIResponse(200, "删除成功", results=res["res_data"], total=res["total"], allPage=res["all_page"],
+                           status=status.HTTP_200_OK)
+
+
+class  updateSqlBox(APIView):
+    def  post(self,req):
+        data=req.data
+        id=data["id"]
+        serializersObj=serializers.S_addSqlBox(data=data,instance=models.SqlBox.objects.get(id=int(id)),partial=True)
+        if  serializersObj.is_valid(raise_exception=True):
+            res=serializersObj.save()
+            res=serializers.S_addSqlBox(res)
+            res_data=res.data
+            return  APIResponse(200,"更新成功",results=res_data,status=status.HTTP_200_OK)
+
+
+class GetBoxOrSqlType(APIView):
+    """# 查询当前项目所有的数据库连接以及SQL类型"""
+    def get(self,req):
+        data=req.query_params
+        projectId=data["projectId"]
+        obj=models.SqlBox.objects.filter(projectId_id=int(projectId))
+        serializersObj=serializers.S_addSqlBox(obj,many=True)
+        sqlBoxList=serializersObj.data
+        sqlType= [
+            {"id": 1,"name" : "查"},
+            {"id": 2, "name": "改"},
+            {"id": 3, "name": "增"},
+            {"id": 4, "name": "删"},
+        ]
+        return APIResponse(200,"",results={"sqlBoxList":sqlBoxList,"sqlType":sqlType},status=status.HTTP_200_OK)
+
+
+class PageMethod():
+    def __init__(self,mod,S_serializers,data,):
+        self.mod=mod
+        self.S_serializers=S_serializers
+        self.data=data
+    def taskList(self,kwarg={}):
+        id = self.data["projectId"]
+        page = self.data["page"]
+        pageSize = self.data["pageSize"]
+        kwarg["projectId"]=id
+        obj = self.mod.objects.select_related("projectId", "userId").filter(**kwarg).order_by(
+            "createTime").reverse()
+        serializersObj = self.S_serializers(obj, many=True)
+        res_data = serializersObj.data
+        total = len(res_data)  # 数据总数
+        PaginationObj = Pagination(total, page, perPageNum=pageSize, allPageNum=11)
+        all_page = PaginationObj.all_page()
+        if  int(all_page)>=int(page):
+            print(PaginationObj.start(),PaginationObj.end())
+            res_data = res_data[PaginationObj.start():PaginationObj.end()]
+        else:
+            PaginationObj = Pagination(total, int(page)-1, perPageNum=pageSize, allPageNum=11)
+            res_data = res_data[PaginationObj.start():PaginationObj.end()]
+        print(res_data)
+        return {"res_data": res_data, "total": total, "all_page": all_page}
+    def isValid(self):
+        kwargs = {}
+        if "s_name" in self.data.keys():
+            kwargs["name__icontains"] = self.data["s_name"]
+        if "s_type" in self.data.keys():
+            kwargs["type__name__icontains"] = self.data["s_type"]
+        if "s_userId" in self.data.keys():
+            kwargs["userId__name__icontains"] = self.data["s_userId"]
+        return kwargs
+class AddSql(APIView):
+    def post(self,req):
+        data=req.data
+        serializersObj=serializers.S_addSql(data=data)
+        if  serializersObj.is_valid(raise_exception=True):
+            serializersObj.save()
+            s=PageMethod(models.SqlStatement,serializers.S_addSql,data)
+            res=s.taskList(s.isValid())
+            return APIResponse(200, "新增成功", results=res["res_data"], total=res["total"], allPage=res["all_page"],
+                               status=status.HTTP_200_OK)
+
+class GetSql(APIView):
+    def get(self,req):
+        data=req.query_params
+        s = PageMethod(models.SqlStatement, serializers.S_addSql, data)
+        res = s.taskList(s.isValid())
+        return APIResponse(200, "", results=res["res_data"], total=res["total"], allPage=res["all_page"],
+                           status=status.HTTP_200_OK)
+
+class UpdateSql(APIView):
+    def  post(self,req):
+        data=req.data
+        id=data["id"]
+        serializersObj=serializers.S_addSql(data=data,instance=models.SqlStatement.objects.get(id=int(id)),partial=True)
+        if  serializersObj.is_valid(raise_exception=True):
+            res=serializersObj.save()
+            res=serializers.S_addSql(res)
+            res_data=res.data
+            return  APIResponse(200,"更新成功",results=res_data,status=status.HTTP_200_OK)
+class RemoveSql(APIView):
+    def post(self,req):
+        data = req.data
+        id=data["id"]
+        models.SqlStatement.objects.filter(id=id).delete()
+        s = PageMethod(models.SqlStatement, serializers.S_addSql, data)
+        res = s.taskList(s.isValid())
+        return APIResponse(200, "删除成功", results=res["res_data"], total=res["total"], allPage=res["all_page"],
+                           status=status.HTTP_200_OK)
+
+
+class ValidSql(APIView):
+
+    def post(self,req):
+        data=req.data
+        BoxId=data["BoxId"]
+        sql=data["sql"]
+        SqlActionResults=data["SqlActionResults"]
+        obj=models.SqlBox.objects.get(id=BoxId)
+
+        s = Con_sql(action=SqlActionResults,host=obj.host, port=int(obj.port), user=obj.userName, passwd=obj.passWord, database=obj.database)
+        res=s(sql)
+        return APIResponse(200,"SQL执行成功",results=res,status=status.HTTP_200_OK)

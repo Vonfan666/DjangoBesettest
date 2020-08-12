@@ -496,3 +496,73 @@ class S_addTimedTask(serializers.ModelSerializer):
 
         user.save()
         return user
+
+
+class S_addSqlBox(serializers.ModelSerializer):
+    createTime = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
+    updateTime = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
+    projectId = serializers.SerializerMethodField()
+    userId = serializers.SerializerMethodField()
+    type = serializers.SerializerMethodField()
+    def get_projectId(self,obj):
+        return {"id":obj.projectId.id,"name":obj. projectId.name}
+    def get_userId(self,obj):
+        return {"id":obj.userId.id,"name":obj.userId.name}
+    def get_type(self,obj):
+        return {"id":obj.type,"name":obj.get_type_display()}
+    class Meta:
+        model=models.SqlBox
+        fields = "__all__"
+
+
+    def  create(self, validated_data):
+        s.validated_data_add(validated_data, self.initial_data, projectModels.ProjectList, "projectId", "projectId")
+        s.validated_data_add(validated_data, self.initial_data, usersModels.UserProfile, "userId", "userId")
+        validated_data["type"] = int(self.initial_data["type"])
+        user = super().create(validated_data=validated_data)
+        user.save()
+        return user
+
+    def  update(self, instance, validated_data):
+        validated_data["type"] = int(self.initial_data["type"])
+        user = super().update(validated_data=validated_data, instance=instance)
+        user.save()
+        return user
+
+class  S_addSql(serializers.ModelSerializer):
+
+    createTime = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
+    updateTime = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
+    projectId = serializers.SerializerMethodField()
+    userId = serializers.SerializerMethodField()
+    type = serializers.SerializerMethodField()
+    BoxId = serializers.SerializerMethodField()
+    def get_projectId(self, obj):
+        return {"id": obj.projectId.id, "name": obj.projectId.name}
+
+    def get_userId(self, obj):
+        return {"id": obj.userId.id, "name": obj.userId.name}
+
+    def get_type(self, obj):
+        return {"id": obj.type, "name": obj.get_type_display()}
+    def get_BoxId(self, obj):
+        return {"id": obj.BoxId.id, "name": obj.BoxId.name}
+    class Meta:
+        model = models.SqlStatement
+        fields = "__all__"
+
+    def  create(self, validated_data):
+        s.validated_data_add(validated_data, self.initial_data, projectModels.ProjectList, "projectId", "projectId")
+        s.validated_data_add(validated_data, self.initial_data, usersModels.UserProfile, "userId", "userId")
+        s.validated_data_add(validated_data, self.initial_data, models.SqlBox, "BoxId", "BoxId")
+        validated_data["type"] = int(self.initial_data["type"])
+        user = super().create(validated_data=validated_data)
+        user.save()
+        return user
+
+    def  update(self, instance, validated_data):
+        s.validated_data_add(validated_data, self.initial_data, models.SqlBox, "BoxId", "BoxId")
+        validated_data["type"] = int(self.initial_data["type"])
+        user = super().update(validated_data=validated_data, instance=instance)
+        user.save()
+        return user

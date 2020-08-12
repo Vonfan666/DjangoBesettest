@@ -84,13 +84,11 @@ urlpatterns = [
     url(r"^users/case_debug/", caseViews.DebugCase.as_view(), name="DebugCase"),  # 用例调试
     url(r"^users/case_results/", caseViews.CaseResults.as_view(), name="CaseResults"),  # 查看用例调试结果
     url(r"^users/case_results_detail/", caseViews.CaseResultsDetail.as_view(), name="CaseResultsDetail"),  # 查看debug日志详情
-
     url(r"^users/case_results_del/", caseViews.CaseResults.as_view(), name="CaseResults"),  # 查看删除用例调试
     # url(r"^users/case_run_all/", runCase.RunCaseAll.as_view(), name="RunCaseAll"),  # 执行测试计划
     # url(r"^users/case_run_all/", tasks.UsersTask.as_view(), name="RunCaseAll"),  # 执行测试计划
     url(r"^users/case_run_all/", caseViews.RunAll.as_view(), name="RunCaseAll"),  # 异步执行测试计划
     url(r"^users/timed_task/", caseViews.TimedTask.as_view(), name="TimedTask"),  # 新增定时任务
-
     url(r"^users/case_order/", caseViews.CaseOrder.as_view(), name="CaseOrder"),  # 修改该接口的执行顺序
     url(r"^users/casePlan_add/", caseViews.AddCasePlan.as_view(), name="AddCasePlan"),  # 新建测试计划
     url(r"^users/casePlan_get/", caseViews.GetCasePlan.as_view(), name="GetCasePlan"),  # 查看测试计划
@@ -103,7 +101,16 @@ urlpatterns = [
     url(r"^users/get_timedTask/", caseViews.GetTimedTask.as_view(), name="GetTimedTask"),  # 查看自己的定时任务
     url(r"^users/remove_timedTask/", caseViews.RemoveTimedTask.as_view(), name="RemoveTimedTask"),  # 删除自己的定时任务
     url(r"^users/update_timedTask/", caseViews.UpdateTimedTask.as_view(), name="UpdateTimedTask"),  # 编辑自己的定时任务
-
     url(r"^users/valid_cron/", caseViews.ValidCron.as_view(), name="ValidCron"),  # 校验cron
+    url(r"^users/add_sql_box/", caseViews.addSqlBox.as_view(), name="addSqlBox"),  # 新建数据库
+    url(r"^users/remove_sql_box/", caseViews.removeSqlBox.as_view(), name="removeSqlBox"),  # 删除
+    url(r"^users/get_sql_box/", caseViews.GetSqlBox.as_view(), name="GetSqlBox"),  # 查看数据库
+    url(r"^users/update_sql_box/", caseViews.updateSqlBox.as_view(), name="updateSqlBox"),  # 更新库
 
+    url(r"^users/get_boxList_or_SqlType/", caseViews.GetBoxOrSqlType.as_view(), name="GetBoxOrSqlType"),  # 查询当前项目所有的数据库连接以及SQL类型
+    url(r"^users/add_sql/", caseViews.AddSql.as_view(), name="AddSql"),# 新增SQL语句
+    url(r"^users/get_sql/", caseViews.GetSql.as_view(), name="GetSql"),# 查询SQL语句
+    url(r"^users/update_sql/", caseViews.UpdateSql.as_view(), name="UpdateSql"),  # 更新SQL语句
+    url(r"^users/remove_sql/", caseViews.RemoveSql.as_view(), name="RemoveSql"),  # 删除SQL语句
+    url(r"^users/valid_sql/", caseViews.ValidSql.as_view(), name="ValidSql"),  # 验证sql语句是否可以查询
 ]
