@@ -792,14 +792,31 @@ class RemoveSql(APIView):
 
 
 class ValidSql(APIView):
+    def sql(self,data):
+        BoxId = data["BoxId"]
+        sql = data["sql"]
+        SqlActionResults = data["SqlActionResults"]
+        obj = models.SqlBox.objects.get(id=BoxId)
+        s = Con_sql(action=SqlActionResults, host=obj.host, port=int(obj.port), user=obj.userName, passwd=obj.passWord,
+                    database=obj.database)
+        res = s.runSql(sql)
+        return res
+    def box(self,data):
+
+        s = Con_sql(host=data["host"], port=int(data["port"]), user=data["user"], passwd=data["passwd"],
+                    database=data["database"])
+        res=s.connectSql()
+        return res
 
     def post(self,req):
         data=req.data
-        BoxId=data["BoxId"]
-        sql=data["sql"]
-        SqlActionResults=data["SqlActionResults"]
-        obj=models.SqlBox.objects.get(id=BoxId)
+        if int(data["Stype"])==1:  #校验sql
+            res=self.sql(data)
+            return APIResponse(200, "SQL执行成功", results=res, status=status.HTTP_200_OK)
+        else:
+            res=self.box(data)
+            return APIResponse(200, "SQL执行成功", results=res, status=status.HTTP_200_OK)
 
-        s = Con_sql(action=SqlActionResults,host=obj.host, port=int(obj.port), user=obj.userName, passwd=obj.passWord, database=obj.database)
-        res=s(sql)
-        return APIResponse(200,"SQL执行成功",results=res,status=status.HTTP_200_OK)
+
+
+

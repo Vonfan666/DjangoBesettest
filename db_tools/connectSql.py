@@ -5,16 +5,22 @@
 # @Time:2020年08月12日22时28分38秒
 import pymysql
 class Con_sql():
+    """
+    (
+    0,链接数据库报错,
+    1,结果处理成功
+    2，执行sql失败
+    3,结果处理失败
+    )
+    """
     def __init__(self,action=None,host=None,port=None,user=None,passwd=None,database=None,charset="utf8"):
-        self.action=action
+        self.action=action   #sql结果处理方法，用户写的python脚本
         self.host=host
         self.port=port
         self.user=user
         self.passwd=passwd
         self.database=database
         self.charset=charset
-    def __call__(self, *args, **kwargs):
-        return self.runSql(*args)
     def connectSql(self):
         try:
             self.conn = pymysql.connect(
@@ -26,7 +32,7 @@ class Con_sql():
                 charset=self.charset
             )
             self.cursor = self.conn.cursor()
-            return {"code":1,"msg":""}
+            return {"code":1,"msg":"数据库连接成功"}
         except Exception as f:
             return {"code":0,"msg":"连接数据库报错:%s"%f}
 
@@ -34,7 +40,7 @@ class Con_sql():
     def runSql(self,sql):
         res=self.connectSql()
 
-        if res["code"]:
+        if res["code"] :
             try:
                 self.cursor.execute(sql)
                 self.conn.commit()
@@ -43,9 +49,9 @@ class Con_sql():
                 self.cursor.close()
                 value=self.SqlAction(self.action, data)
                 return value
-            except Exception as e:
+            except pymysql.MySQLError as e:
                 self.conn.rollback()
-                return {"code":0,"msg":"数据处理失败，已完成回滚%s"%e}
+                return {"code":2,"msg":"SQL操作失败，已完成回滚%s"%e}
         else:
 
             return res
@@ -70,7 +76,7 @@ class Con_sql():
                 resDict["res"] = eval(method)
             return resDict
         except Exception as e:
-            resDict["code"]=0
+            resDict["code"]=3
             resDict["msg"]="sql执行结果处理错误:%s:"%e
             return resDict
 
