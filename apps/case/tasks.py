@@ -22,12 +22,16 @@ from django.db.models import Q
 @shared_task(bind=True)  #绑定任务为实力方法
 def allRun(self,tasks_data):
     #数据库创建case_results新增数据 status为初始化。。。tasks_data  是json格式
+    print("OJBK")
     try:
+
         s=RunCaseAll()
         s.post(tasks_data)
+        print("ojsa")
         self.update_state(state="Progress",meta={})
         return "success"
     except Exception as  f:
+
         print(f)
         return "fail"
 
@@ -151,3 +155,6 @@ def timedTask(data):
 
 
 
+#定时 celery -A besettest beat -l debug -S django
+
+#异步 celery  -A besettest  worker --loglevel=debug  --pool=solo

@@ -113,4 +113,6 @@ urlpatterns = [
     url(r"^users/update_sql/", caseViews.UpdateSql.as_view(), name="UpdateSql"),  # 更新SQL语句
     url(r"^users/remove_sql/", caseViews.RemoveSql.as_view(), name="RemoveSql"),  # 删除SQL语句
     url(r"^users/valid_sql/", caseViews.ValidSql.as_view(), name="ValidSql"),  # 验证sql语句是否可以查询
+    url(r"^users/case_get_box_or_sql/", caseViews.GetBoxSqlList.as_view(), name="GetBoxSqlList"),  # 点获取前置列表
+
 ]

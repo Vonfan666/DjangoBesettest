@@ -52,7 +52,6 @@ class ProjectList(APIView):
                 valid_data = serializers.S_ProjectList(obj, many=Many)
                 return APIResponse(200, "success", results=valid_data.data,
                                    status=status.HTTP_200_OK)
-
 class ProjectUnityStatus(APIView):
     """修改同步状态
         :param id  项目id
@@ -92,7 +91,6 @@ class ProjectUnityStatus(APIView):
                 Interface_validate_data.save()
 
             return APIResponse(200, "同步成功", status=status.HTTP_200_OK)
-
 class AddProject(APIView):
     """新增项目"""
     def post(self,req):
@@ -177,8 +175,6 @@ class  LastProject(APIView):
         UserProfile.objects.filter(id=userId).update(user_last_project=projectId)
         return APIResponse(200,"success",status=status.HTTP_200_OK)
 # from django.forms.models import model_to_dict
-
-
 class PostMethods(APIView):
     """返回所有的请求数据"""
     def get(self,req):
@@ -202,7 +198,6 @@ class addFilesName(APIView):
             res_data=valid_data.save()
             res_data=serializers.S_InterfaceFilesName(res_data)
             return APIResponse(200,"添加成功",data=res_data.data,status=status.HTTP_200_OK)
-
 class EditFilesName(APIView):
     """修改文件夹名称
         :param
@@ -218,7 +213,6 @@ class EditFilesName(APIView):
             res_data=serializers.S_InterfaceFilesName(valid_data)
             res_data=res_data.data
             return APIResponse(200,"修改成功",results=res_data,status=status.HTTP_200_OK)
-
 class RemoveFilesName(APIView):
     """
     删除接口文件夹
@@ -276,7 +270,7 @@ class EditFiles(APIView):
             models.InterfaceFiles.objects.filter(id=id).update(filesName=name)
             return  APIResponse(200,"sucess",status=status.HTTP_200_OK)
         except:
-            return  APIResponse(401,"修改失败,请联系管理员",status=status.HTTP_200_OK)
+            return  APIResponse(409,"修改失败,请联系管理员",status=status.HTTP_200_OK)
 
 class RmoveFiles(APIView):
     """删除接口文件"""
@@ -286,7 +280,7 @@ class RmoveFiles(APIView):
             models.InterfaceFiles.objects.filter(id=id).delete()
             return  APIResponse(200,"sucess",status=status.HTTP_200_OK)
         except:
-            return  APIResponse(401,"修改失败,请联系管理员",status=status.HTTP_200_OK)
+            return  APIResponse(409,"修改失败,请联系管理员",status=status.HTTP_200_OK)
 from django.forms.models import model_to_dict
 class CopyFiles(APIView):
     """复制接口文件
@@ -407,8 +401,8 @@ class MockRes(APIView):
     permission_classes = (permissions.AllowAny,)
 
     def  post(self,req):
-        # logger.info("哲哥传入参数:%s"%req.data.dict())
-        logger.info("哲哥传入参数:%s" % json.load(req))
+        # # logger.info("哲哥传入参数:%s"%req.data.dict())
+        # logger.info("哲哥传入参数:%s" % json.load(req))
         path=req.path
         obj=models.InterfaceFiles.objects.filter(mock_attr__contains=path).values("res_header","res_data","mock_type","mock_data")
         # res_data={}

@@ -4,13 +4,14 @@ import  logging
 # logger =  logging.getLogger("log")
 
 class dataChange(object):
-    def __init__(self,headers,data,logger,environment=None):
+    def __init__(self,headers,data,logger,url,environment=None):
         self.headers=headers
         self.data=data
         self.logger=logger
         self.environment=environment
         self.headers = self.headerChange()
         self.data = self.dataChange()
+        self.url=url
 
     def run(self):
         """执行方法"""
@@ -18,8 +19,9 @@ class dataChange(object):
         self.isDataType(self.headers,self.data)
         headers=self.replaceEnvironment(self.headers)
         data=self.replaceEnvironment(self.data)
+        url=self.replaceEnvironment(self.url)
 
-        return json.loads(headers),json.loads(data)
+        return json.loads(headers),json.loads(data),url
 
     def headerChange(self):
         """处理请求头格式"""
@@ -38,6 +40,8 @@ class dataChange(object):
         for item in self.headers["keys"]:
             headersCode[item["headerKey"].strip()] = item["headerValue"].strip()
         return headersCode
+
+
 
     def dataChange(self):
         """处理请求数据格式"""
@@ -64,10 +68,21 @@ class dataChange(object):
         res=re_s.findall(data)
         if len(res)>0:
             for  item in res:
-                item=self.itemDataRe(item)
+                value=self.itemDataRe(item)
                 #取出item的值去数据库里面查-查到之后--作为替换字符进去替换到花括号
+                if type(value)==str:  #如果是字符串则直接替换
+                    data=re_s.sub(value,data,1)
+                if type(value)==int:  #如果item是整数则需要另外的替换方式
+                    data=json.loads(data)    #从所有的data列表里面找出当前的item进行替换
+                    dataList=list(data.values())
+                    dataKeyList=list(data.keys())
+                    if len(dataList)>0:
+                        for index,row  in enumerate(dataList):
+                            if row==item:
 
-                data=re_s.sub(item,data,1)
+                                data[dataKeyList[index]]=value
+                    data=json.dumps(data)
+
         else:
             data=data
         return data
@@ -80,6 +95,7 @@ class dataChange(object):
             self.data=json.dumps(data)
 
     def itemDataRe(self,item):
+        """匹配环境变量"""
         re_s = re.compile(r"{{(.+?)}}")
         res = re_s.findall(item)
 
@@ -94,7 +110,8 @@ class dataChange(object):
             value=self.globalDataRe(res)
         if not value: #如果全局变量没找到-则抛出异常
             errorsMsg["Message"] = "%s变量不存在" % (res[0])
-            raise Exception("%s变量不存在啊" % (res))
+            data=json.dumps({"header":json.loads(self.headers),"data":json.loads(self.data),"url":self.url,"msg":"%s变量不存在"%(res[0])})
+            raise Exception(data)
 
         return value
 

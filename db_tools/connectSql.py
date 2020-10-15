@@ -3,7 +3,11 @@
 # -*- coding:utf-8 -*-
 # @Author:von_fan
 # @Time:2020年08月12日22时28分38秒
-import pymysql
+import pymysql,json
+from libs.public import MyEncoder
+from case.models import SqlStatement
+from project.models import Environments
+
 class Con_sql():
     """
     (
@@ -37,9 +41,15 @@ class Con_sql():
             return {"code":0,"msg":"连接数据库报错:%s"%f}
 
 
-    def runSql(self,sql):
+    def runSql(self,sqlId,sql=None,status=None):
         res=self.connectSql()
 
+        sqlObj = SqlStatement.objects.get(id=sqlId)
+        method = self.action
+
+        if not status:  #如果传了data则是说明使用前断传过来的参数进行处理
+            sql=sqlObj.sql
+            method = sqlObj.SqlActionResults
         if res["code"] :
             try:
                 self.cursor.execute(sql)
@@ -47,15 +57,29 @@ class Con_sql():
 
                 data=self.cursor.fetchall()
                 self.cursor.close()
-                value=self.SqlAction(self.action, data)
-                return value
+                if sqlObj.type==1:  #如果类型是查--则取出查的数据 做处理
+                    if method:
+
+                        value=self.SqlAction(method, data)
+                        if value["strStatus"]==1:
+                            self.envAction(sqlObj,value["res"])
+                        else:
+                            self.envAction(sqlObj, json.loads(value["res"]))
+                        return value
+                    else:
+                        try:
+                            value=json.dumps(data)
+                            self.envAction(sqlObj, value)
+                            return value
+                        except Exception as f:
+                            pass
+
+                return {"code":1,"msg":"Sql执行成功","data":data}
             except pymysql.MySQLError as e:
                 self.conn.rollback()
-                return {"code":2,"msg":"SQL操作失败，已完成回滚%s"%e}
+                return {"code":2,"msg":"SQL:%s操作失败，已完成回滚%s"%(sql,e)}
         else:
-
             return res
-
     def SqlAction(self,method,data):
         resDict={
             "code":1,
@@ -72,20 +96,64 @@ class Con_sql():
                 resDict["res"]=eval(methodList[-1])
                 return resDict
             else:
+                a=eval(method)
+                if type(a)==str:
+                    resDict["res"]=a
+                    resDict["strStatus"]=1
+                else:
+                    resDict["strStatus"] = 0
+                    resDict["res"] =json.dumps(a)
 
-                resDict["res"] = eval(method)
             return resDict
         except Exception as e:
             resDict["code"]=3
             resDict["msg"]="sql执行结果处理错误:%s:"%e
             return resDict
 
-    # def
+    def envAction(self, data,value):
+        """执行sql前置或者后置时处理环境变量
+            需要优化--在更换保存的变量位置时  需要更换全局还是环境--在改变的时候---需要删除原来位置的变量--
+        """
+        key = data.name
+        value = value
+        saveResultChoice = json.loads(data.saveResultChoice)
+        envId = data.envId.id
+        if saveResultChoice:
+            for item in saveResultChoice:
+                if item == "保存到环境变量":
+                    obj = Environments.objects.get(id=envId).value
+                    obj=json.loads(obj)
+                    objKeyList = list(map(lambda x: list(x.keys())[0], obj))
+                    # obj[objKeyList.index(key)] = {key: value} if key in objKeyList else obj.append({key: value})
+                    if key in objKeyList:
+                        obj[objKeyList.index(key)] = {key: value}
+                        Environments.objects.filter(id=envId).update(value=json.dumps(obj))
+                    else:
+                        obj.append({key: value})
+                        Environments.objects.filter(id=envId).update(value=json.dumps(obj))
+
+                if item == "保存到全局变量":
+                    obj = Environments.objects.get(id=1).value
+                    obj = json.loads(obj)
+                    objKeyList = list(map(lambda x: list(x.keys())[0], obj))
+                    # obj[objKeyList.index(key)] = {key: value} if key in objKeyList else obj.append({key: value})
+                    if key in objKeyList:
+                        obj[objKeyList.index(key)] = {key: value}
+                        Environments.objects.filter(id=1).update(value=json.dumps(obj))
+                    else:
+                        obj.append({key: value})
+                        Environments.objects.filter(id=1).update(value=json.dumps(obj))
+
+                        # def
 if __name__=="__main__":
     s=Con_sql(host="localhost",port=3306,user="root",passwd="123456",database="besettest")
-    s=s("SELECT * FROM `sql_box` where id=32;")
+    sql="SELECT * FROM `sql_box` where id=31"
+
+
+
+    s=s.runSql(sql)["data"]
     print(s)
-    a="c=s[0],c[1]"
+    a="c=s[0],type(c[1])"
     q=a.split(",")
     print(q)
     for  m in  q:

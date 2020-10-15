@@ -124,7 +124,7 @@ class S_AddFiles(serializers.ModelSerializer):
             create_user=self.initial_data["createUserId"]
             create_user_obj=UserProfile.objects.get(id=create_user)
             validated_data["create_user"]=create_user_obj
-
+            validated_data["mock_type"]=1  #默认mock类型为1
             if "postMethodsId" in  self.initial_data.keys():
                 post_methods = self.initial_data["postMethodsId"]
                 post_methods_obj=models.PostMethods.objects.get(id=post_methods)
@@ -330,6 +330,7 @@ class S_interfaceDetail(serializers.ModelSerializer):
     post_data = serializers.SerializerMethodField()
     res_header = serializers.SerializerMethodField()
     res_data = serializers.SerializerMethodField()
+    mock_data = serializers.SerializerMethodField()
     def get_post_header(self,obj):
         obj=getattr(obj,"post_header",None)
         if obj:
@@ -345,12 +346,34 @@ class S_interfaceDetail(serializers.ModelSerializer):
     def get_res_data(self,obj):
         obj=getattr(obj,"res_data",None)
         if obj:
-            return json.loads(obj)
+             return json.loads(obj)
+
+    def get_mock_data(self,obj):
+        all_obj=obj
+        type=obj.mock_type
+        if type=="2":
+
+                return json.loads(obj.mock_data)
+
+        else:
+            if all_obj.res_data:
+                res_data = all_obj.res_data
+                res_data = json.loads(res_data)
+                res_data_c = {}
+                res_data_c = Public().forData(res_data, res_data_c)
+                return res_data_c
+            else:
+                return ""
     class Meta:
         model=models.InterfaceFiles
         fields="__all__"
 
-
+    def update(self, instance, validated_data):
+        if validated_data["mock_type"]=="2":
+            validated_data["mock_data"]=self.initial_data["mock_data"]
+        user = super().update(instance=instance, validated_data=validated_data)
+        user.save()
+        return user
 class S_Environments(serializers.ModelSerializer):
     create_time = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
     update_time = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')

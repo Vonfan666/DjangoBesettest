@@ -40,13 +40,17 @@ class CaseFile(models.Model):
     postMethod = models.ForeignKey("project.PostMethods",to_field="id",on_delete=models.SET_NULL,null=True,verbose_name="请求方法")
     dataType = models.ForeignKey("project.PostType", to_field="id", on_delete=models.SET_NULL, null=True,
                                  verbose_name="请求数据类型")
+    addEnv=models.TextField(verbose_name="新增环境变量操作",null=True)
+    assertAction=models.TextField(verbose_name="断言",null=True)
     environmentId =models.ForeignKey("project.Environments",to_field="id",on_delete=models.SET_NULL,null=True,verbose_name="关联的环境变量id")
     attr=models.CharField(max_length=255,verbose_name="请求地址")
     status=models.IntegerField(choices=status_Choices,default=0,verbose_name="用例状态")
     detail=models.TextField(verbose_name="用例描述",null=True)
     isGlobalsHeader=models.IntegerField(default=0,verbose_name="全局请求头") #是否使用全局请求头，默认不使用 该字段用于后续扩展
+    beforeAction=models.TextField(null=True,blank=True,verbose_name="前置操作")
     headers=models.TextField(null=True,blank=True,verbose_name="请求头")  #请求头数据
     data=models.TextField(null=True,blank=True,verbose_name="请求参数")  #请求参数
+    afterAction=models.TextField(null=True,blank=True,verbose_name="后置操作")
     createTime=models.DateTimeField(auto_now_add=True,verbose_name="创建时间")
     update_userId = models.ForeignKey("users.UserProfile", to_field="id", on_delete=models.SET_NULL, null=True,
                                related_name="up_name", verbose_name="创建人")
@@ -167,6 +171,8 @@ class SqlStatement(models.Model):
                                related_name="userId_ss", verbose_name="创建人")
     projectId = models.ForeignKey("project.ProjectList", to_field="id", on_delete=models.SET_NULL, null=True,
                                   verbose_name="项目id")
+    saveResultChoice=models.TextField(verbose_name="是否保存到环境变量",null=True)
+    envId=models.ForeignKey("project.Environments",to_field="id",on_delete=models.SET_NULL,null=True,verbose_name="关联的环境变量id")
     SqlActionResults=models.TextField(verbose_name="sql结果处理",null=True)
     type = models.IntegerField(choices=type_Choices,default=1,verbose_name="执行语句类型")
     name = models.CharField(verbose_name="数据库连接名", max_length=255)
@@ -177,3 +183,4 @@ class SqlStatement(models.Model):
 
     class Meta:
         db_table="sql_statement"
+

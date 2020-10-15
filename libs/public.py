@@ -5,7 +5,7 @@
 # @Time:2020年05月04日22时03分18秒
 
 # -*- coding: utf-8 -*-
-import socket,sys,io,time
+import socket,sys,io,time,json
 from django_redis import get_redis_connection  as conn
 from log.logFile import logger as logs
 
@@ -126,5 +126,18 @@ class StartMethod(object):
         sys.stdout = self.stdout_redirector
         sys.stderr = self.stderr_redirector
 
+
+
+class MyEncoder(json.JSONEncoder):
+
+    def default(self, obj):
+        """
+        只要检查到了是bytes类型的数据就把它转为str类型
+        :param obj:
+        :return:
+        """
+        if isinstance(obj, bytes):
+            return str(obj, encoding='utf-8')
+        return json.JSONEncoder.default(self, obj)
 if __name__=="__main__":
     Publics=Public()

@@ -17,9 +17,12 @@ class Config:
     CELERY_TASK_SERIALIZER = 'json'# 任务序列化方式
     CELERY_RESULT_SERIALIZER = 'json'# 任务结果序列化方式
 
-    # CELERY_ENABLE_UTC = False  # 关闭时区
+    # CELERY_TIMEZONE = TIME_ZONE
+    # DJANGO_CELERY_BEAT_TZ_AWARE = False
+
+    CELERY_ENABLE_UTC = False  # 关闭时区
     CELERY_TIMEZONE = TIME_ZONE    # 设置 django-celery-beat 真正使用的时区
-    # DJANGO_CELERY_BEAT_TZ_AWARE = False # 使用 timezone naive 模式，不存储时区信息，只存储经过时区转换后的时间
+    DJANGO_CELERY_BEAT_TZ_AWARE = False # 使用 timezone naive 模式，不存储时区信息，只存储经过时区转换后的时间
 
     CELERY_TASK_RESULT_EXPIRES =  60 * 60 * 24  # 超过时间
     CELERY_MESSAGE_COMPRESSION = 'zlib'  # 是否压缩

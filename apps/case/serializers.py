@@ -4,6 +4,7 @@ from rest_framework.validators import ValidationError
 from libs.validated_update import Validated_data
 from libs.public import  Public
 from project import models as projectModels
+
 from users import  models as usersModels
 from django.db.models import Q
 from django_celery_beat.models import PeriodicTask
@@ -67,6 +68,8 @@ class S_AddInterface(serializers.ModelSerializer):
         CaseGroupId=serializers.SerializerMethodField()
         data=serializers.SerializerMethodField()
         headers=serializers.SerializerMethodField()
+        beforeAction = serializers.SerializerMethodField()
+        afterAction = serializers.SerializerMethodField()
         # dataType=serializers.SerializerMethodField
         # postMethod=serializers.SerializerMethodField()
         # environmentId=serializers.SerializerMethodField()
@@ -88,6 +91,13 @@ class S_AddInterface(serializers.ModelSerializer):
             if obj.headers:
                 # print(obj.headers)
                 return json.loads(obj.headers)
+        def get_beforeAction(self,obj):
+            if obj.beforeAction:
+                return json.loads(obj.beforeAction)
+        def get_afterAction(self,obj):
+            if obj.afterAction:
+                # print(obj.headers)
+                return json.loads(obj.afterAction)
         class Meta:
             model=models.CaseFile
             fields="__all__"
@@ -101,6 +111,8 @@ class S_AddInterface(serializers.ModelSerializer):
             validated_data["status"]=self.initial_data["status"]
             validated_data["data"]=self.initial_data["data"]
             validated_data["headers"] = self.initial_data["headers"]
+            validated_data["beforeAction"] = self.initial_data["beforeAction"]
+            validated_data["afterAction"] = self.initial_data["afterAction"]
             user=super().create(validated_data=validated_data)
             user.save()
             return  user
@@ -109,6 +121,8 @@ class S_AddInterface(serializers.ModelSerializer):
             validated_data["status"] = self.initial_data["status"]
             validated_data["data"] = self.initial_data["data"]
             validated_data["headers"] = self.initial_data["headers"]
+            validated_data["beforeAction"] = self.initial_data["beforeAction"]
+            validated_data["afterAction"] = self.initial_data["afterAction"]
             s.validated_data_add(validated_data,self.initial_data,  usersModels.UserProfile,"userId","update_userId")
 
             s.validated_data_add(validated_data, self.initial_data, models.CaseGroup, "CaseGroupId", "CaseGroupId")
@@ -129,6 +143,8 @@ class S_CaseRun(serializers.ModelSerializer):
     headers = serializers.SerializerMethodField()
     userId = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
+    # beforeAction = serializers.SerializerMethodField()
+    # afterAction = serializers.SerializerMethodField()
     def get_environmentId(self,obj):
         item = projectModels.Environments.objects.get(is_eg=1).value
         if not obj.environmentId:
@@ -152,6 +168,15 @@ class S_CaseRun(serializers.ModelSerializer):
 
     def get_status(self, obj):
         return {"id": obj.status, "name": obj.get_status_display()}
+
+    # def get_beforeAction(self, obj):
+    #     if obj.beforeAction:
+    #         return json.loads(obj.beforeAction)
+    #
+    # def get_afterAction(self, obj):
+    #     if obj.afterAction:
+    #         # print(obj.headers)
+    #         return json.loads(obj.afterAction)
     class Meta:
         model=models.CaseFile
         fields="__all__"
@@ -191,6 +216,16 @@ class S_debugCase(serializers.Serializer):
             raise ValidationError("请求数据类型必须填写")
         if attr == "" or attr == None:
             raise ValidationError("请求地址必须填写")
+        # addEnv=self.initial_data["addEnv"]   #如果允许变量名称重复 就把这个判断去掉
+        # Env_list=json.loads(addEnv)["keys"]
+        # for  item  in  Env_list:
+        #     key=item["name"]
+        #     envId=item["envId"]
+        #     obj=projectModels.Environments.objects.get(id=envId).value
+        #     obj=json.loads(obj)
+        #     keys_list=list(map(lambda  x:list(x.keys())[0],obj))
+        #     if  key in keys_list:
+        #         raise ValidationError("%s:变量名已存在"%key)
         # if attrs.get("headers") == "":
         #     raise ValidationError("请求类型为必须填写")
         # if attrs.get("data")=="":
@@ -235,7 +270,9 @@ class  S_CaseFilesDetail(serializers.ModelSerializer):
                     "detail": rows.detail,
                     "headers": json.loads(rows.headers),
                     "data": json.loads(rows.data),
-                    "environmentId":a
+                    "environmentId":a,
+                    "afterAction":rows.afterAction,
+                    "beforeAction":rows.beforeAction
                 }
                 code["child"].append(dict_obj)
             res.append(code)
@@ -555,6 +592,7 @@ class  S_addSql(serializers.ModelSerializer):
         s.validated_data_add(validated_data, self.initial_data, projectModels.ProjectList, "projectId", "projectId")
         s.validated_data_add(validated_data, self.initial_data, usersModels.UserProfile, "userId", "userId")
         s.validated_data_add(validated_data, self.initial_data, models.SqlBox, "BoxId", "BoxId")
+        s.validated_data_add(validated_data,self.initial_data,projectModels.Environments,"envId","envId")
         validated_data["type"] = int(self.initial_data["type"])
         user = super().create(validated_data=validated_data)
         user.save()
@@ -566,3 +604,18 @@ class  S_addSql(serializers.ModelSerializer):
         user = super().update(validated_data=validated_data, instance=instance)
         user.save()
         return user
+
+class S_GetBoxSqlList(serializers.ModelSerializer):
+    projectId = serializers.SerializerMethodField()
+    children=serializers.SerializerMethodField()
+    typeC = serializers.SerializerMethodField()   #操作类型的标识 1数据库操作  2 文件操 目前只有数据库操作
+    def get_projectId(self,obj):
+        return {"id":obj.projectId.id,"name":obj. projectId.name}
+    def get_children(self,obj):
+        print(obj.boxId_ss.all())
+        return obj.boxId_ss.all().values("id","name"),
+    def get_typeC(self,obj):
+        return 1
+    class Meta:
+        model=models.SqlBox
+        fields = ("id","name","projectId","children","typeC")

@@ -16,6 +16,7 @@ import time
 from libs.public import StartMethod
 from log.logFile import logger as logs
 from django_redis import get_redis_connection  as conn
+from case.libs.findeSqlCase import CaseAction
 
 #
 # class EchoConsumer(WebsocketConsumer):
@@ -68,7 +69,7 @@ class RunCase(WebsocketConsumer):
         listId=sorted(listIdSort,key=lambda x:x[0])
         #开始执行的时候插入数据--但是状态还是执行中-- 前端查看数据时用websockt 五秒获取一次状态---获取之后自动断开
         for id in listId:
-
+            print("nimabi")
             # 1封装环境变量取值---返回url  headers data
             id=id[1]
             caseName=models.CaseFile.objects.get(id=id).name
@@ -83,12 +84,14 @@ class RunCase(WebsocketConsumer):
             res_data = json.loads(json.dumps(res_data))
             res_data = res_data[0]
             self.logger.info("%s>>>第{{%s}}个单位开始执行"%(caseName,n))
-            s = InRequests(res_data["postMethod"], res_data["dataType"], res_data["environmentId"], res_data["name"],self.logger)
-            res= s.run(res_data["attr"], res_data["headers"], res_data["data"])
+            # s = InRequests(res_data["postMethod"], res_data["dataType"], res_data["environmentId"], res_data["name"],self.logger)
+            # response= s.run(res_data["attr"], res_data["headers"], res_data["data"])
+            caseAction = CaseAction()
+            response = caseAction.action(res_data, self.logger)
             self.logger.info("%s>>>第{{%s}}个单位执行结束"%(caseName,n))
-            self.send(json.dumps(res))
+            self.send(json.dumps(response))
             n=n+1
-            self.l["results"].append(res)
+            self.l["results"].append(response)
         self.close()
     def disconnect(self, close_code):
         #断开时清除redis数据

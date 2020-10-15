@@ -5,7 +5,7 @@ from  datetime import datetime
 from django_celery_beat.models import PeriodicTask, IntervalSchedule
 from django_redis import get_redis_connection  as conn
 from  rest_framework.views import APIView,status
-
+from case.libs.findeSqlCase import CaseAction
 from case.libs.toRequests import InRequests
 from case.tasks import allRun,celeryTasks
 from libs.Pagination import Pagination
@@ -19,7 +19,7 @@ from .libs.timedTask import TimedTask,myTimedTask
 from db_tools.connectSql  import Con_sql
 
 
-# from case.runCase import RunCaseAll
+from case.runCase import RunCaseAll
 """最新的"""
 
 #非异步
@@ -39,6 +39,7 @@ class RunAll(APIView):
         timeStr=time.strftime("%Y%m%d%H%M%S",time.localtime())
         tasks_data["timeStr"]=timeStr
         tasks_data_json=json.dumps(tasks_data)
+        print("开始")
         res= allRun.delay(tasks_data_json)
         tasks_data["tasksId"]=res.task_id
         tasks_data_celeryTasks_json=json.dumps(tasks_data)
@@ -74,8 +75,10 @@ class RunCase(APIView):
         start()
         self.logger = logs(self.__class__.__module__)
         self.logger.info("单位开始执行")
-        s = InRequests(res_data["postMethod"],res_data["dataType"],res_data["environmentId"],res_data["name"],self.logger)
-        response=s.run(res_data["attr"],res_data["headers"],res_data["data"])
+        # s = InRequests(res_data["postMethod"],res_data["dataType"],res_data["environmentId"],res_data["name"],self.logger)
+        # response=s.run(res_data["attr"],res_data["headers"],res_data["data"])
+        caseAction = CaseAction()
+        response = caseAction.action(res_data, self.logger)
         l["results"].append(response)
         self.logger.info("单位执行结束")
         redisListLog = self.logRedis.lrange("log:%s_%s" % (data["userId"], None), 0, -1)
@@ -99,12 +102,15 @@ class DebugCase(APIView):
         res_data=req.data.dict()
         validateObj=serializers.S_debugCase(data=data,many=False)
         environmentsObj=self.Environmented(validateObj,res_data)
+        res_data["environmentId"]=environmentsObj
         start = StartMethod(data["userId"])
         start()
         self.logger = logs(self.__class__.__module__)
         self.logger.info("单位开始执行")
-        s = InRequests(res_data["postMethod"], res_data["dataType"], environmentsObj,res_data["name"],self.logger)
-        response = s.run(res_data["attr"], res_data["headers"], res_data["data"])
+        # s = InRequests(res_data["postMethod"], res_data["dataType"], environmentsObj,res_data["name"],self.logger)
+        # response = s.run(res_data["attr"], res_data["headers"], res_data["data"])
+        caseAction = CaseAction()
+        response = caseAction.action(res_data,self.logger)
         l["results"].append(response)
         self.logger.info("单位执行结束")
         redisListLog = self.logRedis.lrange("log:%s_%s" % (data["userId"], None), 0, -1)
@@ -264,6 +270,23 @@ class CaseEdit(APIView):
         serializersObj=serializers.S_AddInterface(obj,many=True)
         res_obj=serializersObj.data
         return  APIResponse(200,"sucess",results=res_obj,status=status.HTTP_200_OK)
+class GetBoxSqlList(APIView):
+    def get(self,req):
+        #操作类型前端写死
+        data=req.query_params
+        res_dict=[]
+        obj=models.SqlBox.objects.filter(projectId_id=int(data["projectId"]))
+        serializersObj=serializers.S_GetBoxSqlList(obj,many=True)
+        res=serializersObj.data
+        res_dict.extend([
+            {"typeC": 1, "lists": res, "name": "数据库操作"},  # 只返回了sql的操作类型-其他操作类型后续新增
+            # 文件处理是假数据
+            {"typeC": 2, "lists": [ { "id": 1, "name": "文件处理是假数据" },{ "id": 2, "name": "上传文件" },{ "id": 3, "name": "文件遍历" }], "name": "文件操作"},
+        ])
+
+        return APIResponse(200,"",results=res_dict,status=status.HTTP_200_OK)
+
+
 class CaseOrder(APIView):
     """修改用例执行顺序"""
     def post(self,req):
@@ -640,26 +663,31 @@ class addSqlBox(APIView):
                                status=status.HTTP_200_OK)
 
 class SqlBoxMethods():
-    def taskList(self,data,kwarg={}):
+    def taskList(self,data,kwarg={},page=None,pageSize=None):
         id = data["projectId"]
-        page = data["page"]
-        pageSize = data["pageSize"]
+
         kwarg["projectId"]=id
         obj = models.SqlBox.objects.select_related("projectId", "userId").filter(**kwarg).order_by(
             "createTime").reverse()
         serializersObj = serializers.S_addSqlBox(obj, many=True)
         res_data = serializersObj.data
-        total = len(res_data)  # 数据总数
-        PaginationObj = Pagination(total, page, perPageNum=pageSize, allPageNum=11)
-        all_page = PaginationObj.all_page()
-        if  int(all_page)>=int(page):
-            print(PaginationObj.start(),PaginationObj.end())
-            res_data = res_data[PaginationObj.start():PaginationObj.end()]
-        else:
-            PaginationObj = Pagination(total, int(page)-1, perPageNum=pageSize, allPageNum=11)
-            res_data = res_data[PaginationObj.start():PaginationObj.end()]
-        print(res_data)
+        total=None
+        all_page=None
+        if "page"  in  data.keys():
+            page = data["page"]
+            pageSize = data["pageSize"]
+            total = len(res_data)  # 数据总数
+            PaginationObj = Pagination(total, page, perPageNum=pageSize, allPageNum=11)
+            all_page = PaginationObj.all_page()
+            if  int(all_page)>=int(page):
+                print(PaginationObj.start(),PaginationObj.end())
+                res_data = res_data[PaginationObj.start():PaginationObj.end()]
+            else:
+                PaginationObj = Pagination(total, int(page)-1, perPageNum=pageSize, allPageNum=11)
+                res_data = res_data[PaginationObj.start():PaginationObj.end()]
         return {"res_data": res_data, "total": total, "all_page": all_page}
+
+
     def isValid(self,data):
         kwargs = {}
         if "name" in data.keys():
@@ -672,6 +700,7 @@ class SqlBoxMethods():
 class  GetSqlBox(APIView):
     def get(self,req):
         data=req.query_params
+
         s=SqlBoxMethods()
         res=s.taskList(data,kwarg=s.isValid(data))
         return APIResponse(200, "", results=res["res_data"], total=res["total"], allPage=res["all_page"],
@@ -759,6 +788,7 @@ class AddSql(APIView):
             serializersObj.save()
             s=PageMethod(models.SqlStatement,serializers.S_addSql,data)
             res=s.taskList(s.isValid())
+
             return APIResponse(200, "新增成功", results=res["res_data"], total=res["total"], allPage=res["all_page"],
                                status=status.HTTP_200_OK)
 
@@ -771,9 +801,41 @@ class GetSql(APIView):
                            status=status.HTTP_200_OK)
 
 class UpdateSql(APIView):
+
+    def envAction(self,data):
+        key = data["name"]
+        envId=data["envId"]
+        id=data["id"]
+        sql_saveResultChoice = models.SqlStatement.objects.get(id=id).saveResultChoice#原列表
+        if sql_saveResultChoice:
+            sql_saveResultChoice=json.loads(sql_saveResultChoice)
+
+            saveResultChoice=json.loads(data["saveResultChoice"])  #新传列表
+
+            save_list=list(set(sql_saveResultChoice)  & set(saveResultChoice))  #并集去重
+            if saveResultChoice!= sql_saveResultChoice:
+                for  ele  in save_list:   #删除新老列表都存在的类容
+                    sql_saveResultChoice.remove(ele)
+                    saveResultChoice.remove(ele)
+                for item_old  in sql_saveResultChoice:
+                    if item_old=="保存到全局变量":
+                        envObj=Environments.objects.get(id=1)
+                    if item_old=="保存到环境变量":
+                        envObj = Environments.objects.get(id=envId)
+                    value_obj = json.loads(envObj.value)
+                    list_key=list(map(lambda x:list(x.keys())[0],value_obj))
+                    index=list_key.index(key)
+                    value_obj.pop(index)
+                    envObj.value = json.dumps(value_obj)
+                    envObj.save()
+
+
     def  post(self,req):
         data=req.data
         id=data["id"]
+        self.envAction(data)
+
+
         serializersObj=serializers.S_addSql(data=data,instance=models.SqlStatement.objects.get(id=int(id)),partial=True)
         if  serializersObj.is_valid(raise_exception=True):
             res=serializersObj.save()
@@ -794,12 +856,13 @@ class RemoveSql(APIView):
 class ValidSql(APIView):
     def sql(self,data):
         BoxId = data["BoxId"]
-        sql = data["sql"]
+        sql=data["sql"]
+        sqlId=data["id"]
         SqlActionResults = data["SqlActionResults"]
         obj = models.SqlBox.objects.get(id=BoxId)
         s = Con_sql(action=SqlActionResults, host=obj.host, port=int(obj.port), user=obj.userName, passwd=obj.passWord,
                     database=obj.database)
-        res = s.runSql(sql)
+        res = s.runSql(sqlId,sql,1)
         return res
     def box(self,data):
 
@@ -815,7 +878,11 @@ class ValidSql(APIView):
             return APIResponse(200, "SQL执行成功", results=res, status=status.HTTP_200_OK)
         else:
             res=self.box(data)
-            return APIResponse(200, "SQL执行成功", results=res, status=status.HTTP_200_OK)
+            return APIResponse(200, "数据库连接成功", results=res, status=status.HTTP_200_OK)
+
+
+
+
 
 
 

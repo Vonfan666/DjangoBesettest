@@ -65,26 +65,19 @@ class RunCaseAll():
     def post(self,req):
 
         """需要传一个项目id 然后通过项目id找到name"""
-
+        print(11111111)
         req = json.loads(req)
-        print(req)
         key = "%s_%s" % (req["id"], req["timeStr"])  # 把计划id+时间戳当做用户id传过去
-        print(key)
         self.logRedis = conn()
-        print("实例redis")
         self.logRedis.set("status:%s"%key,self.resStatus(1))
         casePlanObj=models.CasePlan.objects.select_related("projectId").get(id=int(req["id"]))
         print(casePlanObj)
         projectId=casePlanObj.projectId
-        print("22222")
         fileName=casePlanObj.cname #脚本名称
-        print(3)
         name=casePlanObj.name   #计划名称
-        print(4)
         description=casePlanObj.detail
         againScript=casePlanObj.againScript  #是否新建脚本(删除之前的在新建)   不删除直接使用之前的
         res_list=self.serializers_data(projectId)  #各种骚操作找到排序后的用例参数集
-        print(res_list)
         if not res_list["code"]:  # 如果有接口或者用例执行顺序重复则直接返回
             return APIResponse(409, res_list["msg"], results=res_list["msg"], status=status.HTTP_200_OK)
         else:
@@ -133,7 +126,7 @@ class RunCaseAll():
 
 
 
-#非异步
+# # 非异步
 # from  rest_framework.views import APIView,status
 # from libs.api_response import APIResponse
 # from . import models,serializers
@@ -196,7 +189,6 @@ class RunCaseAll():
 #         req=json.loads(req)
 #         print(req)
 #         # self.userId="%s_%s"%(req["id"],req["timeStr"])  #把计划id+时间戳当做用户id传过去
-#         time.sleep(10)
 #         casePlanObj=models.CasePlan.objects.select_related("projectId").get(id=int(req["id"]))
 #         projectId=casePlanObj.projectId
 #         fileName=casePlanObj.cname #脚本名称
@@ -224,7 +216,7 @@ class RunCaseAll():
 #         runner.run(self.allCase(fileName))
 #         report_set.close()
 #         #### 数据库创建case_results新增数据 status为执行完毕。。。
-#
+
 
 
 

@@ -34,7 +34,7 @@ def custom_exception_handler(exc, context):
                 else:
                     message = value[0]
         # print('123 = %s - %s - %s' % (context['view'], context['request'].method, exc))
-        return APIResponse(401,message,status=status.HTTP_200_OK)
+        return APIResponse(409,message,status=status.HTTP_200_OK)
 
 
 

@@ -25,17 +25,21 @@ class InRequests():
 
     def run(self,url,headers,data=None):
         self.url = url
-
         try:
-            s = dataChange(headers, data,self.logger,self.environmentId)
+            s = dataChange(headers, data,self.logger,self.url,environment=self.environmentId)
             obj = s.run()
         except Exception as f:
-            res=self.resData(code=0)["errors"]
-            res["errors"] = f.args[0]
+            f_obj=json.loads(f.args[0])
+            self.headers=f_obj["header"]
+            self.data=f_obj["data"]
+            self.url=f_obj["url"]
+            res=self.resData(code=0)
+            res["errors"] = f_obj["msg"]
             return res
         self.headers = obj[0]
         self.logger.info("传入headers值为:%s"%self.headers)
         self.data = obj[1]
+        self.url=obj[2]
         self.logger.info("传入data值为:%s" % self.data)
         if self.postMethod==1:
             self.requestsMethods="GET"
@@ -71,7 +75,8 @@ class InRequests():
             return fixRes
 
         self.logger.info("接口响应ResHeader为%s" % res.headers)
-        self.logger.info("接口响应data为%s" %res.json())
+        self.logger.info("接口响应data为%s" %res.text)
+
 
         return self.resResults(fixRes,res)
 
@@ -92,7 +97,7 @@ class InRequests():
             return fixRes
 
         self.logger.info("接口响应ResHeader为%s" %res.headers)
-        self.logger.info("接口响应data为%s" %res.json())
+        self.logger.info("接口响应data为%s" %res.text)
 
         return self.resResults(fixRes, res)
 
@@ -107,9 +112,14 @@ class InRequests():
         fixRes["postUrl"] = res.url
         fixRes["resStatus"] = res.status_code
         fixRes["resHeaders"] = json.loads(json.dumps(dict(res.headers)))
-        fixRes["resData"] = res.json()
-        fixRes["resText"] = res.text
-
+        try:
+            fixRes["resData"] = json.loads(res.text)
+        except:
+            fixRes["resData"]=res.text
+        try:
+            fixRes["resText"] = json.loads(res.text)   #测试接口返回类容
+        except:
+            fixRes["resText"] = res.text
         return fixRes
 
     def form_get(self):
