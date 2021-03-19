@@ -29,7 +29,7 @@ django-filter==2.2.0
 django-guardian==2.2.0
 django-redis==4.12.1
 django-timezone-field==4.0
-djangorestframework==3.11.0
+djangorestframework==3.11.2
 djangorestframework-jwt==1.11.0
 dnspython==1.16.0
 eventlet==0.25.2
