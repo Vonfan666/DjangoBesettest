@@ -10,7 +10,7 @@ Automat==0.8.0
 beautifulsoup4==4.8.1
 billiard==3.6.3.0
 bs4==0.0.1
-celery==4.4.6
+celery==5.2.2
 certifi==2020.4.5.1
 cffi==1.13.2
 channels==2.4.0
