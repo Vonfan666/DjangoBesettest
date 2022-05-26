@@ -71,7 +71,7 @@ six==1.13.0
 soupsieve==1.9.4
 sqlparse==0.3.0
 stevedore==1.31.0
-Twisted==20.3.0
+Twisted==22.4.0
 txaio==20.4.1
 uritemplate==3.0.1
 urllib3==1.25.8
